@@ -27,5 +27,35 @@
  */
 
 import './index.css';
+import Window from './PixijsCore/Window';
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
+// 创建Window对象
+const window = new Window();
+// 创建异步操作
+const process = async () => {
+    window.printText('Hello World!');
+    await window.waitForClick();
+    window.printText('Now I want to test the effect of long sentences, so output a string of very long sentences!');
+    await window.waitForClick();
+    window.printText('This is the third sentence');
+    await window.waitForClick();
+    window.printText('This is the fourth sentence');
+    await window.waitForClick();
+    window.printText('This is the fifth sentence');
+    await window.waitForClick();
+    window.printText('This is the sixth sentence');
+    await window.waitForClick();
+    window.printText('What should I write in the seventh sentence?');
+    await window.waitForClick();
+    window.printText('oh,');
+    await window.waitForClick();
+    window.printText('Just here to promote my friend\'s novel.');
+    await window.waitForClick();
+    window.printText('The name of the novel is "Until All Things Are Silent".');
+    await window.waitForClick();
+    window.printText('Oh, it\'s a new screen.');
+    await window.waitForClick();
+    window.printText('The function display ends here~');
+};
+// 异步运行
+process();
