@@ -2,6 +2,11 @@ body {
   /* 自动铺满 */
   width: 100%;
   height: 100%;
+  /* 将默认的margin和padding都去掉 */
+  margin-left: 0%;
+  margin-top: 0%;
+  /* 设置背景色 */
   background-color: green;
+  /* 使得body的内容不会超出body的范围 */
   overflow: hidden;
 }

@@ -11,8 +11,8 @@ export default class Window{
      */
     constructor() {
       // 创建Pixijs App, 并将其添加到body中
-      this.width = 1024;
-      this.height = 768;
+      this.width = 1920;
+      this.height = 1080;
       this.fontSize = 36;
       this.marginRight = 50;
       this.marginLeft = 50;
@@ -42,11 +42,24 @@ export default class Window{
       document.body.appendChild(this.app.view);
     }
     /**
+     * 自动缩放
+     * @returns 无
+     */
+    autoZoom(){
+      document.body.style.transform = `scale( ${window.innerHeight / this.height} )`;
+      document.body.style.transformOrigin = '0px 0px';
+      window.addEventListener('resize', () => {
+        document.body.style.transform = `scale( ${window.innerHeight / this.height} )`;
+      })
+    }
+    /**
      * 打印文本
      * @param text 要打印的文本
      * @description 打印文本。可以通过 window.printText('Hello World!') 打印文本。
      */
     printText(text: string): void {
+      // 计算文本的打印时间
+      const textPrintTime = text.length * this.textSpeed;
       // 设置文本的样式
       const message = new PIXI.Text(text, this.textStyle);
       // 设置文本的左边距
@@ -73,8 +86,6 @@ export default class Window{
       this.app.stage.addChild(message);
       // 将文本添加到 textChildren 中
       this.textChildren.push(message);
-      // 计算文本的打印时间
-      const textPrintTime = text.length * this.textSpeed;
     }
     /**
      * 等待点击
@@ -154,9 +165,4 @@ export default class Window{
      * @description 表示文字显示速度毫秒/字。可以设值。默认值为30。
      */
     textSpeed: number;
-    /**
-     * 文字显示队列
-     * @description 同时包含文本及其显示时间的数组。
-     */
-    textQueue: {text: PIXI.Text, time: number}[] = [];
   }

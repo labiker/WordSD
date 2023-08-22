@@ -31,9 +31,14 @@ import Window from './PixijsCore/Window';
 
 // 创建Window对象
 const window = new Window();
+// 启动自动缩放
+window.autoZoom();
+
 // 创建异步操作
 const process = async () => {
     window.printText('Hello World!');
+    await window.waitForClick();
+    window.printText('Press F11 to enter full screen mode for the best gaming experience.');
     await window.waitForClick();
     window.printText('Now I want to test the effect of long sentences, so output a string of very long sentences!');
     await window.waitForClick();
