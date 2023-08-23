@@ -58,9 +58,23 @@ const process = async () => {
     await window.waitForClick();
     window.printText('The name of the novel is "Until All Things Are Silent".');
     await window.waitForClick();
-    window.printText('Oh, it\'s a new screen.');
+    window.printText('Now to test if we can call another asynchronous operation.');
     await window.waitForClick();
+    await processSecond();
+    window.printText('Now it\'s back to the first asynchronous operation');
+    await window.waitForClick();
+    await printTextAndWaitForClick('This is a macro.It automatically waits for a click after outputting text.');
     window.printText('The function display ends here~');
+};
+// 创建第二个异步操作，用于测试是否可以被第一个异步操作调用。
+const processSecond = async () => {
+    window.printText('This is the processSecond function.');
+    await window.waitForClick();
+};
+// 创建一个宏，这个宏能在输出文本的同时等待点击。
+const printTextAndWaitForClick = async (text: string) => {
+    window.printText(text);
+    await window.waitForClick();
 };
 // 异步运行
 process();
