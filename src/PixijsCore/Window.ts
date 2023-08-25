@@ -88,6 +88,24 @@ export default class Window{
       this.textChildren.push(message);
     }
     /**
+     * 打印可被点击文本
+     * @param text 要打印的文本
+     * @param func 点击后调用的函数
+     * @description 该文本可响应点击，点击后调用指定的函数
+     */
+    printClickableText(text: string, func: () => void): void {
+      // 打印文本
+      this.printText(text);
+      // 获取最后一个文本
+      const lastTextChild = this.textChildren[this.textChildren.length - 1];
+      // 设置最后一个文本的交互模式为静态
+      lastTextChild.eventMode = 'static';
+      // 设置最后一个文本的鼠标样式为手型
+      lastTextChild.cursor = 'pointer';
+      // 设置最后一个文本的交互模式为按钮
+      lastTextChild.on('pointerdown', func);
+    }
+    /**
      * 等待点击
      * @description 等待点击。可以通过 await window.waitForClick() 等待点击。
      */
