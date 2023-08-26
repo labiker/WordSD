@@ -27,63 +27,79 @@
  */
 
 import './index.css';
-import Window from './PixijsCore/Window';
+import * as PIXI from 'pixi.js';
+import FullScreenDialog from './module/FullScreenDialog';
 
-// 创建Window对象
-const window = new Window();
-// 启动自动缩放
-window.autoZoom();
+// 创建 Pixijs App, 并将其添加到body中
+// Pixijs App 是公用的，可以在任何地方使用 app 这个变量来访问它。
+const appWidth = 1920;
+const appHeight = 1080;
+const app = new PIXI.Application<HTMLCanvasElement>({width: appWidth, height: appHeight});
+document.body.appendChild(app.view);
+// 自动缩放
+const autoZoom = () => {
+    document.body.style.transform = `scale( ${window.innerHeight / appHeight} )`;
+    document.body.style.transformOrigin = '0px 0px';
+    window.addEventListener('resize', () => {
+      document.body.style.transform = `scale( ${window.innerHeight / appHeight} )`;
+    })
+}
+autoZoom();
+
+// 全屏对话框模块
+// 创建对象并绑定到 Pixijs App 上
+const fsDialog = new FullScreenDialog(app);
 
 // 创建异步操作
 const process = async () => {
-    window.printText('Hello World!');
-    await window.waitForClick();
-    window.printText('Press F11 to enter full screen mode for the best gaming experience.');
-    await window.waitForClick();
-    window.printClickableText('Click here to go to the test branch.', async () => {
-        await window.waitForClick();
-        window.printText('Now I want to test the effect of long sentences, so output a string of very long sentences!');
-        await window.waitForClick();
-        window.printText('This is the third sentence');
-        await window.waitForClick();
-        window.printText('This is the fourth sentence');
-        await window.waitForClick();
-        window.printText('This is the fifth sentence');
-        await window.waitForClick();
-        window.printText('This is the sixth sentence');
-        await window.waitForClick();
-        window.printText('What should I write in the seventh sentence?');
-        await window.waitForClick();
-        window.printText('oh,');
-        await window.waitForClick();
-        window.printText('Just here to promote my friend\'s novel.');
-        await window.waitForClick();
-        window.printText('The name of the novel is "Until All Things Are Silent".');
-        await window.waitForClick();
-        window.printText('Now to test if we can call another asynchronous operation.');
-        await window.waitForClick();
+    await fsDialog.printTextAsync('Hello World!');
+    await fsDialog.waitForClick();
+    await fsDialog.printTextAsync('Press F11 to enter full screen mode for the best gaming experience.');
+    await fsDialog.waitForClick();
+    await fsDialog.printClickableText('Click here to go to the test branch.', async () => {
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('Now I want to test the effect of long sentences, so output a string of very long sentences!');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('This is the third sentence');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('This is the fourth sentence');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('This is the fifth sentence');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('This is the sixth sentence');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('What should I write in the seventh sentence?');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('oh,');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('Just here to promote my friend\'s novel.');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('The name of the novel is "Until All Things Are Silent".');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('Now to test if we can call another asynchronous operation.');
+        await fsDialog.waitForClick();
         await processSecond();
-        window.printText('Now it\'s back to the first asynchronous operation');
-        await window.waitForClick();
+        await fsDialog.printTextAsync('Now it\'s back to the first asynchronous operation');
+        await fsDialog.waitForClick();
         await printTextAndWaitForClick('This is a macro.It automatically waits for a click after outputting text.');
-        window.printText('The function display ends here~');
+        await fsDialog.printTextAsync('The function display ends here~');
     });
-    window.printClickableText('Click here to enter the mini-game session.', async () => {
-        await window.waitForClick();
-        window.printText('This is the mini-game session.');
-        await window.waitForClick();
-        window.printText('The function display ends here~');
+    await fsDialog.printClickableText('Click here to enter the mini-game session.', async () => {
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('This is the mini-game session.');
+        await fsDialog.waitForClick();
+        await fsDialog.printTextAsync('The function display ends here~');
     });
 };
 // 创建第二个异步操作，用于测试是否可以被第一个异步操作调用。
 const processSecond = async () => {
-    window.printText('This is the processSecond function.');
-    await window.waitForClick();
+    await fsDialog.printTextAsync('This is the processSecond function.');
+    await fsDialog.waitForClick();
 };
 // 创建一个宏，这个宏能在输出文本的同时等待点击。
 const printTextAndWaitForClick = async (text: string) => {
-    window.printText(text);
-    await window.waitForClick();
+    await fsDialog.printTextAsync(text);
+    await fsDialog.waitForClick();
 };
 // 异步运行
 process();

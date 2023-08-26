@@ -2,17 +2,18 @@ import * as PIXI from 'pixi.js';
 
 /**
  * @author Labiker
- * @description Window 是用于管理窗口的类。
+ * @description FullScreenDialog 是用于管理全屏对话框的类。
  */
-export default class Window{
+export default class FullScreenDialog{
     /**
-     * 构建Window对象
+     * 构建 FullScreenDialog 对象
+     * @param app Pixijs App
      * @returns 无
      */
-    constructor() {
-      // 创建Pixijs App, 并将其添加到body中
-      this.width = 1920;
-      this.height = 1080;
+    constructor(app: PIXI.Application<HTMLCanvasElement>) {
+      this.app = app;
+      this.width = app.view.width;
+      this.height = app.view.height;
       this.fontSize = 36;
       this.marginRight = 50;
       this.marginLeft = 50;
@@ -38,8 +39,23 @@ export default class Window{
         wordWrapWidth: this.wordWrapWidth,
         lineJoin: 'round',
       });
-      this.app = new PIXI.Application<HTMLCanvasElement>({width: this.width, height: this.height});
-      document.body.appendChild(this.app.view);
+      this.clickableTextStyle = new PIXI.TextStyle({
+        fontFamily: 'Arial',
+        fontSize: this.fontSize,
+        fontStyle: 'italic',
+        fontWeight: 'bold',
+        fill: ['#00ff99', '#ffffff'], // gradient
+        stroke: '#4a1850',
+        strokeThickness: 5,
+        dropShadow: true,
+        dropShadowColor: '#000000',
+        dropShadowBlur: 4,
+        dropShadowAngle: Math.PI / 6,
+        dropShadowDistance: 6,
+        wordWrap: true,
+        wordWrapWidth: this.wordWrapWidth,
+        lineJoin: 'round',
+      });
     }
     /**
      * 自动缩放
@@ -53,15 +69,13 @@ export default class Window{
       })
     }
     /**
-     * 打印文本
+     * 异步打印文本
      * @param text 要打印的文本
-     * @description 打印文本。可以通过 window.printText('Hello World!') 打印文本。
+     * @description 将打印时间均摊在每个字上，逐字打印文本。可以通过 await window.printTextAsync('Hello World!') 打印文本。
      */
-    printText(text: string): void {
-      // 计算文本的打印时间
-      const textPrintTime = text.length * this.textSpeed;
-      // 设置文本的样式
-      const message = new PIXI.Text(text, this.textStyle);
+    async printTextAsync(text: string): Promise<void> {
+      // 初始化文本，并设置文本样式
+      const message = new PIXI.Text('', this.textStyle);
       // 设置文本的左边距
       message.x = this.marginRight;
       // 判断是否为首次打印文本
@@ -78,7 +92,7 @@ export default class Window{
           // 将其y设为 marginTop
           message.y = this.marginTop;
         } else {
-          // 如果不是首次打印文本，且不需要清空舞台中的文本，则将其y设为上一个文本的y + fontSize + lineSpacing
+          // 如果不是首次打印文本，且不需要清空舞台中的文本，则将其y设为上一个文本的y + height + lineSpacing
           message.y = lastTextChild.y + lastTextChild.height + this.lineSpacing;
         }
       }
@@ -86,6 +100,19 @@ export default class Window{
       this.app.stage.addChild(message);
       // 将文本添加到 textChildren 中
       this.textChildren.push(message);
+      // 将文本拆分为单个字符
+      const textArray = text.split('');
+      // 遍历字符数组
+      for (const char of textArray) {
+        // 将字符添加到舞台中
+        message.text += char;
+        // 等待一段时间
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(true);
+          }, this.textSpeed);
+        });
+      }
     }
     /**
      * 打印可被点击文本
@@ -93,11 +120,13 @@ export default class Window{
      * @param func 点击后调用的函数
      * @description 该文本可响应点击，点击后调用指定的函数
      */
-    printClickableText(text: string, func: () => void): void {
+    async printClickableText(text: string, func: () => void): Promise<void> {
       // 打印文本
-      this.printText(text);
+      await this.printTextAsync(text);
       // 获取最后一个文本
       const lastTextChild = this.textChildren[this.textChildren.length - 1];
+      // 设置最后一个文本的样式
+      lastTextChild.style = this.clickableTextStyle;
       // 设置最后一个文本的交互模式为静态
       lastTextChild.eventMode = 'static';
       // 设置最后一个文本的鼠标样式为手型
@@ -139,6 +168,13 @@ export default class Window{
      */
     textStyle: PIXI.TextStyle;
     /**
+     * 可被点击的文本样式
+     * @description 表示可被点击的文本样式。可以设值。
+     * 可以通过 window.clickableTextStyle 访问。
+     * 可以通过 window.clickableTextStyle = new PIXI.TextStyle({...}) 修改。
+     */
+    clickableTextStyle: PIXI.TextStyle;
+    /**
      * 文字大小
      * @description 表示文字大小。可以设值。默认值为36。
      */
@@ -179,8 +215,13 @@ export default class Window{
      */
     textChildren: PIXI.Text[] = [];
     /**
-     * 文字显示速度毫秒/字
-     * @description 表示文字显示速度毫秒/字。可以设值。默认值为30。
+     * 舞台中的字符数组
+     * @description 表示舞台中的字符数组。可以通过 window.charChildren 访问。
+     */
+    charChildren: PIXI.Text[] = [];
+    /**
+     * 文字显示速度
+     * @description 单位：毫秒/字。可以设值。默认值为30。
      */
     textSpeed: number;
   }
