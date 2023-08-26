@@ -58,17 +58,6 @@ export default class FullScreenDialog{
       });
     }
     /**
-     * 自动缩放
-     * @returns 无
-     */
-    autoZoom(){
-      document.body.style.transform = `scale( ${window.innerHeight / this.height} )`;
-      document.body.style.transformOrigin = '0px 0px';
-      window.addEventListener('resize', () => {
-        document.body.style.transform = `scale( ${window.innerHeight / this.height} )`;
-      })
-    }
-    /**
      * 清空对话框
      * @returns 无
      */
@@ -79,13 +68,13 @@ export default class FullScreenDialog{
       this.textChildren = [];
     }
     /**
-     * 异步打印文本
-     * @param text 要打印的文本
-     * @description 将打印时间均摊在每个字上，逐字打印文本。可以通过 await FullScreenDialog.printTextAsync('Hello World!') 打印文本。
+     * 显示文本
+     * @param text 显示文本
+     * @description 直接显示所有文本。可以通过 FullScreenDialog.printText('Hello World!') 显示文本。
      */
-    async printTextAsync(text: string): Promise<void> {
+    printText(text: string): void {
       // 初始化文本，并设置文本样式
-      const message = new PIXI.Text('', this.textStyle);
+      const message = new PIXI.Text(text, this.textStyle);
       // 设置文本的左边距
       message.x = this.marginRight;
       // 判断是否为首次打印文本
@@ -110,6 +99,17 @@ export default class FullScreenDialog{
       this.app.stage.addChild(message);
       // 将文本添加到 textChildren 中
       this.textChildren.push(message);
+    }
+    /**
+     * 异步打印文本
+     * @param text 要打印的文本
+     * @description 将打印时间均摊在每个字上，逐字打印文本。可以通过 await FullScreenDialog.printTextAsync('Hello World!') 打印文本。
+     */
+    async printTextAsync(text: string): Promise<void> {
+      // 初始化文本
+      this.printText('');
+      // 获取最后一个文本
+      const lastTextChild = this.textChildren[this.textChildren.length - 1];
       // 将文本拆分为单个字符
       const textArray = text.split('');
       // 检测鼠标左键点击行为
@@ -121,11 +121,11 @@ export default class FullScreenDialog{
       for (const char of textArray) {
         if (isClicked) {
           // 如果已点击，则将剩余的字符全部打印出来
-          message.text = text;
+          lastTextChild.text = text;
           break;
         } else {
           // 如果未点击，则将当前字符添加到文本中
-          message.text += char;
+          lastTextChild.text += char;
           // 等待一段时间
           await new Promise((resolve) => {
             setTimeout(() => {
@@ -141,9 +141,9 @@ export default class FullScreenDialog{
      * @param func 点击后调用的函数
      * @description 该文本可响应点击，点击后调用指定的函数
      */
-    async printClickableText(text: string, func: () => void): Promise<void> {
-      // 打印文本
-      await this.printTextAsync(text);
+    printClickableText(text: string, func: () => void): void {
+      // 显示文本
+      this.printText(text);
       // 获取最后一个文本
       const lastTextChild = this.textChildren[this.textChildren.length - 1];
       // 设置最后一个文本的样式
