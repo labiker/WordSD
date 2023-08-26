@@ -69,9 +69,19 @@ export default class FullScreenDialog{
       })
     }
     /**
+     * 清空对话框
+     * @returns 无
+     */
+    clearDialog(){
+      this.textChildren.forEach((textChild) => {
+        this.app.stage.removeChild(textChild);
+      });
+      this.textChildren = [];
+    }
+    /**
      * 异步打印文本
      * @param text 要打印的文本
-     * @description 将打印时间均摊在每个字上，逐字打印文本。可以通过 await window.printTextAsync('Hello World!') 打印文本。
+     * @description 将打印时间均摊在每个字上，逐字打印文本。可以通过 await FullScreenDialog.printTextAsync('Hello World!') 打印文本。
      */
     async printTextAsync(text: string): Promise<void> {
       // 初始化文本，并设置文本样式
@@ -102,16 +112,27 @@ export default class FullScreenDialog{
       this.textChildren.push(message);
       // 将文本拆分为单个字符
       const textArray = text.split('');
-      // 遍历字符数组
+      // 检测鼠标左键点击行为
+      let isClicked = false;
+      document.addEventListener('click', () => {
+        isClicked = true;
+      });
+      // 遍历字符数组，逐字打印文本
       for (const char of textArray) {
-        // 将字符添加到舞台中
-        message.text += char;
-        // 等待一段时间
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(true);
-          }, this.textSpeed);
-        });
+        if (isClicked) {
+          // 如果已点击，则将剩余的字符全部打印出来
+          message.text = text;
+          break;
+        } else {
+          // 如果未点击，则将当前字符添加到文本中
+          message.text += char;
+          // 等待一段时间
+          await new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(true);
+            }, this.textSpeed);
+          });
+        }
       }
     }
     /**
@@ -136,7 +157,7 @@ export default class FullScreenDialog{
     }
     /**
      * 等待点击
-     * @description 等待点击。可以通过 await window.waitForClick() 等待点击。
+     * @description 等待点击。可以通过 await FullScreenDialog.waitForClick() 等待点击。
      */
     waitForClick() {
       return new Promise<void>((resolve) => {
@@ -147,7 +168,7 @@ export default class FullScreenDialog{
     }
     /**
      * Pixijs app
-     * @description Pixijs app对象。可以通过 window.app 访问。
+     * @description Pixijs app对象。
      */
     app: PIXI.Application<HTMLCanvasElement>;
     /** 
@@ -163,15 +184,15 @@ export default class FullScreenDialog{
     /**
      * 文本样式
      * @description 表示文本样式。可以设值。
-     * 可以通过 window.textStyle 访问。
-     * 可以通过 window.textStyle = new PIXI.TextStyle({...}) 修改。
+     * 可以通过 FullScreenDialog.textStyle 访问。
+     * 可以通过 FullScreenDialog.textStyle = new PIXI.TextStyle({...}) 修改。
      */
     textStyle: PIXI.TextStyle;
     /**
      * 可被点击的文本样式
      * @description 表示可被点击的文本样式。可以设值。
-     * 可以通过 window.clickableTextStyle 访问。
-     * 可以通过 window.clickableTextStyle = new PIXI.TextStyle({...}) 修改。
+     * 可以通过 FullScreenDialog.clickableTextStyle 访问。
+     * 可以通过 FullScreenDialog.clickableTextStyle = new PIXI.TextStyle({...}) 修改。
      */
     clickableTextStyle: PIXI.TextStyle;
     /**
@@ -211,14 +232,9 @@ export default class FullScreenDialog{
     lineSpacing: number;
     /**
      * 舞台中的文本数组
-     * @description 表示舞台中的文本数组。可以通过 window.textChildren 访问。
+     * @description 表示舞台中的文本数组。可以通过 FullScreenDialog.textChildren 访问。
      */
     textChildren: PIXI.Text[] = [];
-    /**
-     * 舞台中的字符数组
-     * @description 表示舞台中的字符数组。可以通过 window.charChildren 访问。
-     */
-    charChildren: PIXI.Text[] = [];
     /**
      * 文字显示速度
      * @description 单位：毫秒/字。可以设值。默认值为30。

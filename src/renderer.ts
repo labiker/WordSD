@@ -57,6 +57,7 @@ const process = async () => {
     await fsDialog.printTextAsync('Press F11 to enter full screen mode for the best gaming experience.');
     await fsDialog.waitForClick();
     await fsDialog.printClickableText('Click here to go to the test branch.', async () => {
+        fsDialog.clearDialog();
         await fsDialog.waitForClick();
         await fsDialog.printTextAsync('Now I want to test the effect of long sentences, so output a string of very long sentences!');
         await fsDialog.waitForClick();
@@ -85,6 +86,7 @@ const process = async () => {
         await fsDialog.printTextAsync('The function display ends here~');
     });
     await fsDialog.printClickableText('Click here to enter the mini-game session.', async () => {
+        fsDialog.clearDialog();
         await fsDialog.waitForClick();
         await fsDialog.printTextAsync('This is the mini-game session.');
         await fsDialog.waitForClick();
