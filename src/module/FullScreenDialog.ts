@@ -160,11 +160,49 @@ export default class FullScreenDialog{
      * @description 等待点击。可以通过 await FullScreenDialog.waitForClick() 等待点击。
      */
     waitForClick() {
-      return new Promise<void>((resolve) => {
-        document.addEventListener('click', () => {
-          resolve();
+      // 获取最新的文本
+      const lastTextChild = this.textChildren[this.textChildren.length - 1];
+      if (lastTextChild === undefined) { // 如果当前没有文本，则直接返回
+        return new Promise<void>((resolve) => {
+          document.addEventListener('click', () => {resolve()});
         });
-      });
+      } else { // 如果当前存在文本，则显示等待字符
+        lastTextChild.text += ' ';
+        // 设置一个等待字符切换定时器
+        const timer = setInterval(() => {
+          if (lastTextChild.text.endsWith(' ')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -1) + ' .';
+          } else if (lastTextChild.text.endsWith(' .')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -2) + ' ..';
+          } else if (lastTextChild.text.endsWith(' ..')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -3) + ' ...';
+          } else if (lastTextChild.text.endsWith(' ...')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -4) + ' ';
+          }
+        }, 500);
+        // 创建点击事件处理函数
+        const clickHandler = () => {
+          // 清除定时器
+          clearInterval(timer);
+          // 还原最新的文本
+          if (lastTextChild.text.endsWith(' ')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -1);
+          } else if (lastTextChild.text.endsWith(' .')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -2);
+          } else if (lastTextChild.text.endsWith(' ..')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -3);
+          } else if (lastTextChild.text.endsWith(' ...')) {
+            lastTextChild.text = lastTextChild.text.slice(0, -4);
+          }
+          // 移除点击事件监听器
+          document.removeEventListener('click', clickHandler, false);
+        };
+        return new Promise<void>((resolve) => {
+          // 添加点击事件监听器
+          document.addEventListener('click', clickHandler, false);
+          document.addEventListener('click', () => {resolve()});
+        });
+      }
     }
     /**
      * Pixijs app
@@ -240,4 +278,4 @@ export default class FullScreenDialog{
      * @description 单位：毫秒/字。可以设值。默认值为30。
      */
     textSpeed: number;
-  }
+}
