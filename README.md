@@ -8,6 +8,10 @@ Different from traditional novel game engines, WordSD pursues a new way of game 
 
 WordSeed is currently in its infancy, and anyone interested in developing a novel engine is welcome to join!
 
+## Requirements
+* Node JS
+* yarn
+
 ## Starting WordSD
 
 ```shell
