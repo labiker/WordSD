@@ -14,11 +14,11 @@ export default class FullScreenDialog{
       this.app = app;
       this.width = app.view.width;
       this.height = app.view.height;
-      this.fontSize = 36;
-      this.marginRight = 50;
-      this.marginLeft = 50;
-      this.marginTop = 50;
-      this.marginBottom = 50;
+      this.fontSize = 49;
+      this.marginRight = 320;
+      this.marginLeft = 320;
+      this.marginTop = 150;
+      this.marginBottom = 200;
       this.wordWrapWidth = this.width - this.marginRight - this.marginLeft;
       this.lineSpacing = 6;
       this.textSpeed = 30;
@@ -83,6 +83,11 @@ export default class FullScreenDialog{
         message.y = this.marginTop;
       } else {
         const lastTextChild = this.textChildren[this.textChildren.length - 1];
+        // 如果上一个文本是不可交互的普通文本，则设为半透明
+        if (lastTextChild.style === this.textStyle) {
+          lastTextChild.alpha = 0.5;
+        }
+        // 判断是否需要清空舞台中的文本
         if (lastTextChild.y + lastTextChild.height + this.lineSpacing + this.marginBottom > this.height) {
           // 如果已超过下边距，则清空舞台中的文本
           this.textChildren.forEach((textChild) => {

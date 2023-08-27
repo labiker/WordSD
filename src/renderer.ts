@@ -115,9 +115,9 @@ const process = async () => {
             await printTextAndWaitForClick('"The Rentouma Company will provide you with the most thoughtful service."');
             fsDialog.clearDialog();
             await printTextAndWaitForClick('In less than a week, you moved into the apartment arranged by the Rentouma Company.');
-            await printTextAndWaitForClick(`【Food: ${gameData.food} / ${gameData.foodMax} 】Although the trip was hasty, you still remembered to bring some food.`);
-            await printTextAndWaitForClick(`【Sanity: ${gameData.sanity} / ${gameData.sanityMax} 】The inherent breath of the room always makes people breathless.`);
-            await printTextAndWaitForClick(`【Health: ${gameData.health} / ${gameData.healthMax} 】But it's better than being killed by someone unknown outside.`);
+            await printTextAndWaitForClick(`【Food: ${gameData.food} / ${gameData.foodMax} 】\nAlthough the trip was hasty, you still remembered to bring some food.`);
+            await printTextAndWaitForClick(`【Sanity: ${gameData.sanity} / ${gameData.sanityMax} 】\nThe inherent breath of the room always makes people breathless.`);
+            await printTextAndWaitForClick(`【Health: ${gameData.health} / ${gameData.healthMax} 】\nBut it's better than being killed by someone unknown outside.`);
             await printTextAndWaitForClick('The follow-up content is still under development, please look forward to it~');
         });
     });
@@ -175,9 +175,9 @@ const process = async () => {
             await printTextAndWaitForClick('“人头马公司将竭诚为您，提供最周到的服务。”');
             fsDialog.clearDialog();
             await printTextAndWaitForClick('不到一周，你就搬进了人头马公司安排的公寓。');
-            await printTextAndWaitForClick(`【存粮： ${gameData.food} / ${gameData.foodMax} 】尽管此行匆忙，但你还是记得带上了一些食物。`);
-            await printTextAndWaitForClick(`【理智： ${gameData.sanity} / ${gameData.sanityMax} 】房间固有的气息总有些让人喘不过气。`);
-            await printTextAndWaitForClick(`【生命： ${gameData.health} / ${gameData.healthMax} 】但也好过在外头被不知名的某人夺了性命。`);
+            await printTextAndWaitForClick(`【存粮： ${gameData.food} / ${gameData.foodMax} 】\n尽管此行匆忙，但你还是记得带上了一些食物。`);
+            await printTextAndWaitForClick(`【理智： ${gameData.sanity} / ${gameData.sanityMax} 】\n房间固有的气息总有些让人喘不过气。`);
+            await printTextAndWaitForClick(`【生命： ${gameData.health} / ${gameData.healthMax} 】\n但也好过在外头被不知名的某人夺了性命。`);
             await printTextAndWaitForClick('后续内容仍在开发中，敬请期待~');
         });
     });
