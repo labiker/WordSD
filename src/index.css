@@ -6,7 +6,7 @@ body {
   margin-left: 0%;
   margin-top: 0%;
   /* 设置背景色 */
-  background-color: green;
+  background-color: black;
   /* 使得body的内容不会超出body的范围 */
   overflow: hidden;
 }

@@ -35,13 +35,25 @@ import FullScreenDialog from './module/FullScreenDialog';
 const appWidth = 1920;
 const appHeight = 1080;
 const app = new PIXI.Application<HTMLCanvasElement>({width: appWidth, height: appHeight});
-document.body.appendChild(app.view);
+const pixijsContainer = document.body;
+pixijsContainer.appendChild(app.view);
 // 自动缩放
 const autoZoom = () => {
-    document.body.style.transform = `scale( ${window.innerHeight / appHeight} )`;
-    document.body.style.transformOrigin = '0px 0px';
+    // 以窗口高度为基准的变换
+    const appScale = innerHeight / appHeight;
+    const marginLeft = (innerWidth - appWidth * appScale) / 2;
+
+    pixijsContainer.style.transformOrigin = `0 0`;
+    pixijsContainer.style.transform = `scale(${appScale})`;
+    pixijsContainer.style.marginLeft = `${marginLeft}px`; // 水平居中
+
     window.addEventListener('resize', () => {
-      document.body.style.transform = `scale( ${window.innerHeight / appHeight} )`;
+        // 以窗口高度为基准的变换
+        const appScale = innerHeight / appHeight;
+        const marginLeft = (innerWidth - appWidth * appScale) / 2;
+        
+        pixijsContainer.style.transform = `scale(${appScale})`;
+        pixijsContainer.style.marginLeft = `${marginLeft}px`;
     })
 }
 autoZoom();
