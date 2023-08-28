@@ -29,6 +29,7 @@
 import './index.css';
 import * as PIXI from 'pixi.js';
 import FullScreenDialog from './module/FullScreenDialog';
+import BackLog from './module/BackLog';
 
 // 创建 Pixijs App, 并将其添加到body中
 // Pixijs App 是公用的，可以在任何地方使用 app 这个变量来访问它。
@@ -62,6 +63,10 @@ autoZoom();
 // 创建对象并绑定到 Pixijs App 上
 const fsDialog = new FullScreenDialog(app);
 
+// 日志模块
+// 创建对象并绑定到 Pixijs App 上
+const backLog = new BackLog(app);
+
 // 创建异步操作
 const process = async () => {
     /**
@@ -73,16 +78,19 @@ const process = async () => {
         await fsDialog.printTextAsync(text);
         await fsDialog.waitForClick();
     };
+
+    // 自动记录文本启用
+    backLog.autoRecordText = true;
+
+    // 正式开始
     fsDialog.printClickableText('English version', async () => {
         fsDialog.clearDialog();
-        await fsDialog.waitForClick();
         await fsDialog.printTextAsync('Welcome to WordSD!');
         await fsDialog.waitForClick();
         await fsDialog.printTextAsync('Press F11 to enter full screen mode for the best gaming experience.');
         await fsDialog.waitForClick();
         fsDialog.printClickableText('Click here to go to the test branch.', async () => {
             fsDialog.clearDialog();
-            await fsDialog.waitForClick();
             await fsDialog.printTextAsync('Now to test if we can call another asynchronous operation.');
             await fsDialog.waitForClick();
             await processSecond('English');
@@ -93,7 +101,6 @@ const process = async () => {
         });
         fsDialog.printClickableText('Click here to enter the mini-game session.', async () => {
             fsDialog.clearDialog();
-            await fsDialog.waitForClick();
             // Define some game variables
             let gameData = {
                 survival: true,               // Whether to survive
@@ -135,7 +142,6 @@ const process = async () => {
     });
     fsDialog.printClickableText('中文版', async () => {
         fsDialog.clearDialog();
-        await fsDialog.waitForClick();
         await fsDialog.printTextAsync('欢迎来到 WordSD!');
         await fsDialog.waitForClick();
         await fsDialog.printTextAsync('按下 F11 进入全屏模式以获得最好的游戏体验。');
@@ -153,7 +159,6 @@ const process = async () => {
         });
         fsDialog.printClickableText('点击此处进入迷你游戏分支。', async () => {
             fsDialog.clearDialog();
-            await fsDialog.waitForClick();
             // 定义一些游戏变量
             let gameData = {
                 survival: true,               // 是否存活

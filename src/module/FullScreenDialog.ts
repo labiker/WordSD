@@ -14,6 +14,7 @@ export default class FullScreenDialog{
       this.app = app;
       this.width = app.view.width;
       this.height = app.view.height;
+      // 文本相关
       this.fontSize = 49;
       this.marginRight = 320;
       this.marginLeft = 320;
@@ -22,6 +23,17 @@ export default class FullScreenDialog{
       this.wordWrapWidth = this.width - this.marginRight - this.marginLeft;
       this.lineSpacing = 6;
       this.textSpeed = 30;
+      // 构建背景
+      this.background = new PIXI.Graphics();
+      this.background.beginFill(0x000000, 0.5);
+      this.background.drawRect(0, 0, this.width, this.height);
+      this.background.endFill();
+      this.background.eventMode = 'static';
+      this.background.on('click', (event) => {
+        event.stopPropagation(); // 阻止事件传递
+      });
+      this.app.stage.addChildAt(this.background, this.app.stage.children.length);
+      // 构建文本样式
       this.textStyle = new PIXI.TextStyle({
         fontFamily: 'Arial',
         fontSize: this.fontSize,
@@ -101,14 +113,15 @@ export default class FullScreenDialog{
         }
       }
       // 将文本添加到舞台中
-      this.app.stage.addChild(message);
+      this.app.stage.addChildAt(message, this.app.stage.children.length);
       // 将文本添加到 textChildren 中
       this.textChildren.push(message);
     }
     /**
      * 异步打印文本
      * @param text 要打印的文本
-     * @description 将打印时间均摊在每个字上，逐字打印文本。可以通过 await FullScreenDialog.printTextAsync('Hello World!') 打印文本。
+     * @description 将打印时间均摊在每个字上，逐字打印文本。
+     * @return Promise<void>
      */
     async printTextAsync(text: string): Promise<void> {
       // 初始化文本
@@ -119,7 +132,7 @@ export default class FullScreenDialog{
       const textArray = text.split('');
       // 检测鼠标左键点击行为
       let isClicked = false;
-      document.addEventListener('click', () => {
+      this.background.addEventListener('click', () => {
         isClicked = true;
       });
       // 遍历字符数组，逐字打印文本
@@ -145,6 +158,7 @@ export default class FullScreenDialog{
      * @param text 要打印的文本
      * @param func 点击后调用的函数
      * @description 该文本可响应点击，点击后调用指定的函数
+     * @returns 无
      */
     printClickableText(text: string, func: () => void): void {
       // 显示文本
@@ -162,14 +176,15 @@ export default class FullScreenDialog{
     }
     /**
      * 等待点击
-     * @description 等待点击。可以通过 await FullScreenDialog.waitForClick() 等待点击。
+     * @description 等待鼠标左键点击。会显示等待字符。
+     * @returns Promise<void>
      */
     waitForClick() {
       // 获取最新的文本
       const lastTextChild = this.textChildren[this.textChildren.length - 1];
       if (lastTextChild === undefined) { // 如果当前没有文本，则直接返回
         return new Promise<void>((resolve) => {
-          document.addEventListener('click', () => {resolve()});
+          this.background.addEventListener('click', () => {resolve()});
         });
       } else { // 如果当前存在文本，则显示等待字符
         lastTextChild.text += ' ';
@@ -200,87 +215,97 @@ export default class FullScreenDialog{
             lastTextChild.text = lastTextChild.text.slice(0, -4);
           }
           // 移除点击事件监听器
-          document.removeEventListener('click', clickHandler, false);
+          this.background.removeEventListener('click', clickHandler, false);
         };
         return new Promise<void>((resolve) => {
           // 添加点击事件监听器
-          document.addEventListener('click', clickHandler, false);
-          document.addEventListener('click', () => {resolve()});
+          this.background.addEventListener('click', clickHandler, false);
+          this.background.addEventListener('click', () => {resolve()});
         });
       }
     }
     /**
      * Pixijs app
-     * @description Pixijs app对象。
+     * @description 绑定的 Pixijs app 对象。
      */
-    app: PIXI.Application<HTMLCanvasElement>;
+    private app: PIXI.Application<HTMLCanvasElement>;
     /** 
-     * 窗口宽度
-     * @description 表示窗口宽度。可以设值。默认值为1024。
+     * 对话框背景
+     * @description 用于绑定点击事件。最先加入舞台，位于最底层。
      */
-    width: number;
-    /** 
-     * 窗口高度
-     * @description 表示窗口高度。可以设值。默认值为768。
-     */
-    height: number;
-    /**
-     * 文本样式
-     * @description 表示文本样式。可以设值。
-     * 可以通过 FullScreenDialog.textStyle 访问。
-     * 可以通过 FullScreenDialog.textStyle = new PIXI.TextStyle({...}) 修改。
-     */
-    textStyle: PIXI.TextStyle;
+    private background: PIXI.Graphics;
     /**
      * 可被点击的文本样式
-     * @description 表示可被点击的文本样式。可以设值。
+     * @description 表示可被点击的文本样式。
      * 可以通过 FullScreenDialog.clickableTextStyle 访问。
      * 可以通过 FullScreenDialog.clickableTextStyle = new PIXI.TextStyle({...}) 修改。
      */
-    clickableTextStyle: PIXI.TextStyle;
+    public clickableTextStyle: PIXI.TextStyle;
     /**
      * 文字大小
-     * @description 表示文字大小。可以设值。默认值为36。
+     * @description 默认值为 49。
      */
-    fontSize: number;
+    private fontSize: number;
     /** 
-     * 文字右边距
-     * @description 指定用于禁入处理的右边距字符数。(在竖写模式下，解释为下端的字符数)
+     * 窗口高度
+     * @description 默认值为 1080。
      */
-    marginRight: number;
-    /** 
-     * 文字左边距
-     * @description 指定用于禁入处理的左边距字符数。(在竖写模式下，解释为上端的字符数)
-     */
-    marginLeft: number;
-    /** 
-     * 文字上边距
-     * @description 指定用于禁入处理的上边距字符数。(在竖写模式下，解释为右端的字符数)
-     */
-    marginTop: number;
-    /** 
-     * 文字下边距
-     * @description 指定用于禁入处理的下边距字符数。(在竖写模式下，解释为左端的字符数)
-     */
-    marginBottom: number;
-    /** 
-     * 文本换行的宽度
-     * @description 需要将 wordWrap 设置为 true 才能使用。可以设值。默认值为440。
-     */
-    wordWrapWidth: number;
+    private height: number;
     /**
      * 文本行间距
-     * @description 表示文本行间距。可以设值。默认值为0。
+     * @description 默认值为 6。
      */
-    lineSpacing: number;
+    private lineSpacing: number;
+    /** 
+     * 文字右边距
+     * @description 指定用于禁入处理的右边距字符数。
+     * @note 在竖写模式下，解释为下端的字符数。
+     */
+    private marginRight: number;
+    /** 
+     * 文字左边距
+     * @description 指定用于禁入处理的左边距字符数。
+     * @note 在竖写模式下，解释为上端的字符数。
+     */
+    private marginLeft: number;
+    /** 
+     * 文字上边距
+     * @description 指定用于禁入处理的上边距字符数。
+     * @note 在竖写模式下，解释为右端的字符数。
+     */
+    private marginTop: number;
+    /** 
+     * 文字下边距
+     * @description 指定用于禁入处理的下边距字符数。
+     * @note 在竖写模式下，解释为左端的字符数。
+     */
+    private marginBottom: number;
     /**
      * 舞台中的文本数组
      * @description 表示舞台中的文本数组。可以通过 FullScreenDialog.textChildren 访问。
      */
-    textChildren: PIXI.Text[] = [];
+    private textChildren: PIXI.Text[] = [];
     /**
      * 文字显示速度
-     * @description 单位：毫秒/字。可以设值。默认值为30。
+     * @description 单位：毫秒/字。默认值为 30。
      */
-    textSpeed: number;
+    private textSpeed: number;
+    /**
+     * 文本样式
+     * @description 表示文本样式。
+     * 可以通过 FullScreenDialog.textStyle 访问。
+     * 可以通过 FullScreenDialog.textStyle = new PIXI.TextStyle({...}) 修改。
+     */
+    private textStyle: PIXI.TextStyle;
+    /** 
+     * 窗口宽度
+     * @description 默认值为 1920。
+     */
+    private width: number;
+    /** 
+     * 文本换行的宽度
+     * @description 需要将 wordWrap 设置为 true 才能使用。
+     * @note 默认值为 FullScreenDialog.width - FullScreenDialog.marginRight - FullScreenDialog.marginLeft。
+     */
+    private wordWrapWidth: number;
 }
