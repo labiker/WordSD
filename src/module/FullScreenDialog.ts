@@ -22,7 +22,8 @@ export default class FullScreenDialog{
       this.marginBottom = 200;
       this.wordWrapWidth = this.width - this.marginRight - this.marginLeft;
       this.lineSpacing = 6;
-      this.textSpeed = 30;
+      this.normalModeTextSpeed = 30;
+      this.textSpeed = this.normalModeTextSpeed;
       // 构建背景
       this.background = new PIXI.Graphics();
       this.background.beginFill(0x000000, 0.5);
@@ -33,6 +34,9 @@ export default class FullScreenDialog{
         event.stopPropagation(); // 阻止事件传递
       });
       this.app.stage.addChildAt(this.background, this.app.stage.children.length);
+      // 快进模式相关
+      this.skipMode = false;
+      this.skipModeTextSpeed = 3;
       // 构建文本样式
       this.textStyle = new PIXI.TextStyle({
         fontFamily: 'Arial',
@@ -68,6 +72,8 @@ export default class FullScreenDialog{
         wordWrapWidth: this.wordWrapWidth,
         lineJoin: 'round',
       });
+      // 启用按键检测
+      this.enableKeyDetection();
     }
     /**
      * 清空对话框
@@ -180,6 +186,10 @@ export default class FullScreenDialog{
      * @returns Promise<void>
      */
     waitForClick() {
+      // 如果当前处于快进模式，则不等待点击
+      if (this.skipMode) {
+        return;
+      }
       // 获取最新的文本
       const lastTextChild = this.textChildren[this.textChildren.length - 1];
       if (lastTextChild === undefined) { // 如果当前没有文本，则直接返回
@@ -188,7 +198,7 @@ export default class FullScreenDialog{
         });
       } else { // 如果当前存在文本，则显示等待字符
         lastTextChild.text += ' ';
-        // 设置一个等待字符切换定时器
+        // 设置一个定时器，用于显示等待字符
         const timer = setInterval(() => {
           if (lastTextChild.text.endsWith(' ')) {
             lastTextChild.text = lastTextChild.text.slice(0, -1) + ' .';
@@ -200,8 +210,8 @@ export default class FullScreenDialog{
             lastTextChild.text = lastTextChild.text.slice(0, -4) + ' ';
           }
         }, 500);
-        // 创建点击事件处理函数
-        const clickHandler = () => {
+        // 清除定时器的函数
+        const clearTimer = () => {
           // 清除定时器
           clearInterval(timer);
           // 还原最新的文本
@@ -214,15 +224,56 @@ export default class FullScreenDialog{
           } else if (lastTextChild.text.endsWith(' ...')) {
             lastTextChild.text = lastTextChild.text.slice(0, -4);
           }
+        }
+        // 创建点击事件处理函数
+        const clickHandler = () => {
+          // 清除定时器
+          clearTimer();
           // 移除点击事件监听器
           this.background.removeEventListener('click', clickHandler, false);
         };
+        // 创建按键事件处理函数
+        const keyHandler = (event: KeyboardEvent) => {
+          // 如果按下 Ctrl 键，则清除定时器，并移除按键事件监听器
+          if (event.ctrlKey) {
+            clearTimer();
+            window.removeEventListener('keydown', keyHandler, false);
+          }
+        };
         return new Promise<void>((resolve) => {
-          // 添加点击事件监听器
+          // 添加点击事件监听器，用于清除等待字符
           this.background.addEventListener('click', clickHandler, false);
+          window.addEventListener('keydown', keyHandler, false);
+          // 添加点击事件监听器，用于返回 Promise
           this.background.addEventListener('click', () => {resolve()});
+          window.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.ctrlKey) {
+              resolve()
+            }
+          });
         });
       }
+    }
+    /**
+     * 启用按键检测
+     * @description 当按下 Ctrl 键时，会将 FullScreenDialog.skipMode 设置为 true，松开时会将其设置为 false。
+     * 同时会将 FullScreenDialog.textSpeed 设置为 FullScreenDialog.skipModeTextSpeed 或 FullScreenDialog.normalModeTextSpeed。
+     * @note 该方法会在构造函数中自动调用。
+     * @returns 无
+     */
+    enableKeyDetection() {
+      window.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.ctrlKey) {
+          this.skipMode = true;
+          this.textSpeed = this.skipModeTextSpeed;
+        }
+      });
+      window.addEventListener('keyup', (event: KeyboardEvent) => {
+        if (event.key === 'Control') {
+          this.skipMode = false;
+          this.textSpeed = this.normalModeTextSpeed;
+        }
+      });
     }
     /**
      * Pixijs app
@@ -246,6 +297,22 @@ export default class FullScreenDialog{
      * @description 默认值为 49。
      */
     private fontSize: number;
+    /**
+     * 快进模式
+     * @description 默认值为 false。按下 Ctrl 键时为 true，松开时为 false。
+     */
+    private skipMode: boolean;
+    /**
+     * 快进模式下的文本显示速度
+     * @description 单位：毫秒/字。默认值为 3。
+     */
+    private skipModeTextSpeed: number;
+    /**
+     * 普通模式下的文本显示速度
+     * @description 单位：毫秒/字。默认值为 30。
+     */
+    private normalModeTextSpeed: number;
+
     /** 
      * 窗口高度
      * @description 默认值为 1080。
@@ -287,7 +354,8 @@ export default class FullScreenDialog{
     private textChildren: PIXI.Text[] = [];
     /**
      * 文字显示速度
-     * @description 单位：毫秒/字。默认值为 30。
+     * @description 单位：毫秒/字。
+     * @note 在快进模式下为 FullScreenDialog.skipModeTextSpeed，在普通模式下为 FullScreenDialog.normalModeTextSpeed。
      */
     private textSpeed: number;
     /**
