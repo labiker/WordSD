@@ -1,135 +1,104 @@
 import * as PIXI from 'pixi.js';
 
 /**
- * @author Labiker
- * @description BackLog 是用于管理文本日志的类。
+ * 基于 `Pixijs` 的日志模块。
+ *
+ * @since 1.0.0
  */
 export default class BackLog{
     /**
-     * 构建 BackLog 对象
+     * 自动启动鼠标滚轮检测和鼠标右键检测。
+     * 向上滚动鼠标滚轮，显示日志。
+     * 显示日志时，右键点击鼠标，关闭日志；上下滚动鼠标滚轮，控制日志文本上下移动。
      * @param app Pixijs App
-     * @returns 无
      */
     constructor(app: PIXI.Application<HTMLCanvasElement>) {
       this.app = app;
       this.width = app.view.width;
       this.height = app.view.height;
-      // 历史文本相关
-      this.fontSize = 49;
-      this.marginRight = 320;
-      this.marginLeft = 320;
       this.marginTop = 150;
       this.marginBottom = 80;
-      this.wordWrapWidth = this.width - this.marginRight - this.marginLeft;
       this.lineSpacing = 36;
-      this.textStyle = new PIXI.TextStyle({
-        fill: "#ffffff",
-        fontFamily: "\"Times New Roman\", Times, serif",
-        fontSize: this.fontSize,
-        wordWrap: true,
-        wordWrapWidth: this.wordWrapWidth,
-      });
-      // 标题相关
-      this.titleMarginLeft = 0;
-      this.titleMarginTop = 20;
-      this.titleText = 'Back Log';
-      this.titleTextStyle = new PIXI.TextStyle({
-        fill: "#ffffff",
-        fontFamily: "\"Comic Sans MS\", cursive, sans-serif",
-        fontSize: this.fontSize,
-      });
-      // 关闭按钮相关
-      this.closeButtonX = 1800;
-      this.closeButtonY = 960;
-      // 初始化
-      this.autoRecordText = false;
-      this.recordedTexts = [];
-      this.isShowing = false;
       this.observeTextChanges();
-      this.enableKeyDetection();
+      this.enableWheelDetection();
+      this.enableRightClickDetection();
     }
+
     /**
-     * 关闭日志
-     * @description 如果日志已经打开，则关闭日志。
-     * @note 请和 BackLog.open() 配对使用。
-     * @returns 无
+     * 关闭日志。
+     * 
+     * 如果日志已经打开，则关闭日志。
+     * @note 请和 `BackLog.open()` 配对使用。
      */
     public close() {
-      // 判断是否已显示日志
       if (!this.isShowing) {
         return;
       }
-      // 循环 showingObjects，从舞台中移除
-      this.showingObjects.forEach((showingObject) => {
-        this.app.stage.removeChild(showingObject);
-      });
-      // 清空 showingObjects
-      this.showingObjects = [];
-      // 清空 textChildren
-      this.textChildren = [];
-      // 设置正在显示日志的标志
+      this.removeAllObjects();
       this.isShowing = false;
-      // 开启自动记录文本
       this.autoRecordText = true;
     }
+
     /**
-     * 启用按键检测
-     * @description 当鼠标滚轮向上滚动时，显示日志。当鼠标滚轮向下滚动时，关闭日志。
+     * 启用鼠标滚轮检测。
+     * 
+     * 当鼠标滚轮向上滚动时，显示日志。当鼠标滚轮向下滚动时，关闭日志。
+     * 已显示日志，并且鼠标滚轮向上滚动时，`this.pixiTexts` 整体上移。
+     * 已显示日志，并且鼠标滚轮向下滚动时，`this.pixiTexts` 整体下移。
      * @note 该方法会在构造函数中自动调用。
-     * @returns 无
      */
-    private enableKeyDetection() {
-      // 监听鼠标滚轮事件
+    private enableWheelDetection() {
       this.app.view.addEventListener('wheel', (event) => {
-        // 判断鼠标滚轮滚动方向
-        if (event.deltaY < 0) {  // 如果向上滚动，则打开日志，等待日志关闭
+        if (event.deltaY < 0) {
           if(this.isShowing) {
-            // 如果已显示日志，并且存在可显示的文本，并且最顶部的文本的高度小于 marginTop，
-            // 则适当地整体下移文本 30，直到最顶部的文本的高度等于 marginTop
-            if (this.textChildren.length > 0) {
-              const firstTextChild = this.textChildren[0];
+            if (this.pixiTexts.length > 0) {
+              const firstTextChild = this.pixiTexts[0];
               if (firstTextChild.y < this.marginTop) {
-                this.textChildren.forEach((textChild) => {
-                  textChild.y += 30;
+                this.pixiTexts.forEach((pixiText) => {
+                  pixiText.y += 30;
                 });
               }
             }
           } else {
             this.open();
           }
-        } else if (this.isShowing) {  // 如果向下滚动，并且已显示日志，并且存在可显示的文本，
-          // 并且最底部的文本的高度大于 height - marginBottom，则适当地整体上移文本 30
-          if (this.textChildren.length > 0) {
-            const lastTextChild = this.textChildren[this.textChildren.length - 1];
+        } else if (this.isShowing) {
+          if (this.pixiTexts.length > 0) {
+            const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
             const lastTextChildBottom = lastTextChild.y + lastTextChild.height;
             const lastTextChildBottomMargin = this.height - this.marginBottom - lastTextChildBottom;
-            console.log('lastTextChildBottomMargin: ', lastTextChildBottomMargin);
             if (lastTextChildBottomMargin < 0) {
-              this.textChildren.forEach((textChild) => {
-                textChild.y -= 30;
+              this.pixiTexts.forEach((pixiText) => {
+                pixiText.y -= 30;
               });
             }
           }
         }
       });
-      // 监听鼠标右键点击事件
+    }
+
+    /**
+     * 启用鼠标右键检测。
+     * 
+     * 已显示日志，并且鼠标右键点击时，关闭日志。
+     * @note 该方法会在构造函数中自动调用。
+     */
+    private enableRightClickDetection() {
       this.app.view.addEventListener('contextmenu', (event) => {
-        // 判断是否已显示日志
         if (this.isShowing) {
-          // 如果已显示日志，则关闭日志
           this.close();
         } else {
           return;
         }
-        // 阻止默认事件
         event.preventDefault();
       });
     }
+
     /**
-     * 观察文本变化
-     * @description 检测 app.stage.children 中 Pixi.Text 类型的子对象是否被移除，则记录文本（自动记录模式下）。
+     * 观察文本变化。
+     * 
+     * `this.autoRecordText` 为真时，检测到 `BackLog.app.stage.children` 中 `Pixi.Text` 类型的子对象被移除时，记录文本。
      * @note 该方法会在构造函数中自动调用。
-     * @returns 无
      */
     private observeTextChanges() {
       this.app.stage.on('childRemoved', (child) => {
@@ -138,226 +107,291 @@ export default class BackLog{
         }
       });
     }
+
     /**
-     * 打开日志
-     * @description 如果日志未打开，则打开日志。包含一个纯黑的背景，左上角显示一个醒目的标题，右下角有一个关闭按钮
-     * @note 请和 BackLog.close() 配对使用。
-     * @returns 无
+     * 打开日志。
+     * 
+     * 当日志未打开时，打开日志。纯黑的背景，在左上角显示标题，在右下角显示关闭按钮。
+     * 另外还有两个遮罩，一个在上方，一个在下方，用于遮挡上下的文本。
+     * 自动显示 `BackLog.recordedTexts` 中的文本。
+     * @note 请和 `BackLog.close()` 配对使用。
      */
     public open() {
-      // 判断是否已显示日志
       if (this.isShowing) {
         return;
       }
-      // 显示背景
-      this.background = new PIXI.Graphics();
-      this.background.beginFill(0x000000, 0.8);
-      this.background.drawRect(0, 0, this.width, this.height);
-      this.background.endFill();
-      this.background.eventMode = 'static';
-      this.background.on('click', (event) => {
-        event.stopPropagation(); // 阻止事件传递
-      });
-      this.showObject(this.background, this.app.stage.children.length)
-      // 显示文本
+
+      this.background = new Background(this.width, this.height);
+      this.showObject(this.background)
+
       this.recordedTexts.forEach((text, index) => {
-        const message = new PIXI.Text(text, this.textStyle);
-        message.x = this.marginLeft;
-        // 判断是否为首次打印文本
-        if (index === 0) {
-          // 如果是首次打印文本，则将其y设为 marginTop
-          message.y = this.marginTop;
-        } else {
-          const lastTextChild = this.textChildren[index - 1];
-          // 如果不是首次打印文本，则将其y设为上一个文本的y + height + lineSpacing
+        const message = new Message(text, this.width);
+        if (index !== 0) {
+          const lastTextChild = this.pixiTexts[index - 1];
           message.y = lastTextChild.y + lastTextChild.height + this.lineSpacing;
         }
-        // 将文本添加到 textChildren 中
-        this.textChildren.push(message);
-        // 将文本添加到舞台中
-        this.showObject(message, this.app.stage.children.length);
+        this.showObject(message);
       });
-      // 仅当文本存在时，将文本整体上移，使得最后一个文本位于窗口可见范围的最下方
-      if (this.textChildren.length > 0) {
-        const lastTextChild = this.textChildren[this.textChildren.length - 1];
+
+      if (this.pixiTexts.length > 0) {
+        const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
         const lastTextChildBottom = lastTextChild.y + lastTextChild.height;
         const lastTextChildBottomMargin = this.height - this.marginBottom - lastTextChildBottom;
         if (lastTextChildBottomMargin < 0) {
-          this.textChildren.forEach((textChild) => {
-            textChild.y += lastTextChildBottomMargin;
+          this.pixiTexts.forEach((pixiText) => {
+            pixiText.y += lastTextChildBottomMargin;
           });
         }
       }
-      // 在文本上边距之上的区域，添加一个纯黑色的矩形，用于遮挡上方的文本
-      const topMask = new PIXI.Graphics();
-      topMask.beginFill(0x000000, 1);
-      topMask.drawRect(0, 0, this.width, this.marginTop);
-      topMask.endFill();
-      this.showObject(topMask, this.app.stage.children.length);
-      // 在文本下边距之下的区域，添加一个纯黑色的矩形，用于遮挡下方的文本
-      const bottomMask = new PIXI.Graphics();
-      bottomMask.beginFill(0x000000, 1);
-      bottomMask.drawRect(0, this.height - this.marginBottom, this.width, this.marginBottom);
-      bottomMask.endFill();
-      this.showObject(bottomMask, this.app.stage.children.length);
-      // 显示标题
-      const title = new PIXI.Text(this.titleText, this.titleTextStyle);
-      title.x = this.titleMarginLeft;
-      title.y = this.titleMarginTop;
-      this.showObject(title, this.app.stage.children.length);
-      // 显示关闭按钮
-      const closeButton = new PIXI.Text('×', this.textStyle);
-      closeButton.x = this.closeButtonX;
-      closeButton.y = this.closeButtonY;
-      closeButton.eventMode = 'static';
-      closeButton.cursor = 'pointer';
-      closeButton.on('click', () => {
-        this.close();
-      });
-      this.showObject(closeButton, this.app.stage.children.length);
-      // 设置正在显示日志的标志
+
+      const topMask = new TopMask(this.width, this.marginTop);
+      this.showObject(topMask);
+
+      const bottomMask = new BottomMask(0, this.height - this.marginBottom, this.width, this.marginBottom);
+      this.showObject(bottomMask);
+
+      const title = new Title();
+      this.showObject(title, false);
+
+      const closeButton = new CloseButton(this);
+      this.showObject(closeButton, false);
+
       this.isShowing = true;
-      // 关闭自动记录文本
       this.autoRecordText = false;
     }
+
     /**
-     * 记录文本
-     * @description 记录文本到日志中。
-     * @param text 要记录的文本
-     * @returns 无
+     * 记录文本。
+     * @param text 要记录的文本。
+     * @note 记录文本到 `BackLog.recordedTexts` 中。
      */
     public recordText(text: string) {
       this.recordedTexts.push(text);
     }
+
     /**
-     * 显示对象到舞台
-     * @description 调用 app.stage.addChildAt() 方法，将对象显示到舞台中。同时，将对象记录到 showingObjects 中。
-     * @returns 无
+     * 显示对象到舞台。
+     * 
+     * 调用 `BackLog.app.stage.addChildAt()` ，将对象显示到舞台中。
+     * 同时，将对象添加到 `BackLog.showingObjects` 中。
+     * 如果该对象是 `PIXI.Text` 类型，并且 `isRecorded` 为 `true`，则将对象添加到 `BackLog.pixiTexts` 中。
+     * @param object 要显示的对象。
+     * @param isRecorded 是否记录到 `BackLog.pixiTexts` 中。
      */
-    private showObject(object: PIXI.DisplayObject, index: number) {
-      this.app.stage.addChildAt(object, index);
+    private showObject(object: PIXI.DisplayObject, isRecorded?: boolean) {
+      this.app.stage.addChildAt(object, this.app.stage.children.length);
       this.showingObjects.push(object);
+      if (object instanceof PIXI.Text && isRecorded !== false) {
+        this.pixiTexts.push(object);
+      }
     }
+
     /**
-     * Pixijs app
-     * @description 绑定的 Pixijs app 对象。
+     * 从舞台中移除所有对象。
+     * 
+     * 调用 `BackLog.app.stage.removeChild()` ，将对象从舞台中移除。
+     * 同时，清空 `BackLog.showingObjects` 和 `BackLog.pixiTexts`。
+     */
+    private removeAllObjects() {
+      this.showingObjects.forEach((showingObject) => {
+        this.app.stage.removeChild(showingObject);
+      });
+      this.showingObjects = [];
+      this.pixiTexts = [];
+    }
+
+    /**
+     * 绑定的 `Pixijs app` 对象。
      */
     private app: PIXI.Application<HTMLCanvasElement>;
+
     /**
-     * 自动记录文本
-     * @description 默认值为 false，为 true 时，将自动记录文本。
-     * @note 你可以在任何地方将其设为 false 或 true，以控制是否自动记录文本。
+     * 自动记录文本。
+     * 
+     * 为 `true` 时，将自动记录文本。
+     * @note 你可以在任何地方将其设为 `false` 或 `true`，以控制是否自动记录文本。
+     * @default false
      */
     public autoRecordText: boolean;
+
     /** 
-     * 日志背景
-     * @description 用于绑定点击事件。位于最上层。
+     * 日志背景。
+     * 
+     * 用于在 `BackLog.show()` 时，显示到舞台中阻止鼠标点击事件传递。
      */
-    private background: PIXI.Graphics;
+    private background: Background;
+
     /** 
-     * 关闭按钮的x坐标
-     * @description 默认值为 1800.
-     */
-    private closeButtonX: number;
-    /**
-     * 关闭按钮的y坐标
-     * @description 默认值为 960.
-     */
-    private closeButtonY: number;
-    /**
-     * 文字大小
-     * @description 默认值为 49。
-     */
-    private fontSize: number;
-    /** 
-     * 窗口高度
-     * @description 默认值为 1080。
+     * 窗口高度。
+     * @default 1080
      */
     private height: number;
+
     /** 
-     * 正在显示日志的标志
-     * @description 初始值为 false 。
+     * 正在显示日志的标志。
+     * @default false
      */
     private isShowing: boolean;
+
     /**
-     * 文本行间距
-     * @description 默认值为 36。
+     * 文本行间距。
+     * @default 36
      */
     private lineSpacing: number;
+
     /** 
-     * 文字右边距
-     * @description 指定用于禁入处理的右边距字符数。
-     * @note 在竖写模式下，解释为下端的字符数。
-     */
-    private marginRight: number;
-    /** 
-     * 文字左边距
-     * @description 指定用于禁入处理的左边距字符数。
-     * @note 在竖写模式下，解释为上端的字符数。
-     */
-    private marginLeft: number;
-    /** 
-     * 文字上边距
-     * @description 指定用于禁入处理的上边距字符数。
-     * @note 在竖写模式下，解释为右端的字符数。
+     * 日志文本上边距。
+     * @default 150
      */
     private marginTop: number;
+
     /** 
-     * 文字下边距
-     * @description 指定用于禁入处理的下边距字符数。
-     * @note 在竖写模式下，解释为左端的字符数。
+     * 日志文本下边距。
+     * @default 80
      */
     private marginBottom: number;
+
     /**
-     * 日志中的纯文本数组
-     * @description 在 BackLog.show() 时，将 recordedTexts 中的文本显示到舞台中。
+     * 已记录的文本数组。
+     * @note 在调用 `BackLog.show()` 时，将文本显示到舞台中。
      */
     private recordedTexts: string[] = [];
+
     /** 
-     * 日志中正在显示的 Pixi 对象
-     * @description 用于在调用 BackLog.close() 时，清空舞台中的对象。
+     * 日志中正在显示的 Pixi 对象。
+     * @note 在调用 `BackLog.close()` 时，将这些对象从舞台中移除。
      */
     private showingObjects: PIXI.DisplayObject[] = [];
+
     /**
-     * 舞台中的文本数组
-     * @description 表示舞台中的文本数组。可以通过 BackLog.textChildren 访问。
+     * 舞台中的 `PIXI.Text` 数组。
+     * @note 配合鼠标滚轮事件，控制文本上下移动。
      */
-    private textChildren: PIXI.Text[] = [];
-    /**
-     * 文本样式
-     * @description 表示文本样式。
-     * 可以通过 BackLog.textStyle 访问。
-     * 可以通过 BackLog.textStyle = new PIXI.TextStyle({...}) 修改。
-     */
-    private textStyle: PIXI.TextStyle;
+    private pixiTexts: PIXI.Text[] = [];
+
     /** 
-     * 标题左边距
-     * @description 默认值为 0.
+     * 窗口宽度。
+     * @default 1920
      */
-    private titleMarginLeft: number;
-    /**
-     * 标题上边距
-     * @description 默认值为 20.
-     */
-    private titleMarginTop: number;
-    /**
-     * 标题文字内容
-     * @description 默认值为 Back Log.
-     */
-    private titleText: string;
-    /**
-     * 标题文字样式
-     */
-    private titleTextStyle: PIXI.TextStyle;
-    /** 
-     * 窗口宽度
-     * @description 表示窗口宽度。默认值为 1920。
-     */
-    private width: number;
-    /** 
-     * 文本换行的宽度
-     * @description 需要将 wordWrap 设置为 true 才能使用。
-     * @note 默认值为 BackLog.width - BackLog.marginRight - BackLog.marginLeft。
-     */
-    private wordWrapWidth: number;
+    public width: number;
+}
+
+/**
+ * 日志背景。
+ * @note 用于在 `BackLog.show()` 时，显示到舞台中阻止鼠标点击事件传递。
+ * @since 1.0.0
+ */
+class Background extends PIXI.Graphics {
+  /**
+   * @param width 背景宽度。
+   * @param height 背景高度。
+   */
+  constructor(width: number, height: number) {
+    super();
+    this.beginFill(0x000000, 0.8);
+    this.drawRect(0, 0, width, height);
+    this.endFill();
+    this.eventMode = 'static';
+    this.on('click', (event) => {
+      event.stopPropagation();
+    });
+  }
+}
+
+/**
+ * 关闭按钮。
+ * @note 用于在 `BackLog.show()` 时，显示到舞台中，点击后将关闭日志。
+ * @since 1.0.0
+ */
+class CloseButton extends PIXI.Text {
+  /**
+   * @param backLog 日志对象。
+   */
+  constructor(backLog: BackLog) {
+    super('×', new PIXI.TextStyle({
+      fill: "#ffffff",
+      fontFamily: "\"Times New Roman\", Times, serif",
+      fontSize: 49,
+    }));
+    this.x = 1800;
+    this.y = 960;
+    this.eventMode = 'static';
+    this.cursor = 'pointer';
+    this.on('click', () => {
+      backLog.close();
+    });
+  }
+}
+
+/**
+ * 标题。
+ * @note 用于在 `BackLog.show()` 时，显示到舞台中。
+ * @since 1.0.0
+ */
+class Title extends PIXI.Text {
+  constructor() {
+    super('Back Log', new PIXI.TextStyle({
+      fill: "#ffffff",
+      fontFamily: "\"Comic Sans MS\", cursive, sans-serif",
+      fontSize: 49,
+    }));
+    this.x = 0;
+    this.y = 20;
+  }
+}
+
+/**
+ * 顶部遮罩。
+ * @note 用于在 `BackLog.show()` 时，显示到舞台中，遮挡上方的文本。
+ * @since 1.0.0
+ */
+class TopMask extends PIXI.Graphics {
+  /**
+   * @param width 遮罩宽度。
+   * @param height 遮罩高度。
+   */
+  constructor(width: number, height: number) {
+    super();
+    this.beginFill(0x000000, 1);
+    this.drawRect(0, 0, width, height);
+    this.endFill();
+  }
+}
+
+/**
+ * 底部遮罩。
+ * @note 用于在 `BackLog.show()` 时，显示到舞台中，遮挡下方的文本。
+ * @since 1.0.0
+ */
+class BottomMask extends PIXI.Graphics {
+  constructor(x: number, y: number, width: number, height: number) {
+    super();
+    this.beginFill(0x000000, 1);
+    this.drawRect(x, y, width, height);
+    this.endFill();
+  }
+}
+
+/**
+ * 消息。
+ * @note 用于在 `BackLog.show()` 时，显示到舞台中，显示文本。
+ * @since 1.0.0
+ */
+class Message extends PIXI.Text {
+  /**
+   * @param text 要显示的文本。
+   * @param backLogWidth 日志宽度。
+   */
+  constructor(text: string, backLogWidth: number) {
+    super(text);
+    this.x = 320;
+    this.y = 150;
+    this.style = new PIXI.TextStyle({
+      fill: "#ffffff",
+      fontFamily: "\"Times New Roman\", Times, serif",
+      fontSize: 49,
+      wordWrap: true,
+      wordWrapWidth: backLogWidth - this.x - this.x,
+    });
+  }
 }

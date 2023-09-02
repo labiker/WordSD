@@ -31,7 +31,7 @@ import * as PIXI from 'pixi.js';
 import FullScreenDialog from './module/FullScreenDialog';
 import BackLog from './module/BackLog';
 
-// 创建 Pixijs App, 并将其添加到body中
+// 创建 Pixijs App, 并将其添加到body中。
 // Pixijs App 是公用的，可以在任何地方使用 app 这个变量来访问它。
 const appWidth = 1920;
 const appHeight = 1080;
@@ -60,11 +60,11 @@ const autoZoom = () => {
 autoZoom();
 
 // 全屏对话框模块
-// 创建对象并绑定到 Pixijs App 上
+// 创建对象并绑定到 Pixijs App 上。
 const fsDialog = new FullScreenDialog(app);
 
 // 日志模块
-// 创建对象并绑定到 Pixijs App 上
+// 创建对象并绑定到 Pixijs App 上。
 const backLog = new BackLog(app);
 
 // 自动记录文本启用
@@ -120,7 +120,7 @@ const gameData = {
  * 宏
  * @param enText 英文文本
  * @param zhcnText 中文文本
- * @description 检测语言，输出对应文本，然后等待点击。
+ * @note 检测语言，输出对应文本，然后等待点击。
  */
 const printTextAndWaitForClick = async (enText: string, zhcnText: string) => {
     const text = gameData.system.language === 'en' ? enText : zhcnText;
@@ -131,7 +131,7 @@ const printTextAndWaitForClick = async (enText: string, zhcnText: string) => {
  * 宏
  * @param enText 英文文本
  * @param zhcnText 中文文本
- * @description 检测语言，输出对应可点击文本。
+ * @note 检测语言，输出对应可点击文本。
  */
 const printClickableText = async (enText: string, zhcnText: string, func: () => void) => {
     const text = gameData.system.language === 'en' ? enText : zhcnText;
