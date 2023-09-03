@@ -112,6 +112,25 @@ export default class FullScreenDialog{
     }
 
     /**
+     * 等待。
+     * 
+     * 处于快进模式时仍需等待。
+     * 不显示等待字符。
+     * 用于等待一个逻辑由假变真的事件。
+     * @param target 等待的目标。
+     * @note 通常放在 `this.printClickableText()` 之后。
+     */
+    public async waitFor(target: () => boolean): Promise<void> {
+      while (!target()) {
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(true);
+          }, 100);
+        });
+      }
+    }
+
+    /**
      * 等待点击。
      * 
      * 如果当前处于快进模式，则不等待点击。

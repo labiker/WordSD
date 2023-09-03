@@ -120,6 +120,7 @@ const gameData = {
         purchasedFood: 0,             // Purchased food
         purchasedFoodMax: 100,        // Purchased food (upper limit)
         purchasedFoodMin: 20,         // Purchased food (lower limit)
+        isNoteProcessed: false,       // Whether the note is processed
     }
 };
 
@@ -155,13 +156,7 @@ const process = async () => {
         gameData.system.language = 'zh-cn';
     });
     // 等待语言选择
-    while (gameData.system.language === '') {
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(true);
-            }, 100);
-        });
-    }
+    await fsDialog.waitFor(() => gameData.system.language !== '');
     fsDialog.clearDialog();
     await printTextAndWaitForClick(
         'Welcome to WordSD!',
@@ -222,6 +217,7 @@ const creatNewWorldLine = async () => {
     gameData.player.sanity = gameData.player.sanityMax;
     gameData.player.food = gameData.player.foodMax;
     gameData.player.credibility = 0;
+    gameData.player.isNoteProcessed = false;
     fsDialog.clearDialog();
     await printTextAndWaitForClick(
         'For various reasons, you have to find a place to hide.',
@@ -360,13 +356,7 @@ const creatNewWorldLine = async () => {
             }
         );
         // 等待尸体处理
-        while (gameData.legacy.humanCorpse > 0) {
-            await new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(true);
-                }, 100);
-            });
-        }
+        await fsDialog.waitFor(() => gameData.legacy.humanCorpse <= 0);
     }
     // 如果有有害物词条, 进入有害物词条检查环节
     if (gameData.collection.smilingAngel_1 || gameData.collection.smilingAngel_2) {
@@ -383,8 +373,6 @@ const creatNewWorldLine = async () => {
             `容器的底部, 压着一片纸条, 上头有一段字迹潦草的笔记。`
         );
         fsDialog.clearDialog();
-        // 是否已处理笔记
-        let isNoteProcessed = false;
         printClickableText(
             `- Read the note`,
             `- 阅读笔记`,
@@ -416,7 +404,7 @@ const creatNewWorldLine = async () => {
                     `你将笔记放回原处。`
                 );
                 fsDialog.clearDialog();
-                isNoteProcessed = true;
+                gameData.player.isNoteProcessed = true;
             }
         )
         printClickableText(
@@ -437,17 +425,11 @@ const creatNewWorldLine = async () => {
                     `你这么认为。`
                 );
                 fsDialog.clearDialog();
-                isNoteProcessed = true;
+                gameData.player.isNoteProcessed = true;
             }
         )
         // 等待笔记处理
-        while (!isNoteProcessed) {
-            await new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(true);
-                }, 100);
-            });
-        }
+        await fsDialog.waitFor(() => gameData.player.isNoteProcessed);
     }
     await printTextAndWaitForClick(
         `【 Time: ${gameData.system.currentTime} o'clock 】\nYou have been busy moving, and it was already night.`,
@@ -457,8 +439,8 @@ const creatNewWorldLine = async () => {
         `You can go out and have a look, maybe you can meet new neighbors and say hello.`,
         `可以出去看看, 也许能碰到新的邻居, 打个招呼。`
     );
-    // 外出环节
-    let isGoOut = false;
+    // 雪橇犬事件
+    let sledDogSceneClear = false;   // 使用局部变量，避免世界线之间互相影响。
     printClickableText(
         `- Go out`,
         `- 外出`,
@@ -602,20 +584,14 @@ const creatNewWorldLine = async () => {
                                 `你关上门, 回到房间里。`
                             );
                             fsDialog.clearDialog();
-                            isGoOut = true;
+                            sledDogSceneClear = true;
                         }
                     );
                 }
             }
         );
     }
-    while (!isGoOut) {
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(true);
-            }, 100);
-        });
-    }
+    await fsDialog.waitFor(() => sledDogSceneClear);
     await printTextAndWaitForClick(
         `..`,
         `..`
