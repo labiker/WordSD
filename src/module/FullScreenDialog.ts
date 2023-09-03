@@ -30,10 +30,10 @@ export default class FullScreenDialog{
      * 清空对话框。
      */
     public clearDialog(){
-      this.pixiTexts.forEach((pixiText) => {
-        this.app.stage.removeChild(pixiText);
+      this.messages.forEach((message) => {
+        this.app.stage.removeChild(message);
       });
-      this.pixiTexts = [];
+      this.messages = [];
     }
 
     /**
@@ -46,9 +46,9 @@ export default class FullScreenDialog{
      */
     public printText(text: string): void {
       const message = new Message(text, this.width);
-      if (this.pixiTexts.length !== 0) {
-        const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
-        if (lastTextChild.style === message.style) {
+      if (this.messages.length !== 0) {
+        const lastTextChild = this.messages[this.messages.length - 1];
+        if (lastTextChild.eventMode !== 'static') {
           lastTextChild.alpha = 0.5;
         }
         if (lastTextChild.y + lastTextChild.height + this.lineSpacing + this.marginBottom > this.height) {
@@ -69,7 +69,7 @@ export default class FullScreenDialog{
      */
     async printTextAsync(text: string): Promise<void> {
       this.printText('');
-      const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
+      const lastTextChild = this.messages[this.messages.length - 1];
       const charArray = text.split('');
 
       let isClicked = false;
@@ -104,7 +104,7 @@ export default class FullScreenDialog{
      */
     public printClickableText(text: string, func: () => void): void {
       this.printText(text);
-      const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1] as Message;
+      const lastTextChild = this.messages[this.messages.length - 1];
       lastTextChild.style = lastTextChild.clickableTextStyle;
       lastTextChild.eventMode = 'static';
       lastTextChild.cursor = 'pointer';
@@ -142,7 +142,7 @@ export default class FullScreenDialog{
         return;
       }
 
-      const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
+      const lastTextChild = this.messages[this.messages.length - 1];
       if (lastTextChild === undefined) {
         return new Promise<void>((resolve) => {
           this.background.addEventListener('click', () => {resolve()});
@@ -228,15 +228,15 @@ export default class FullScreenDialog{
      * 
      * 调用 `this.app.stage.addChildAt()` ，将对象显示到舞台中。
      * 同时，将对象添加到 `this.showingObjects` 中。
-     * 如果该对象是 `PIXI.Text` 类型，并且 `isRecorded` 为 `true`，则将对象添加到 `this.pixiTexts` 中。
+     * 如果该对象是 `Message` 类型，并且 `isRecorded` 为 `true`，则将对象添加到 `this.messages` 中。
      * @param object 要显示的对象。
-     * @param isRecorded 是否记录到 `this.pixiTexts` 中。
+     * @param isRecorded 是否记录到 `this.messages` 中。
      */
     private showObject(object: PIXI.DisplayObject, isRecorded?: boolean) {
       this.app.stage.addChildAt(object, this.app.stage.children.length);
       this.showingObjects.push(object);
-      if (object instanceof PIXI.Text && isRecorded !== false) {
-        this.pixiTexts.push(object);
+      if (object instanceof Message && isRecorded !== false) {
+        this.messages.push(object);
       }
     }
 
@@ -250,11 +250,6 @@ export default class FullScreenDialog{
      * @description 用于绑定点击事件。最先加入舞台，位于最底层。
      */
     private background: Background;
-
-    /**
-     * 可响应点击事件的文本的样式。
-     */
-    public clickableTextStyle: PIXI.TextStyle;
 
     /** 
      * 全屏对话框中正在显示的 Pixi 对象。
@@ -301,9 +296,9 @@ export default class FullScreenDialog{
     private marginBottom: number;
 
     /**
-     * 舞台中的 `PIXI.Text` 数组。
+     * 舞台中的 `Message` 数组。
      */
-    private pixiTexts: PIXI.Text[] = [];
+    private messages: Message[] = [];
 
     /**
      * 文本显示速度。
