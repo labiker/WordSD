@@ -1,20 +1,31 @@
-# WordSD
+# WordSD — 2D Game Engine Based On PixiJS
 
-Welcome to `Word Seed`!
+![wordsd_github_logo](https://github.com/labiker/WordSD/assets/49630998/12ad2a25-e914-4c31-9dfe-91ad8c2d5b1f)
 
-This is a novel game engine completely based on Pixijs.
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/xVVk5hdkXK)
 
-Different from traditional novel game engines, WordSD pursues a new way of game development.
+Welcome to WordSD!
 
-WordSeed is currently in its infancy, and anyone interested in developing a novel engine is welcome to join!
+WordSD is a 2D game engine based entirely on Pixijs.
 
-## Requirements
+It provides the necessary features needed to develop text adventure games.
+
+Different from traditional game engines, it pursues a new way of game development.
+
+WordSeed is currently in its infancy, and anyone interested in developing a game engine is welcome to join!
+
+## How to start
 * Node JS
 * yarn
 
-## Starting WordSD
+If you don't already have Node.js and yarn, go install them. Then, in the folder where you have cloned the repository, install the dependencies using yarn:
 
-```shell
+```sh
 yarn
-yarn start
+```
+
+Then, to start the engine, run:
+
+```sh
+yarn run start
 ```
