@@ -103,7 +103,7 @@ export default class BackLog{
     private observeTextChanges() {
       this.app.stage.on('childRemoved', (child) => {
         if (this.autoRecordText && child instanceof PIXI.Text) {
-          this.recordText(child.text);
+          this.recordPixiText(child);
         }
       });
     }
@@ -113,7 +113,7 @@ export default class BackLog{
      * 
      * 当日志未打开时，打开日志。纯黑的背景，在左上角显示标题，在右下角显示关闭按钮。
      * 另外还有两个遮罩，一个在上方，一个在下方，用于遮挡上下的文本。
-     * 自动显示 `BackLog.recordedTexts` 中的文本。
+     * 自动显示 `BackLog.recordedPixiTexts` 中的文本。
      * @note 请和 `BackLog.close()` 配对使用。
      */
     public open() {
@@ -124,8 +124,8 @@ export default class BackLog{
       this.background = new Background(this.width, this.height);
       this.showObject(this.background)
 
-      this.recordedTexts.forEach((text, index) => {
-        const message = new Message(text, this.width);
+      this.recordedPixiTexts.forEach((pixiText, index) => {
+        const message = new Message(pixiText, this.width);
         if (index !== 0) {
           const lastTextChild = this.pixiTexts[index - 1];
           message.y = lastTextChild.y + lastTextChild.height + this.lineSpacing;
@@ -161,12 +161,12 @@ export default class BackLog{
     }
 
     /**
-     * 记录文本。
-     * @param text 要记录的文本。
-     * @note 记录文本到 `BackLog.recordedTexts` 中。
+     * 记录 `PIXI.Text` 对象。
+     * @param pixiText 要记录的 `PIXI.Text` 对象。
+     * @note 记录 `PIXI.Text` 对象到 `BackLog.recordedPixiTexts` 中。
      */
-    public recordText(text: string) {
-      this.recordedTexts.push(text);
+    public recordPixiText(pixiText: PIXI.Text) {
+      this.recordedPixiTexts.push(pixiText);
     }
 
     /**
@@ -252,10 +252,10 @@ export default class BackLog{
     private marginBottom: number;
 
     /**
-     * 已记录的文本数组。
-     * @note 在调用 `BackLog.show()` 时，将文本显示到舞台中。
+     * 已记录的 `PIXI.Text` 数组。
+     * @note 在调用 `BackLog.open()` 时，将文本显示到舞台中。
      */
-    private recordedTexts: string[] = [];
+    private recordedPixiTexts: PIXI.Text[] = [];
 
     /** 
      * 日志中正在显示的 Pixi 对象。
@@ -379,15 +379,15 @@ class BottomMask extends PIXI.Graphics {
  */
 class Message extends PIXI.Text {
   /**
-   * @param text 要显示的文本。
+   * @param pixiText 要显示的文本。
    * @param backLogWidth 日志宽度。
    */
-  constructor(text: string, backLogWidth: number) {
-    super(text);
+  constructor(pixiText: PIXI.Text, backLogWidth: number) {
+    super(pixiText.text);
     this.x = 320;
     this.y = 150;
     this.style = new PIXI.TextStyle({
-      fill: "#ffffff",
+      fill: pixiText.style.fill,
       fontFamily: "\"Times New Roman\", Times, serif",
       fontSize: 49,
       wordWrap: true,

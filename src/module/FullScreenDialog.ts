@@ -42,10 +42,13 @@ export default class FullScreenDialog{
      * 如果上一个文本是不可响应点击事件的文本，则设为半透明。
      * 当文本超出对话框范围时，会自动调用清空对话框。
      * 如果不是首次打印文本，且不需要清空舞台中的文本，则将其 `y` 设为上一个文本的 `y + height + lineSpacing`。
-     * @param text 显示文本
+     * 会根据 `type` 的值，设置文本的样式。
+     * @param text 显示文本。
+     * @param type 文本类型。
      */
-    public printText(text: string): void {
+    public printText(text: string, type?: 'warning' | 'hint'): void {
       const message = new Message(text, this.width);
+
       if (this.messages.length !== 0) {
         const lastTextChild = this.messages[this.messages.length - 1];
         if (lastTextChild.eventMode !== 'static') {
@@ -57,6 +60,19 @@ export default class FullScreenDialog{
           message.y = lastTextChild.y + lastTextChild.height + this.lineSpacing;
         }
       }
+
+      switch (type) {
+        case 'warning':
+          message.style = message.warningTextStyle;
+          break;
+        case 'hint':
+          message.style = message.hintTextStyle;
+          break;
+        default:
+          message.style = message.normalTextStyle;
+          break;
+      }
+
       this.showObject(message);
     }
 
@@ -66,9 +82,10 @@ export default class FullScreenDialog{
      * 根据 `this.textSpeed` 的值，逐字打印文本。
      * 如果出现点击事件，则将剩余的字符全部打印出来。
      * @param text 要打印的文本。
+     * @param type 文本类型。
      */
-    async printTextAsync(text: string): Promise<void> {
-      this.printText('');
+    async printTextAsync(text: string, type?: 'warning' | 'hint'): Promise<void> {
+      this.printText('', type);
       const lastTextChild = this.messages[this.messages.length - 1];
       const charArray = text.split('');
 
@@ -341,44 +358,57 @@ class Message extends PIXI.Text {
     super(text);
     this.x = 320;
     this.y = 150;
-    this.style = new PIXI.TextStyle({
-      fontFamily: 'Arial',
+    this.normalTextStyle = new PIXI.TextStyle({
+      fill: "#ffffff",
+      fontFamily: "\"Comic Sans MS\", cursive, sans-serif",
       fontSize: 49,
-      fontStyle: 'italic',
-      fontWeight: 'bold',
-      fill: ['#ffffff', '#00ff99'],
-      stroke: '#4a1850',
-      strokeThickness: 5,
-      dropShadow: true,
-      dropShadowColor: '#000000',
-      dropShadowBlur: 4,
-      dropShadowAngle: Math.PI / 6,
-      dropShadowDistance: 6,
       wordWrap: true,
       wordWrapWidth: backLogWidth - this.x - this.x,
-      lineJoin: 'round',
     });
     this.clickableTextStyle = new PIXI.TextStyle({
-      fontFamily: 'Arial',
+      fill: ['#a0a0ff', '#ffffff'],
+      fontFamily: "\"Comic Sans MS\", cursive, sans-serif",
       fontSize: 49,
-      fontStyle: 'italic',
       fontWeight: 'bold',
-      fill: ['#00ff99', '#ffffff'],
-      stroke: '#4a1850',
-      strokeThickness: 5,
-      dropShadow: true,
-      dropShadowColor: '#000000',
-      dropShadowBlur: 4,
-      dropShadowAngle: Math.PI / 6,
-      dropShadowDistance: 6,
       wordWrap: true,
       wordWrapWidth: backLogWidth - this.x - this.x,
-      lineJoin: 'round',
     });
+    this.warningTextStyle = new PIXI.TextStyle({
+      fill: ['#ff9e9e', '#ffffff'],
+      fontFamily: "\"Comic Sans MS\", cursive, sans-serif",
+      fontSize: 49,
+      fontWeight: 'bold',
+      wordWrap: true,
+      wordWrapWidth: backLogWidth - this.x - this.x,
+    });
+    this.hintTextStyle = new PIXI.TextStyle({
+      fill: ['#9effa0', '#ffffff'],
+      fontFamily: "\"Comic Sans MS\", cursive, sans-serif",
+      fontSize: 49,
+      fontWeight: 'bold',
+      wordWrap: true,
+      wordWrapWidth: backLogWidth - this.x - this.x,
+    });
+    this.style = this.normalTextStyle;
   }
+
+  /**
+   * 普通文本的样式。
+   */
+  public normalTextStyle: PIXI.TextStyle;
 
   /**
    * 可响应点击事件的文本的样式。
    */
   public clickableTextStyle: PIXI.TextStyle;
+
+  /**
+   * 警告文本的样式。
+   */
+  public warningTextStyle: PIXI.TextStyle;
+
+  /**
+   * 提示文本的样式。
+   */
+  public hintTextStyle: PIXI.TextStyle;
 }
