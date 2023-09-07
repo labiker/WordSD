@@ -1,8 +1,8 @@
 {
   "name": "wordsd",
-  "productName": "wordsd",
+  "productName": "WordSD",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "2D Game Engine Based On PixiJS",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
