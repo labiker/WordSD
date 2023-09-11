@@ -4,9 +4,8 @@ import BackLog from '../module/BackLog';
 import { app } from '../renderer';
 
 /** A class that handles all of gameplay based features. */
-export class Game
-{
-    constructor(){
+export class Game {
+    constructor() {
         this._backLog.autoRecordText = true;
     }
     private _gameData = gameData;
@@ -360,159 +359,159 @@ export class Game
     private _sledDogScene = async () => {
         let sledDogSceneClear = false;
         this._printClickableText(
-        `- Go out`,
-        `- 外出`,
-        async () => {
-            this._fsDialog.clearDialog();
-            await this._printTextAndWC(
-                `You open the door, take a step, and a smiling face suddenly appears at your feet.`,
-                `你打开门, 迈出一步, 一张笑脸突然出现在你脚边。`
-            );
-            await this._printTextAndWC(
-                `A dog grinned, bit through your knee, and dragged you down the hallway.`,
-                `一条狗咧着嘴, 咬穿你的膝盖, 将你拖到楼道中。`
-            );
-            await this._printTextAndWC(
-                `It throws you to the ground, gently licks your tears, and bites your cheeks.`,
-                `它将你扑倒在地, 温柔地舔舐你的泪水, 咬烂了你的脸颊。`
-            );
-            await this._printTextAndWC(
-                `Your teeth collide with its teeth, its saliva burns your tongue, and you can't cry out.`,
-                `你的牙齿与它的牙齿相撞, 它的唾液烧烂了你的舌头, 你喊不出声了。`
-            );
-            this._fsDialog.clearDialog();
-            await this._printTextAndWC(
-                `Its blood-stained smile fills the field of vision, you hear the sound of sucking, and there is a spicy tingling sensation in the eye sockets,`,
-                `它染血的微笑充满了视野, 你听见吸吮的声音, 眼窝中传来辛辣的刺痛感。`
-            );
-            this._gameData.player.health = 0;
-            this._gameData.story.sledDogDeathSceneI = true;
-            this._gameData.legacy.humanCorpse += 1;
-            await this._printTextAndWC(
-                `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nYou finally realize that its snort is exhaling into your brain.`,
-                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n你最后意识到它的鼻息呼入了脑颅。`,
-                'warning'
-            );
-            // 创建新的世界线
-            await this._creatNewWorldLine();
-        }
-        );
-        if (this._gameData.story.sledDogDeathSceneI) {
-        this._printClickableText(
-            `- View the door eye`,
-            `- 查看门眼`,
+            `- Go out`,
+            `- 外出`,
             async () => {
                 this._fsDialog.clearDialog();
                 await this._printTextAndWC(
-                    `In the dim light, a snow-white sled dog sleepily lies in front of the door.`,
-                    `在昏暗的光线下, 一条雪白的雪橇犬趴在门前昏昏欲睡。`
+                    `You open the door, take a step, and a smiling face suddenly appears at your feet.`,
+                    `你打开门, 迈出一步, 一张笑脸突然出现在你脚边。`
                 );
-                this._printClickableText(
-                    `- Go out`,
-                    `- 出门`,
-                    async () => {
-                        this._fsDialog.clearDialog();
-                        await this._printTextAndWC(
-                            `You open the door, carefully pass it,`,
-                            `你打开门, 小心翼翼地经过它, `
-                        );
-                        await this._printTextAndWC(
-                            `It lifted its face and grinned.`,
-                            `它抬起脸来咧嘴笑了。`
-                        );
-                        await this._printTextAndWC(
-                            `It then bites off your knee.`,
-                            `它接着咬断了你的膝盖。`
-                        );
-                        await this._printTextAndWC(
-                            `..`,
-                            `..`,
-                        );
-                        await this._printTextAndWC(
-                            `....`,
-                            `....`,
-                        );
-                        await this._printTextAndWC(
-                            `......`,
-                            `......`,
-                        );
-                        this._gameData.player.health = 0;
-                        this._gameData.story.sledDogDeathSceneII = true;
-                        this._gameData.legacy.humanCorpse += 1;
-                        await this._printTextAndWC(
-                            `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nA snow-white sled dog whispered with joy, and it licked the last piece of minced meat with pity,`,
-                            `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n一条雪白的雪橇犬满心欢喜地低鸣着, 它怜惜地舔尽最后一块碎肉, `,
-                            'warning'
-                        );
-                        await this._printTextAndWC(
-                            `Stretch out, and your hair swells up.`,
-                            `伸个懒腰, 毛发哗一下膨胀起来。`
-                        );
-                        await this._printTextAndWC(
-                            `It wagged its tail, trotted towards the stairs, and left.`,
-                            `它摇晃着尾巴, 小步跑向楼梯, 离开了。`
-                        );
-                        if(this._gameData.story.sledDogDeathSceneII && !this._gameData.collection.smilingAngel_1) {
-                            this._gameData.collection.smilingAngel_1 = true;
-                            await this._printTextAndWC(
-                                `Colletion: Smiling Angel Part 1`,
-                                `收录有害物词条： 微笑天使 part1`,
-                                'hint'
-                            );
-                        }
-                        // 创建新的世界线
-                        await this._creatNewWorldLine();
-                    }
+                await this._printTextAndWC(
+                    `A dog grinned, bit through your knee, and dragged you down the hallway.`,
+                    `一条狗咧着嘴, 咬穿你的膝盖, 将你拖到楼道中。`
                 );
-                if (this._gameData.collection.smilingAngel_1 && this._gameData.item.CorpsePieces > 0) {
+                await this._printTextAndWC(
+                    `It throws you to the ground, gently licks your tears, and bites your cheeks.`,
+                    `它将你扑倒在地, 温柔地舔舐你的泪水, 咬烂了你的脸颊。`
+                );
+                await this._printTextAndWC(
+                    `Your teeth collide with its teeth, its saliva burns your tongue, and you can't cry out.`,
+                    `你的牙齿与它的牙齿相撞, 它的唾液烧烂了你的舌头, 你喊不出声了。`
+                );
+                this._fsDialog.clearDialog();
+                await this._printTextAndWC(
+                    `Its blood-stained smile fills the field of vision, you hear the sound of sucking, and there is a spicy tingling sensation in the eye sockets,`,
+                    `它染血的微笑充满了视野, 你听见吸吮的声音, 眼窝中传来辛辣的刺痛感。`
+                );
+                this._gameData.player.health = 0;
+                this._gameData.story.sledDogDeathSceneI = true;
+                this._gameData.legacy.humanCorpse += 1;
+                await this._printTextAndWC(
+                    `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nYou finally realize that its snort is exhaling into your brain.`,
+                    `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n你最后意识到它的鼻息呼入了脑颅。`,
+                    'warning'
+                );
+                // 创建新的世界线
+                await this._creatNewWorldLine();
+            }
+        );
+        if (this._gameData.story.sledDogDeathSceneI) {
+            this._printClickableText(
+                `- View the door eye`,
+                `- 查看门眼`,
+                async () => {
+                    this._fsDialog.clearDialog();
+                    await this._printTextAndWC(
+                        `In the dim light, a snow-white sled dog sleepily lies in front of the door.`,
+                        `在昏暗的光线下, 一条雪白的雪橇犬趴在门前昏昏欲睡。`
+                    );
                     this._printClickableText(
-                        `- Feed the corpse pieces`,
-                        `- 喂食尸块`,
+                        `- Go out`,
+                        `- 出门`,
                         async () => {
                             this._fsDialog.clearDialog();
                             await this._printTextAndWC(
-                                `You open the door. Toss it a piece of meat.`,
-                                `你打开门。丢给它一块肉。`
+                                `You open the door, carefully pass it,`,
+                                `你打开门, 小心翼翼地经过它, `
                             );
                             await this._printTextAndWC(
-                                `It lowered its head to sniff, and then slowly ate the meat.`,
-                                `它低下头去嗅闻, 而后慢条斯理地将肉吃掉了。`
+                                `It lifted its face and grinned.`,
+                                `它抬起脸来咧嘴笑了。`
                             );
                             await this._printTextAndWC(
-                                `The sled dog licks its lips, stares at you meaningfully for a moment, and turns away.`,
-                                `雪橇犬舔舔嘴唇, 意味深长地盯着你看了会儿, 转身离开。`
+                                `It then bites off your knee.`,
+                                `它接着咬断了你的膝盖。`
                             );
-                            this._fsDialog.clearDialog();
-                            this._gameData.item.CorpsePieces -= 1;
                             await this._printTextAndWC(
-                                `【 Corpse - ${1}. Currently: ${this._gameData.item.CorpsePieces} 】`,
-                                `【 尸块 - ${1} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
+                                `..`,
+                                `..`,
+                            );
+                            await this._printTextAndWC(
+                                `....`,
+                                `....`,
+                            );
+                            await this._printTextAndWC(
+                                `......`,
+                                `......`,
+                            );
+                            this._gameData.player.health = 0;
+                            this._gameData.story.sledDogDeathSceneII = true;
+                            this._gameData.legacy.humanCorpse += 1;
+                            await this._printTextAndWC(
+                                `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nA snow-white sled dog whispered with joy, and it licked the last piece of minced meat with pity,`,
+                                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n一条雪白的雪橇犬满心欢喜地低鸣着, 它怜惜地舔尽最后一块碎肉, `,
                                 'warning'
                             );
-                            if(!this._gameData.collection.smilingAngel_2) {
-                                this._gameData.collection.smilingAngel_2 = true;
+                            await this._printTextAndWC(
+                                `Stretch out, and your hair swells up.`,
+                                `伸个懒腰, 毛发哗一下膨胀起来。`
+                            );
+                            await this._printTextAndWC(
+                                `It wagged its tail, trotted towards the stairs, and left.`,
+                                `它摇晃着尾巴, 小步跑向楼梯, 离开了。`
+                            );
+                            if (this._gameData.story.sledDogDeathSceneII && !this._gameData.collection.smilingAngel_1) {
+                                this._gameData.collection.smilingAngel_1 = true;
                                 await this._printTextAndWC(
-                                    `Collection: Smiling Angel Part 2`,
-                                    `收录有害物词条： 微笑天使 part2`,
+                                    `Colletion: Smiling Angel Part 1`,
+                                    `收录有害物词条： 微笑天使 part1`,
                                     'hint'
                                 );
                             }
-                            this._fsDialog.clearDialog();
-                            await this._printTextAndWC(
-                                `Suddenly, something creepy.`,
-                                `突然间, 有些毛骨悚然。`
-                            );
-                            await this._printTextAndWC(
-                                `You close the door and go back to the room.`,
-                                `你关上门, 回到房间里。`
-                            );
-                            this._fsDialog.clearDialog();
-                            sledDogSceneClear = true;
+                            // 创建新的世界线
+                            await this._creatNewWorldLine();
                         }
                     );
+                    if (this._gameData.collection.smilingAngel_1 && this._gameData.item.CorpsePieces > 0) {
+                        this._printClickableText(
+                            `- Feed the corpse pieces`,
+                            `- 喂食尸块`,
+                            async () => {
+                                this._fsDialog.clearDialog();
+                                await this._printTextAndWC(
+                                    `You open the door. Toss it a piece of meat.`,
+                                    `你打开门。丢给它一块肉。`
+                                );
+                                await this._printTextAndWC(
+                                    `It lowered its head to sniff, and then slowly ate the meat.`,
+                                    `它低下头去嗅闻, 而后慢条斯理地将肉吃掉了。`
+                                );
+                                await this._printTextAndWC(
+                                    `The sled dog licks its lips, stares at you meaningfully for a moment, and turns away.`,
+                                    `雪橇犬舔舔嘴唇, 意味深长地盯着你看了会儿, 转身离开。`
+                                );
+                                this._fsDialog.clearDialog();
+                                this._gameData.item.CorpsePieces -= 1;
+                                await this._printTextAndWC(
+                                    `【 Corpse - ${1}. Currently: ${this._gameData.item.CorpsePieces} 】`,
+                                    `【 尸块 - ${1} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
+                                    'warning'
+                                );
+                                if (!this._gameData.collection.smilingAngel_2) {
+                                    this._gameData.collection.smilingAngel_2 = true;
+                                    await this._printTextAndWC(
+                                        `Collection: Smiling Angel Part 2`,
+                                        `收录有害物词条： 微笑天使 part2`,
+                                        'hint'
+                                    );
+                                }
+                                this._fsDialog.clearDialog();
+                                await this._printTextAndWC(
+                                    `Suddenly, something creepy.`,
+                                    `突然间, 有些毛骨悚然。`
+                                );
+                                await this._printTextAndWC(
+                                    `You close the door and go back to the room.`,
+                                    `你关上门, 回到房间里。`
+                                );
+                                this._fsDialog.clearDialog();
+                                sledDogSceneClear = true;
+                            }
+                        );
+                    }
                 }
-            }
-        );
+            );
         }
         await this._fsDialog.waitFor(() => sledDogSceneClear);
     }

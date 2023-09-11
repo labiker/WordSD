@@ -35,8 +35,7 @@ const appHeight = 1080;
 export const app = new Application<HTMLCanvasElement>({ width: appWidth, height: appHeight });
 
 /** Set up a resize function for the app */
-function resize(container: HTMLElement)
-{
+function resize(container: HTMLElement) {
     // Transform the PixiJS stage
     const appScale = innerHeight / appHeight;
     const marginLeft = (innerWidth - appWidth * appScale) / 2;
@@ -49,8 +48,7 @@ function resize(container: HTMLElement)
 }
 
 /** Setup app and initialise assets */
-async function init()
-{
+async function init() {
     // The container to hold the app
     const pixijsContainer = document.body;
 
