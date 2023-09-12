@@ -7,10 +7,24 @@ import { app } from '../renderer';
 export class Game {
     constructor() {
         this._backLog.autoRecordText = true;
+        this._loopCheck;
     }
+
     private _gameData = gameData;
     private _fsDialog = new FullScreenDialog(app);
     private _backLog = new BackLog(app);
+
+    /* 
+     * 为使模块之间能够不冲突，进行一些循环检测。
+     */
+    private _loopCheck = setInterval(() => {
+        if (this._backLog.isShowing) {
+            this._fsDialog.enableGlobalKeyDetection = false;
+        } else {
+            this._fsDialog.enableGlobalKeyDetection = true;
+        }
+    }, 10);
+
     /**
      * 宏
      * @param enText 英文文本
@@ -34,6 +48,7 @@ export class Game {
         const text = this._gameData.system.language === 'en' ? enText : zhcnText;
         this._fsDialog.printClickableText(text, func);
     }
+
     public process = async () => {
         // 选择语言
         this._fsDialog.printClickableText('English version', () => {
@@ -56,6 +71,7 @@ export class Game {
         this._fsDialog.clearDialog();
         await this._creatNewWorldLine();
     }
+
     private _creatNewWorldLine = async () => {
         // 重置玩家属性
         this._resetPlayerStatus();
@@ -168,6 +184,7 @@ export class Game {
         await this._secondDay();
 
     }
+
     private _resetPlayerStatus = () => {
         this._gameData.player.health = this._gameData.player.healthMax;
         this._gameData.player.sanity = this._gameData.player.sanityMax;
@@ -175,6 +192,7 @@ export class Game {
         this._gameData.player.credibility = 0;
         this._gameData.player.isNoteProcessed = false;
     }
+
     private _checkItem = async () => {
         if (this._gameData.item.CorpsePieces > 0) {
             await this._printTextAndWC(
@@ -193,6 +211,7 @@ export class Game {
             this._fsDialog.clearDialog();
         }
     }
+
     private _checkLegacy = async () => {
         if (this._gameData.legacy.humanCorpse > 0) {
             await this._printTextAndWC(
@@ -282,6 +301,7 @@ export class Game {
             await this._fsDialog.waitFor(() => this._gameData.legacy.humanCorpse <= 0);
         }
     }
+
     private _checkCollection = async () => {
         if (this._gameData.collection.smilingAngel_1 || this._gameData.collection.smilingAngel_2) {
             await this._printTextAndWC(
@@ -356,6 +376,7 @@ export class Game {
             await this._fsDialog.waitFor(() => this._gameData.player.isNoteProcessed);
         }
     }
+
     private _sledDogScene = async () => {
         let sledDogSceneClear = false;
         this._printClickableText(
@@ -515,6 +536,7 @@ export class Game {
         }
         await this._fsDialog.waitFor(() => sledDogSceneClear);
     }
+
     private _secondDay = async () => {
         // 消耗8小时的睡眠
         const increaseSanity = this._gameData.player.sanityIncreasePerHour * 8 > this._gameData.player.sanityMax - this._gameData.player.sanity ? this._gameData.player.sanityMax - this._gameData.player.sanity : this._gameData.player.sanityIncreasePerHour * 8;

@@ -231,7 +231,7 @@ export default class BackLog {
    * 正在显示日志的标志。
    * @default false
    */
-  private isShowing: boolean;
+  public isShowing: boolean;
 
   /**
    * 文本行间距。

@@ -199,6 +199,7 @@ export default class FullScreenDialog {
       };
 
       const keyHandler = (event: KeyboardEvent) => {
+        if (!this.enableGlobalKeyDetection) return;
         if (event.ctrlKey) {
           clearTimer();
           window.removeEventListener('keydown', keyHandler, false);
@@ -210,6 +211,7 @@ export default class FullScreenDialog {
         window.addEventListener('keydown', keyHandler, false);
         this.background.addEventListener('click', () => { resolve() });
         window.addEventListener('keydown', (event: KeyboardEvent) => {
+          if (!this.enableGlobalKeyDetection) return;
           if (event.ctrlKey) {
             resolve()
           }
@@ -221,19 +223,24 @@ export default class FullScreenDialog {
   /**
    * 启用按键检测。
    * 
+   * 若 `this.enableGlobalKeyDetection` 为 `true`，则启用全局按键检测。
+   * 
    * 按下 `Ctrl` 键时，使 `this.skipMode = true`，同时使 `this.textSpeed = this.skipModeTextSpeed`。
    * 
    * 松开 `Ctrl` 键时，使 `this.skipMode = false`，同时使 `this.textSpeed = this.normalModeTextSpeed`。
    * @note 该方法会在构造函数中自动调用。
    */
   private enableKeyDetection() {
+    this.enableGlobalKeyDetection = true;
     window.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (!this.enableGlobalKeyDetection) return;
       if (event.ctrlKey) {
         this.skipMode = true;
         this.textSpeed = this.skipModeTextSpeed;
       }
     });
     window.addEventListener('keyup', (event: KeyboardEvent) => {
+      if (!this.enableGlobalKeyDetection) return;
       if (event.key === 'Control') {
         this.skipMode = false;
         this.textSpeed = this.normalModeTextSpeed;
@@ -283,10 +290,18 @@ export default class FullScreenDialog {
 
   /**
    * 快进模式下的文本显示速度。
-   * @description 单位：毫秒/字。
+   * @note 单位：毫秒/字。
    * @default 3
    */
   private skipModeTextSpeed: number;
+
+  /**
+   * 是否启用全局按键检测。
+   * @note 出于开发缺陷，键盘事件是直接绑定到 `window` 上的，因此无法通过 `this.app.stage` 来阻止事件传递。
+   * 单独使用 `FullScreenDialog` 时，并不会有什么问题，但是如果要与其它模块（比如 `BackLog`）一同使用时，就会出现问题。
+   * 请根据程序需求，在必要的地方自定义需要禁用全局按键检测的逻辑。
+   */
+  public enableGlobalKeyDetection: boolean;
 
   /**
    * 普通模式下的文本显示速度
@@ -350,6 +365,10 @@ class Background extends PIXI.Graphics {
   }
 }
 
+/**
+ * 对话框中的文本。
+ * @since 1.0.0
+ */
 class Message extends Text {
   /**
    * @param text 要显示的文本
