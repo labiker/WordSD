@@ -29,6 +29,7 @@
 import './index.css';
 import { Application } from 'pixi.js';
 import { Game } from './Game/Game';
+import { initAssets } from './assets';
 
 const appWidth = 1920;
 const appHeight = 1080;
@@ -60,6 +61,9 @@ async function init() {
 
     // Trigger the first resize
     resize(pixijsContainer);
+
+    // Setup assets bundles (see assets.ts) and start up loading everything in background
+    await initAssets();
 
     // Load the game
     const game = new Game();
