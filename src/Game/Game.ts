@@ -2,6 +2,7 @@ import { gameData } from './gameData';
 import FullScreenDialog from '../module/FullScreenDialog';
 import BackLog from '../module/BackLog';
 import { app } from '../renderer';
+import { bgm } from '../module/audio';
 
 /** A class that handles all of gameplay based features. */
 export class Game {
@@ -76,6 +77,7 @@ export class Game {
         // 重置玩家属性
         this._resetPlayerStatus();
         this._fsDialog.clearDialog();
+        await bgm.play('sightless-storm-ii.mp3');
         await this._printTextAndWC(
             'For various reasons, you have to find a place to hide.',
             '因为种种原因, 你不得不找个地方避避风头。'
