@@ -2,7 +2,7 @@ import { gameData } from './gameData';
 import FullScreenDialog from '../module/FullScreenDialog';
 import BackLog from '../module/BackLog';
 import { app } from '../renderer';
-import { bgm } from '../module/audio';
+import { bgm, sfx } from '../module/audio';
 
 /** A class that handles all of gameplay based features. */
 export class Game {
@@ -31,11 +31,14 @@ export class Game {
      * @param enText 英文文本
      * @param zhcnText 中文文本
      * @param type 文本类型
-     * @note 检测语言和文本类型, 输出对应文本, 然后等待点击。
+     * @note 检测语言和文本类型, 打印对应文本的同时循环播放音效, 结束后等待点击。
      */
     private _printTextAndWC = async (enText: string, zhcnText: string, type?: 'warning' | 'hint') => {
         const text = this._gameData.system.language === 'en' ? enText : zhcnText;
+        // 仅在非快进模式时, 才有声音
+        sfx.play('sfx_print.mp3', { loop: true });
         await this._fsDialog.printTextAsync(text, type);
+        sfx.stop('sfx_print.mp3');
         await this._fsDialog.waitForClick();
     }
 
@@ -134,56 +137,10 @@ export class Game {
         );
         // 雪橇犬事件
         await this._sledDogScene();
-        await this._printTextAndWC(
-            `..`,
-            `..`
-        );
-        await this._printTextAndWC(
-            `....`,
-            `....`
-        );
-        await this._printTextAndWC(
-            `......`,
-            `......`
-        );
-        // 消耗8小时的食物
-        this._gameData.player.food -= this._gameData.player.foodConsumePerHour * 8;
-        await this._printTextAndWC(
-            `【 Food - ${this._gameData.player.foodConsumePerHour * 8}. Currently: ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\nAfter a simple dinner solution in the living room, you return to the bedroom. `,
-            `【 存粮 - ${this._gameData.player.foodConsumePerHour * 8} 。当前为: ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\n在客厅简单解决掉晚饭后, 你回到了卧室。`,
-            'warning'
-        );
-        await this._printTextAndWC(
-            `Although you are staying in a shared room, you don't see your roommates for a whole day.`,
-            `虽说是以合租的形式入住, 但你整整一天都没有见到室友。`
-        );
-        await this._printTextAndWC(
-            `There were three rooms with the doors tightly closed, and it didn't seem like anyone was there.`,
-            `有三个房间的门紧紧地关着, 里面似乎也不像是有人在的样子。`
-        );
-        await this._printTextAndWC(
-            `You think, maybe they're office workers and they're not at home during the day.`,
-            `你想, 也许他们都是上班族, 白天都不在家。`
-        );
-        await this._printTextAndWC(
-            `You're lying in bed, thinking about what happened today.`,
-            `你躺在床上, 想着今天发生的事情。`
-        );
-        await this._printTextAndWC(
-            `It's not good here, like the mutilated body that was found. But right now, there's nowhere else to go.`,
-            `虽然这里很不妙, 比如发现的那具残破尸体。\n但眼下，也没有其它的去处了。`
-        );
-        await this._printTextAndWC(
-            `Anyway, hide here for a while.`,
-            `总之，先在这里躲上一阵子。`
-        );
-        await this._printTextAndWC(
-            `Determined, you close your eyes and fall asleep.`,
-            `下定决心的你，闭上眼睛, 进入了梦乡。`
-        );
-        this._fsDialog.clearDialog();
-        // 进入第二天
-        await this._secondDay();
+        // 晚餐环节
+        await this._dinnerPhase();
+        // 入住日结算环节
+        await this._dayEndPhase();
 
     }
 
@@ -202,8 +159,8 @@ export class Game {
                 `偶然间, 你发现房间里有一些奇怪的东西......`
             );
             await this._printTextAndWC(
-                `【 Corpse pieces: ${this._gameData.item.CorpsePieces} 】`,
-                `【 尸块： ${this._gameData.item.CorpsePieces} 】`,
+                `【 Corpse pieces (Item): ${this._gameData.item.CorpsePieces} 】`,
+                `【 尸块（道具）： ${this._gameData.item.CorpsePieces} 】`,
                 'hint'
             );
             await this._printTextAndWC(
@@ -255,8 +212,8 @@ export class Game {
                     const decreaseSanity = this._gameData.legacy.humanCorpse * 50 > this._gameData.player.sanity ? this._gameData.player.sanity : this._gameData.legacy.humanCorpse * 50;
                     this._gameData.player.sanity -= decreaseSanity;
                     await this._printTextAndWC(
-                        `【 Corpse + ${this._gameData.legacy.humanCorpse * 10}. Currently: ${this._gameData.item.CorpsePieces} 】`,
-                        `【 尸块 + ${this._gameData.legacy.humanCorpse * 10} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
+                        `【 Corpse pieces (Item) + ${this._gameData.legacy.humanCorpse * 10}. Currently: ${this._gameData.item.CorpsePieces} 】`,
+                        `【 尸块（道具） + ${this._gameData.legacy.humanCorpse * 10} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
                         'hint'
                     );
                     await this._printTextAndWC(
@@ -333,7 +290,7 @@ export class Game {
                     if (this._gameData.collection.smilingAngel_2) {
                         await this._printTextAndWC(
                             `【 Collection: Smiling Angel Part 2 】\nIt still can't understand why anyone would reject its love. How bitter lovesickness is! It spends its time in loveless satiety, mournfully waiting for the next dawn.`,
-                            `【 有害物词条： 微笑天使 part2 】\n它至今无法明白, 为何会有人拒绝了它的爱情。相思何其苦涩！它在无爱的饱腹中虚度光阴, 哀愁地等待下一个黎明。`
+                            `【 有害物词条： 微笑天使 part2 】\n它至今无法明白, 为何会有人拒绝了它的爱情。\n相思何其苦涩！\n它在无爱的饱腹中虚度光阴, 哀愁地等待下一个黎明。`
                         );
                     }
                     this._fsDialog.clearDialog();
@@ -405,7 +362,7 @@ export class Game {
                 this._fsDialog.clearDialog();
                 await this._printTextAndWC(
                     `Its blood-stained smile fills the field of vision, you hear the sound of sucking, and there is a spicy tingling sensation in the eye sockets,`,
-                    `它染血的微笑充满了视野, 你听见吸吮的声音, 眼窝中传来辛辣的刺痛感。`
+                    `它染血的微笑充满了视野, 你听见吸吮的声音, \n眼窝中传来辛辣的刺痛感。`
                 );
                 this._gameData.player.health = 0;
                 this._gameData.story.sledDogDeathSceneI = true;
@@ -463,7 +420,7 @@ export class Game {
                             this._gameData.legacy.humanCorpse += 1;
                             await this._printTextAndWC(
                                 `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nA snow-white sled dog whispered with joy, and it licked the last piece of minced meat with pity,`,
-                                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n一条雪白的雪橇犬满心欢喜地低鸣着, 它怜惜地舔尽最后一块碎肉, `,
+                                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n一条雪白的雪橇犬满心欢喜地低鸣着, \n它怜惜地舔尽最后一块碎肉, `,
                                 'warning'
                             );
                             await this._printTextAndWC(
@@ -488,8 +445,8 @@ export class Game {
                     );
                     if (this._gameData.collection.smilingAngel_1 && this._gameData.item.CorpsePieces > 0) {
                         this._printClickableText(
-                            `- Feed the corpse pieces`,
-                            `- 喂食尸块`,
+                            `- Feed the corpse pieces (Item)`,
+                            `- 喂食尸块（道具）`,
                             async () => {
                                 this._fsDialog.clearDialog();
                                 await this._printTextAndWC(
@@ -507,8 +464,8 @@ export class Game {
                                 this._fsDialog.clearDialog();
                                 this._gameData.item.CorpsePieces -= 1;
                                 await this._printTextAndWC(
-                                    `【 Corpse - ${1}. Currently: ${this._gameData.item.CorpsePieces} 】`,
-                                    `【 尸块 - ${1} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
+                                    `【 Corpse pieces (Item) - ${1}. Currently: ${this._gameData.item.CorpsePieces} 】`,
+                                    `【 尸块（道具） - ${1} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
                                     'warning'
                                 );
                                 if (!this._gameData.collection.smilingAngel_2) {
@@ -537,6 +494,168 @@ export class Game {
             );
         }
         await this._fsDialog.waitFor(() => sledDogSceneClear);
+    }
+
+    /**
+     * 入住日结算环节
+     */
+    private _dayEndPhase = async () => {
+        await this._printTextAndWC(
+            ``,
+            `入住后的第 ${this._gameData.system.currentDay} 天, 就要结束了。`
+        );
+        await this._printTextAndWC(
+            ``,
+            `躺在床上, 思考着至今为止发生过的事情。`
+        );
+        this._fsDialog.clearDialog();
+        // 因 理智 < 50 ，住户违约搬出，触发尾随事件，死亡
+        if (this._gameData.player.sanity < 50) {
+            await this._printTextAndWC(
+                ``,
+                `【 理智： ${this._gameData.player.sanity} < ${50} 】\n遭遇的事件过于离奇, 加上没有得到充分的休息, \n越是思考越是觉得混乱。`,
+                'warning'
+            );
+            await this._printTextAndWC(
+                ``,
+                `瞟向床边, 看着尚未收纳的行李箱, \n一种危险的想法在你的脑海中形成。`
+            );
+            await this._printTextAndWC(
+                ``,
+                `你不由自主地站起身, 开始收拾起东西......`
+            );
+            this._fsDialog.clearDialog();
+            await this._printTextAndWC(
+                ``,
+                `..`
+            );
+            await this._printTextAndWC(
+                ``,
+                `....`
+            );
+            await this._printTextAndWC(
+                ``,
+                `......`
+            );
+            this._fsDialog.clearDialog();
+            await this._printTextAndWC(
+                ``,
+                `深夜的楼道静得有些诡异。`
+            );
+            await this._printTextAndWC(
+                ``,
+                `尽可能地压低脚步声, \n提着稍显沉重的行李箱穿行在走廊间。`
+            );
+            await this._printTextAndWC(
+                ``,
+                `即便如此, \n总感觉在身后某处黑暗的角落里，有人的气息。`
+            );
+            this._fsDialog.clearDialog();
+            await this._printTextAndWC(
+                ``,
+                `也许是错觉吧。`
+            );
+            await this._printTextAndWC(
+                ``,
+                `近来发生了太多事，压力太大了。`
+            );
+            await this._printTextAndWC(
+                ``,
+                `只是偷偷提个行李箱出去，入住时用的也是假身份，不会有问题的。`
+            );
+            this._fsDialog.clearDialog();
+            await this._printTextAndWC(
+                ``,
+                `不会有问题的。`
+            );
+            await this._printTextAndWC(
+                ``,
+                `逃走就好了。`
+            );
+            await this._printTextAndWC(
+                ``,
+                `什么都没发生过。`
+            );
+            this._fsDialog.clearDialog();
+            await this._printTextAndWC(
+                ``,
+                `逐渐地，你开始计划起今后的安排。该去哪儿租房，是不是该离开这座城市？`
+            );
+            await this._printTextAndWC(
+                ``,
+                `“砰！”`
+            );
+            this._fsDialog.clearDialog();
+            this._gameData.player.health = 0;
+            await this._printTextAndWC(
+                ``,
+                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】那是你在这个世界上意识到的最后一声。`
+            );
+            this._gameData.legacy.humanCorpse += 1;
+            await this._creatNewWorldLine();
+        } else if (this._gameData.system.currentDay === 1) {
+            await this._printTextAndWC(
+                `..`,
+                `..`
+            );
+            await this._printTextAndWC(
+                `....`,
+                `....`
+            );
+            await this._printTextAndWC(
+                `......`,
+                `......`
+            );
+            await this._printTextAndWC(
+                `Although you are staying in a shared room, you don't see your roommates for a whole day.`,
+                `虽说是以合租的形式入住, \n但你整整一天都没有见到室友。`
+            );
+            await this._printTextAndWC(
+                `There were three rooms with the doors tightly closed, and it didn't seem like anyone was there.`,
+                `有三个房间的门紧紧地关着, 里面似乎也不像是有人在的样子。`
+            );
+            await this._printTextAndWC(
+                `You think, maybe they're office workers and they're not at home during the day.`,
+                `你想, 也许他们都是上班族, 白天都不在家。`
+            );
+            await this._printTextAndWC(
+                `You're lying in bed, thinking about what happened today.`,
+                `你躺在床上, 想着今天发生的事情。`
+            );
+            await this._printTextAndWC(
+                `It's not good here, like the mutilated body that was found. But right now, there's nowhere else to go.`,
+                `虽然这里很不妙, 比如发现的那具残破尸体。\n但眼下，也没有其它的去处了。`
+            );
+            await this._printTextAndWC(
+                `Anyway, hide here for a while.`,
+                `总之，先在这里躲上一阵子。`
+            );
+            await this._printTextAndWC(
+                `Determined, you close your eyes and fall asleep.`,
+                `下定决心的你，闭上眼睛, 进入了梦乡。`
+            );
+            this._fsDialog.clearDialog();
+            // 进入第二天
+            await this._secondDay();
+        }
+    }
+
+    /**
+     * 晚餐环节
+     */
+    private _dinnerPhase = async () => {
+        await this._printTextAndWC(
+            `It's time for dinner.`,
+            `到了晚餐时间。`
+        );
+        // 消耗8小时的食物
+        this._gameData.player.food -= this._gameData.player.foodConsumePerHour * 8;
+        await this._printTextAndWC(
+            `【 Food - ${this._gameData.player.foodConsumePerHour * 8}. Currently: ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\nAfter a simple dinner solution in the living room, you return to the bedroom. `,
+            `【 存粮 - ${this._gameData.player.foodConsumePerHour * 8} 。当前为: ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\n在客厅简单解决掉晚饭后, 你回到了卧室。`,
+            'warning'
+        );
+        this._fsDialog.clearDialog();
     }
 
     private _secondDay = async () => {

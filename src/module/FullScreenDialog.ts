@@ -86,9 +86,10 @@ export default class FullScreenDialog {
    * @param type 文本类型。
    */
   async printTextAsync(text: string, type?: 'warning' | 'hint'): Promise<void> {
-    this.printText('', type);
+    this.printText('_', type);
     const lastTextChild = this.messages[this.messages.length - 1];
     const charArray = text.split('');
+    const endChar = this.skipMode ? ' ' : '_';
 
     let isClicked = false;
     const clickHandler = () => {
@@ -99,10 +100,10 @@ export default class FullScreenDialog {
 
     for (const char of charArray) {
       if (isClicked) {
-        lastTextChild.text = text;
+        lastTextChild.text = text + endChar;
         break;
       } else {
-        lastTextChild.text += char;
+        lastTextChild.text = lastTextChild.text.slice(0, -1) + char + endChar;
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve(true);
@@ -110,6 +111,8 @@ export default class FullScreenDialog {
         });
       }
     }
+
+    lastTextChild.text = lastTextChild.text.slice(0, -1) + ' ';
   }
 
   /**
@@ -166,31 +169,17 @@ export default class FullScreenDialog {
         this.background.addEventListener('click', () => { resolve() });
       });
     } else {
-      lastTextChild.text += ' ';
-
       const timer = setInterval(() => {
-        if (lastTextChild.text.endsWith(' ')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -1) + ' .';
-        } else if (lastTextChild.text.endsWith(' .')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -2) + ' ..';
-        } else if (lastTextChild.text.endsWith(' ..')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -3) + ' ...';
-        } else if (lastTextChild.text.endsWith(' ...')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -4) + ' ';
+        if (lastTextChild.text.endsWith('_')) {
+          lastTextChild.text = lastTextChild.text.slice(0, -1) + ' ';
+        } else if (lastTextChild.text.endsWith(' ')) {
+          lastTextChild.text = lastTextChild.text.slice(0, -1) + '_';
         }
       }, 500);
 
       const clearTimer = () => {
         clearInterval(timer);
-        if (lastTextChild.text.endsWith(' ')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -1);
-        } else if (lastTextChild.text.endsWith(' .')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -2);
-        } else if (lastTextChild.text.endsWith(' ..')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -3);
-        } else if (lastTextChild.text.endsWith(' ...')) {
-          lastTextChild.text = lastTextChild.text.slice(0, -4);
-        }
+        lastTextChild.text = lastTextChild.text.slice(0, -1);
       }
 
       const clickHandler = () => {

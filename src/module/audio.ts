@@ -86,6 +86,14 @@ class SFX {
     }
 
     /**
+     * Stop sound effects.
+     * @param alias - Name of the audio file.
+     */
+    public stop(alias: string) {
+        sound.stop(alias);
+    }
+
+    /**
      * Set the global volume.
      * @param v - Target volume.
      */
