@@ -4,7 +4,7 @@
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/xVVk5hdkXK)
 [![Electron Forge](https://badgen.net/badge/Electron%20Forge/6.3.0/green?icon=https://www.electronjs.org/assets/img/logo.svg)](https://www.electronforge.io/config/configuration)
-[![PixiJS](https://badgen.net/badge/PixiJS/7.2.4/green)](https://pixijs.download/v7.2.4/docs/index.html)
+[![PixiJS](https://badgen.net/badge/PixiJS/7.3.0/green)](https://pixijs.download/v7.3.0/docs/index.html)
 
 Welcome to WordSD!
 
