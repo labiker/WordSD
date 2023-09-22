@@ -1,4 +1,5 @@
 import { sound } from '@pixi/sound';
+import { Assets } from 'pixi.js';
 
 /** Initialise and start background loading of all assets */
 export async function initAssets() {
