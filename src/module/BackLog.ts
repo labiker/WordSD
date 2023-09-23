@@ -42,38 +42,49 @@ export default class BackLog {
   /**
    * 启用鼠标滚轮检测。
    * 
-   * 当鼠标滚轮向上滚动时，显示日志。当鼠标滚轮向下滚动时，关闭日志。
-   * 已显示日志，并且鼠标滚轮向上滚动时，`this.pixiTexts` 整体上移。
-   * 已显示日志，并且鼠标滚轮向下滚动时，`this.pixiTexts` 整体下移。
+   * 当鼠标滚轮向上滚动，且日志未显示时，显示日志。
+   * 
+   * 已显示日志，但没有文本时，不做任何操作。
+   * 
+   * 鼠标滚轮向上滚动时，`this.pixiTexts` 整体上移；向下滚动时，`this.pixiTexts` 整体下移。
+   * 
+   * 同时，调整 `this.scroll` 相对于 `this.scrollBg`的位置。
    * @note 该方法会在构造函数中自动调用。
    */
   private enableWheelDetection() {
     this.app.view.addEventListener('wheel', (event) => {
-      if (event.deltaY < 0) {
-        if (this.isShowing) {
-          if (this.pixiTexts.length > 0) {
-            const firstTextChild = this.pixiTexts[0];
-            if (firstTextChild.y < this.marginTop) {
-              this.pixiTexts.forEach((pixiText) => {
-                pixiText.y += 30;
-              });
-            }
-          }
-        } else {
-          this.open();
-        }
-      } else if (this.isShowing) {
-        if (this.pixiTexts.length > 0) {
-          const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
-          const lastTextChildBottom = lastTextChild.y + lastTextChild.height;
-          const lastTextChildBottomMargin = this.height - this.marginBottom - lastTextChildBottom;
-          if (lastTextChildBottomMargin < 0) {
-            this.pixiTexts.forEach((pixiText) => {
-              pixiText.y -= 30;
-            });
-          }
-        }
+      const getFirstText = () => {
+        return this.pixiTexts[0];
+      };
+      const getLastText = () => {
+        return this.pixiTexts[this.pixiTexts.length - 1];
+      };
+
+      if (event.deltaY < 0 && !this.isShowing) {
+        this.open();
+        return;
       }
+
+      if (this.isShowing && this.pixiTexts.length <= 0) {
+        return;
+      }
+
+      if (event.deltaY < 0 && this.isShowing && getFirstText().y < this.marginTop) {
+        const step = Math.min(30, this.marginTop - getFirstText().y);
+        this.pixiTexts.forEach((pixiText) => {
+          pixiText.y += step;
+        });
+      } else if (event.deltaY > 0 && this.isShowing && getLastText().y + getLastText().height > this.height - this.marginBottom) {
+        const step = Math.min(30, getLastText().y + getLastText().height - (this.height - this.marginBottom));
+        this.pixiTexts.forEach((pixiText) => {
+          pixiText.y -= step;
+        });
+      }
+
+      this.scroll.draw({
+        y: 150 + Math.abs(this.marginTop - getFirstText().y) / (getLastText().y + getLastText().height - getFirstText().y - (this.height - this.marginTop - this.marginBottom)) * (this.scrollBg.height - this.scroll.height),
+        height: (this.height - this.marginTop) / (getLastText().y + getLastText().height - getFirstText().y) * this.scrollBg.height,
+      });
     });
   }
 
@@ -114,6 +125,7 @@ export default class BackLog {
    * 当日志未打开时，打开日志。纯黑的背景，在左上角显示标题，在右下角显示关闭按钮。
    * 另外还有两个遮罩，一个在上方，一个在下方，用于遮挡上下的文本。
    * 自动显示 `BackLog.recordedPixiTexts` 中的文本。
+   * 在文本右方显示滚动条，用于显示当前文本的位置。
    * @note 请和 `BackLog.close()` 配对使用。
    */
   public open() {
@@ -143,6 +155,24 @@ export default class BackLog {
         });
       }
     }
+
+    this.scrollBg = new ScrollBg();
+    this.showObject(this.scrollBg);
+
+    this.scroll = new Scroll();
+    if (this.pixiTexts.length > 0) {
+      const firstTextChild = this.pixiTexts[0];
+      const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
+      const nextHeight = (this.height - this.marginTop) / (lastTextChild.y + lastTextChild.height - firstTextChild.y) * this.scrollBg.height;
+      const nextY = 150 + this.scrollBg.height - nextHeight;
+      if (nextHeight <= this.scrollBg.height) {
+        this.scroll.draw({
+          y: nextY,
+          height: nextHeight,
+        });
+      }
+    }
+    this.showObject(this.scroll);
 
     const topMask = new TopMask(this.width, this.marginTop);
     this.showObject(topMask);
@@ -262,6 +292,16 @@ export default class BackLog {
    * @note 在调用 `BackLog.close()` 时，将这些对象从舞台中移除。
    */
   private showingObjects: PIXI.DisplayObject[] = [];
+
+  /** 
+   * 滚动条。
+   */
+  private scroll: Scroll;
+
+  /** 
+   * 滚动条背景。
+   */
+  private scrollBg: ScrollBg;
 
   /**
    * 舞台中的 `PIXI.Text` 数组。
@@ -394,5 +434,79 @@ class Message extends PIXI.Text {
       breakWords: true,
       wordWrapWidth: backLogWidth - this.x - this.x,
     });
+  }
+}
+
+/**
+ * A scroll component to be used in the BackLog.
+ * @since 1.0.0
+ */
+export class Scroll extends PIXI.Graphics {
+  constructor() {
+    super();
+    this.draw();
+  }
+
+  /**
+   * Draw the scroll.
+   * @param elm The element to be drawn.
+   */
+  public draw = (elm?: {
+    color?: number,
+    x?: number,
+    y?: number,
+    width?: number,
+    height?: number,
+    radius?: number,
+    border?: number
+  }) => {
+    const color = elm && elm.color ? elm.color : 0xe5e5e5;
+    const x = elm && elm.x ? elm.x : 1700;
+    const y = elm && elm.y ? elm.y : 150;
+    const width = elm && elm.width ? elm.width : 20;
+    const height = elm && elm.height ? elm.height : 840;
+    const radius = elm && elm.radius ? elm.radius : 10;
+    const border = elm && elm.border ? elm.border : 4;
+    this.clear();
+    this.beginFill(color)
+    this.drawRoundedRect(x, y, width - border * 2, height, radius);
+    this.endFill();
+  }
+}
+
+/**
+ * A scroll background component to be used in the BackLog.
+ * @since 1.0.0
+ */
+export class ScrollBg extends PIXI.Graphics {
+  constructor() {
+    super();
+    this.draw();
+  }
+
+  /**
+   * Draw the scroll background.
+   * @param elm The element to be drawn.
+   */
+  public draw = (elm?: {
+    color?: number,
+    x?: number,
+    y?: number,
+    width?: number,
+    height?: number,
+    radius?: number,
+    border?: number
+  }) => {
+    const color = elm && elm.color ? elm.color : 0x727272;
+    const x = elm && elm.x ? elm.x : 1700;
+    const y = elm && elm.y ? elm.y : 150;
+    const width = elm && elm.width ? elm.width : 20;
+    const height = elm && elm.height ? elm.height : 840;
+    const radius = elm && elm.radius ? elm.radius : 10;
+    const border = elm && elm.border ? elm.border : 4;
+    this.clear();
+    this.beginFill(color)
+    this.drawRoundedRect(x, y, width - border * 2, height - border * 2, radius);
+    this.endFill();
   }
 }
