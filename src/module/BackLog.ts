@@ -89,6 +89,65 @@ export default class BackLog {
   }
 
   /**
+   * 启用滚动条拖动。
+   * 
+   * 只能相对于 `this.scrollBg` 上下拖动。
+   * 鼠标光标变为 `grab` 时，表示可以拖动。
+   * 鼠标光标变为 `grabbing` 时，表示正在拖动。
+   */
+  private enableScrollDrag() {
+    this.scroll.eventMode = 'static';
+    this.scroll.cursor = 'grab';
+
+    /** Interaction mouse/touch down handler */
+    this.scroll.on('pointerdown', () => {
+      this.scroll.pressing = true;
+      this.scroll.cursor = 'grabbing';
+      this.background.cursor = 'grabbing';
+    });
+
+    /** Interaction mouse/touch move handler */
+    this.background.on('pointermove', (e: PIXI.FederatedPointerEvent) => {
+      if (!this.scroll.pressing) return;
+
+      const stepY = e.movementY * 2;
+      const getFirstText = () => {
+        return this.pixiTexts[0];
+      };
+      const getLastText = () => {
+        return this.pixiTexts[this.pixiTexts.length - 1];
+      };
+
+      const nextY = this.scroll.absoluteY + stepY;
+      if (nextY >= 150 && nextY <= 150 + this.scrollBg.height - this.scroll.height) {
+        this.scroll.draw({
+          y: nextY,
+        });
+        if (stepY < 0 && getFirstText().y < this.marginTop) {
+          const step = Math.min(-stepY / this.scrollBg.height * (getLastText().y + getLastText().height - getFirstText().y + this.marginBottom + this.marginTop), this.marginTop - getFirstText().y);
+          this.pixiTexts.forEach((pixiText) => {
+            pixiText.y += step;
+          });
+        } else if (stepY > 0 && getLastText().y + getLastText().height > this.height - this.marginBottom) {
+          const step = Math.min(stepY / this.scrollBg.height * (getLastText().y + getLastText().height - getFirstText().y + this.marginBottom + this.marginTop), getLastText().y + getLastText().height - (this.height - this.marginBottom));
+          this.pixiTexts.forEach((pixiText) => {
+            pixiText.y -= step;
+          });
+        }
+      }
+    });
+
+    /** Interaction mouse/touch up handler */
+    const onPointerUp = () => {
+      this.scroll.pressing = false;
+      this.scroll.cursor = 'grab';
+      this.background.cursor = 'default';
+    };
+    this.scroll.on('pointerup', onPointerUp);
+    this.background.on('pointerup', onPointerUp);
+  }
+
+  /**
    * 启用鼠标右键检测。
    * 
    * 已显示日志，并且鼠标右键点击时，关闭日志。
@@ -163,15 +222,16 @@ export default class BackLog {
     if (this.pixiTexts.length > 0) {
       const firstTextChild = this.pixiTexts[0];
       const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
-      const nextHeight = (this.height - this.marginTop) / (lastTextChild.y + lastTextChild.height - firstTextChild.y) * this.scrollBg.height;
-      const nextY = 150 + this.scrollBg.height - nextHeight;
-      if (nextHeight <= this.scrollBg.height) {
+      const nextScrollHeight = (this.height - this.marginTop) / (lastTextChild.y + lastTextChild.height - firstTextChild.y) * this.scrollBg.height;
+      const nextScrollY = 150 + this.scrollBg.height - nextScrollHeight;
+      if (nextScrollHeight <= this.scrollBg.height) {
         this.scroll.draw({
-          y: nextY,
-          height: nextHeight,
+          y: nextScrollY,
+          height: nextScrollHeight,
         });
       }
     }
+    this.enableScrollDrag();
     this.showObject(this.scroll);
 
     const topMask = new TopMask(this.width, this.marginTop);
@@ -462,16 +522,28 @@ export class Scroll extends PIXI.Graphics {
   }) => {
     const color = elm && elm.color ? elm.color : 0xe5e5e5;
     const x = elm && elm.x ? elm.x : 1700;
-    const y = elm && elm.y ? elm.y : 150;
+    this.absoluteY = elm && elm.y ? elm.y : 150;
     const width = elm && elm.width ? elm.width : 20;
-    const height = elm && elm.height ? elm.height : 840;
+    const height = elm && elm.height ? elm.height : this.height > 0 ? this.height : 840;
     const radius = elm && elm.radius ? elm.radius : 10;
     const border = elm && elm.border ? elm.border : 4;
     this.clear();
     this.beginFill(color)
-    this.drawRoundedRect(x, y, width - border * 2, height, radius);
+    this.drawRoundedRect(x, this.absoluteY, width - border * 2, height, radius);
     this.endFill();
   }
+
+  /**
+   * The absolute position of the displayObject on the y axis, in pixels.
+   * @default 150
+   */
+  public absoluteY: number;
+
+  /**
+   * Whether the scroll is pressing.
+   * @default false
+   */
+  public pressing: boolean;
 }
 
 /**
@@ -499,14 +571,20 @@ export class ScrollBg extends PIXI.Graphics {
   }) => {
     const color = elm && elm.color ? elm.color : 0x727272;
     const x = elm && elm.x ? elm.x : 1700;
-    const y = elm && elm.y ? elm.y : 150;
+    this.absoluteY = elm && elm.y ? elm.y : 150;
     const width = elm && elm.width ? elm.width : 20;
     const height = elm && elm.height ? elm.height : 840;
     const radius = elm && elm.radius ? elm.radius : 10;
     const border = elm && elm.border ? elm.border : 4;
     this.clear();
     this.beginFill(color)
-    this.drawRoundedRect(x, y, width - border * 2, height - border * 2, radius);
+    this.drawRoundedRect(x, this.absoluteY, width - border * 2, height - border * 2, radius);
     this.endFill();
   }
+
+  /**
+   * The absolute position of the displayObject on the y axis, in pixels.
+   * @default 150
+   */
+  public absoluteY: number;
 }

@@ -21,7 +21,7 @@ export default class FullScreenDialog {
     this.normalModeTextSpeed = 30;
     this.textSpeed = this.normalModeTextSpeed;
     this.skipMode = false;
-    this.skipModeTextSpeed = 3;
+    this.skipModeTextSpeed = 0.3;
     this.background = new Background(this.width, this.height);
     this.showObject(this.background);
     this.enableKeyDetection();
