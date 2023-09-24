@@ -16,21 +16,61 @@ WordSeed is currently in its infancy, and anyone interested in developing a game
 
 ## Current features
 
-- Modular development
-
-  All the modules in the project are independent of each other and interact directly with PixiJS. Therefore, you can modify and import the modules of this project into your own PixiJS game according to your own needs.
-
 - Full-screen dialog
 
   ![image](https://github.com/labiker/WordSD/assets/49630998/3574149f-c919-4025-8e6d-dc40790f35dd)
 
-  Ability to print text verbatim. Contains the necessary keyboard events and mouse click events. Options offer more possibilities for your story. With multiple text types, it will significantly improve the readability of your own game.
+  Able to simulate typing effects and print text verbatim.
+
+  Contains the necessary keyboard events and mouse click events.
+  
+  Options offer more possibilities for your story. 
+  
+  With multiple text types, it will significantly improve the readability of your own game.
 
 - Back log (record Pixi.Text automatically)
 
-  ![image](https://github.com/labiker/WordSD/assets/49630998/2cfac082-7308-47f0-81a3-9e65e021c434)
+  ![image](https://github.com/labiker/WordSD/assets/49630998/29c59b2a-d039-4036-93ba-442b453642c7)
 
-  Historical text is recorded fully automatically, and some properties (such as color) can be inherited from the original text. Well-equipped mouse click and scroll wheel events are in line with the usage habits of users of traditional text adventure games.
+  Historical text is recorded fully automatically, and some properties (such as color) can be inherited from the original text.
+ 
+  Well-equipped mouse click and scroll wheel events are in line with the usage habits of users of traditional text adventure games.
+
+  The scroll bar can display the position of the current text in the context and can be dragged to adjust the view.
+
+- File reading protocol
+
+  ```ts
+  import { sound } from '@pixi/sound';
+  import { Assets } from 'pixi.js';
+  
+  /** Initialise and start loading of all assets */
+  export async function initAssets() {
+      // Load sound assets
+      sound.add('sightless-storm-ii.mp3', 'app://assets/audio/sightless-storm-ii.mp3');
+      sound.add('sfx_print.mp3', 'app://assets/audio/sfx_print.mp3');
+  }
+  ```
+
+  Customized a file reading protocol that follows [generic URI syntax](https://datatracker.ietf.org/doc/html/rfc3986#section-3), and set up packaging code for the `assets` folder in the root directory.
+
+  You can put any asset you want to use into this directory and read it using a custom protocol.
+
+- Audio
+
+  ```ts
+  import { bgm, sfx } from '../module/audio';
+  
+  bgm.play('sightless-storm-ii.mp3');
+  // ...
+  sfx.play('sfx_print.mp3', { loop: true });
+  // ...
+  sfx.stop('sfx_print.mp3');
+  ```
+
+  The audio module has been added referring to PixiJS's [open-games](https://github.com/pixijs/open-games) repository. 
+
+  You can refer to the official game code to use audio in this project.
 
 ## How to start
 
