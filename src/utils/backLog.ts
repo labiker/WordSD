@@ -1,21 +1,18 @@
 import * as PIXI from 'pixi.js';
+import { app } from './app';
 
 /**
  * 基于 `Pixijs` 的日志模块。
  *
  * @since 1.0.0
  */
-export default class BackLog {
+class BackLog {
   /**
    * 自动启动鼠标滚轮检测和鼠标右键检测。
    * 向上滚动鼠标滚轮，显示日志。
    * 显示日志时，右键点击鼠标，关闭日志；上下滚动鼠标滚轮，控制日志文本上下移动。
-   * @param app Pixijs App
    */
-  constructor(app: PIXI.Application<HTMLCanvasElement>) {
-    this.app = app;
-    this.width = app.view.width;
-    this.height = app.view.height;
+  constructor() {
     this.marginTop = 150;
     this.marginBottom = 80;
     this.lineSpacing = 36;
@@ -52,7 +49,7 @@ export default class BackLog {
    * @note 该方法会在构造函数中自动调用。
    */
   private enableWheelDetection() {
-    this.app.view.addEventListener('wheel', (event) => {
+    app.view.addEventListener('wheel', (event) => {
       const getFirstText = () => {
         return this.pixiTexts[0];
       };
@@ -74,16 +71,16 @@ export default class BackLog {
         this.pixiTexts.forEach((pixiText) => {
           pixiText.y += step;
         });
-      } else if (event.deltaY > 0 && this.isShowing && getLastText().y + getLastText().height > this.height - this.marginBottom) {
-        const step = Math.min(30, getLastText().y + getLastText().height - (this.height - this.marginBottom));
+      } else if (event.deltaY > 0 && this.isShowing && getLastText().y + getLastText().height > app.view.height - this.marginBottom) {
+        const step = Math.min(30, getLastText().y + getLastText().height - (app.view.height - this.marginBottom));
         this.pixiTexts.forEach((pixiText) => {
           pixiText.y -= step;
         });
       }
 
       this.scroll.draw({
-        y: 150 + Math.abs(this.marginTop - getFirstText().y) / (getLastText().y + getLastText().height - getFirstText().y - (this.height - this.marginTop - this.marginBottom)) * (this.scrollBg.height - this.scroll.height),
-        height: (this.height - this.marginTop) / (getLastText().y + getLastText().height - getFirstText().y) * this.scrollBg.height,
+        y: 150 + Math.abs(this.marginTop - getFirstText().y) / (getLastText().y + getLastText().height - getFirstText().y - (app.view.height - this.marginTop - this.marginBottom)) * (this.scrollBg.height - this.scroll.height),
+        height: (app.view.height - this.marginTop) / (getLastText().y + getLastText().height - getFirstText().y) * this.scrollBg.height,
       });
     });
   }
@@ -128,8 +125,8 @@ export default class BackLog {
           this.pixiTexts.forEach((pixiText) => {
             pixiText.y += step;
           });
-        } else if (stepY > 0 && getLastText().y + getLastText().height > this.height - this.marginBottom) {
-          const step = Math.min(stepY / this.scrollBg.height * (getLastText().y + getLastText().height - getFirstText().y + this.marginBottom + this.marginTop), getLastText().y + getLastText().height - (this.height - this.marginBottom));
+        } else if (stepY > 0 && getLastText().y + getLastText().height > app.view.height - this.marginBottom) {
+          const step = Math.min(stepY / this.scrollBg.height * (getLastText().y + getLastText().height - getFirstText().y + this.marginBottom + this.marginTop), getLastText().y + getLastText().height - (app.view.height - this.marginBottom));
           this.pixiTexts.forEach((pixiText) => {
             pixiText.y -= step;
           });
@@ -154,7 +151,7 @@ export default class BackLog {
    * @note 该方法会在构造函数中自动调用。
    */
   private enableRightClickDetection() {
-    this.app.view.addEventListener('contextmenu', (event) => {
+    app.view.addEventListener('contextmenu', (event) => {
       if (this.isShowing) {
         this.close();
       } else {
@@ -171,7 +168,7 @@ export default class BackLog {
    * @note 该方法会在构造函数中自动调用。
    */
   private observeTextChanges() {
-    this.app.stage.on('childRemoved', (child) => {
+    app.stage.on('childRemoved', (child) => {
       if (this.autoRecordText && child instanceof PIXI.Text) {
         this.recordPixiText(child);
       }
@@ -192,11 +189,11 @@ export default class BackLog {
       return;
     }
 
-    this.background = new Background(this.width, this.height);
+    this.background = new Background(app.view.width, app.view.height);
     this.showObject(this.background)
 
     this.recordedPixiTexts.forEach((pixiText, index) => {
-      const message = new Message(pixiText, this.width);
+      const message = new Message(pixiText, app.view.width);
       if (index !== 0) {
         const lastTextChild = this.pixiTexts[index - 1];
         message.y = lastTextChild.y + lastTextChild.height + this.lineSpacing;
@@ -207,7 +204,7 @@ export default class BackLog {
     if (this.pixiTexts.length > 0) {
       const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
       const lastTextChildBottom = lastTextChild.y + lastTextChild.height;
-      const lastTextChildBottomMargin = this.height - this.marginBottom - lastTextChildBottom;
+      const lastTextChildBottomMargin = app.view.height - this.marginBottom - lastTextChildBottom;
       if (lastTextChildBottomMargin < 0) {
         this.pixiTexts.forEach((pixiText) => {
           pixiText.y += lastTextChildBottomMargin;
@@ -222,7 +219,7 @@ export default class BackLog {
     if (this.pixiTexts.length > 0) {
       const firstTextChild = this.pixiTexts[0];
       const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
-      const nextScrollHeight = (this.height - this.marginTop) / (lastTextChild.y + lastTextChild.height - firstTextChild.y) * this.scrollBg.height;
+      const nextScrollHeight = (app.view.height - this.marginTop) / (lastTextChild.y + lastTextChild.height - firstTextChild.y) * this.scrollBg.height;
       const nextScrollY = 150 + this.scrollBg.height - nextScrollHeight;
       if (nextScrollHeight <= this.scrollBg.height) {
         this.scroll.draw({
@@ -234,10 +231,10 @@ export default class BackLog {
     this.enableScrollDrag();
     this.showObject(this.scroll);
 
-    const topMask = new TopMask(this.width, this.marginTop);
+    const topMask = new TopMask(app.view.width, this.marginTop);
     this.showObject(topMask);
 
-    const bottomMask = new BottomMask(0, this.height - this.marginBottom, this.width, this.marginBottom);
+    const bottomMask = new BottomMask(0, app.view.height - this.marginBottom, app.view.width, this.marginBottom);
     this.showObject(bottomMask);
 
     const title = new Title();
@@ -269,7 +266,7 @@ export default class BackLog {
    * @param isRecorded 是否记录到 `BackLog.pixiTexts` 中。
    */
   private showObject(object: PIXI.DisplayObject, isRecorded?: boolean) {
-    this.app.stage.addChildAt(object, this.app.stage.children.length);
+    app.stage.addChildAt(object, app.stage.children.length);
     this.showingObjects.push(object);
     if (object instanceof PIXI.Text && isRecorded !== false) {
       this.pixiTexts.push(object);
@@ -284,7 +281,7 @@ export default class BackLog {
    */
   private removeAllObjects() {
     this.showingObjects.forEach((showingObject) => {
-      this.app.stage.removeChild(showingObject);
+      app.stage.removeChild(showingObject);
     });
     this.showingObjects = [];
     this.pixiTexts = [];
@@ -524,7 +521,7 @@ export class Scroll extends PIXI.Graphics {
     const x = elm && elm.x ? elm.x : 1700;
     this.absoluteY = elm && elm.y ? elm.y : 150;
     const width = elm && elm.width ? elm.width : 20;
-    const height = elm && elm.height ? elm.height : this.height > 0 ? this.height : 840;
+    const height = elm && elm.height ? elm.height : app.view.height > 0 ? app.view.height : 840;
     const radius = elm && elm.radius ? elm.radius : 10;
     const border = elm && elm.border ? elm.border : 4;
     this.clear();
@@ -588,3 +585,5 @@ export class ScrollBg extends PIXI.Graphics {
    */
   public absoluteY: number;
 }
+
+export const backLog = new BackLog();

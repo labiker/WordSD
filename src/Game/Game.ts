@@ -1,28 +1,23 @@
 import { gameData } from './gameData';
-import FullScreenDialog from '../module/FullScreenDialog';
-import BackLog from '../module/BackLog';
-import { app } from '../renderer';
+import { fullScreenDialog } from '../utils/fullScreenDialog';
+import { backLog } from '../utils/backLog';
 import { bgm, sfx } from '../utils/audio';
 
 /** A class that handles all of gameplay based features. */
 export class Game {
     constructor() {
-        this._backLog.autoRecordText = true;
+        backLog.autoRecordText = true;
         this._loopCheck;
     }
-
-    private _gameData = gameData;
-    private _fsDialog = new FullScreenDialog(app);
-    private _backLog = new BackLog(app);
 
     /* 
      * 为使模块之间能够不冲突，进行一些循环检测。
      */
     private _loopCheck = setInterval(() => {
-        if (this._backLog.isShowing) {
-            this._fsDialog.enableGlobalKeyDetection = false;
+        if (backLog.isShowing) {
+            fullScreenDialog.enableGlobalKeyDetection = false;
         } else {
-            this._fsDialog.enableGlobalKeyDetection = true;
+            fullScreenDialog.enableGlobalKeyDetection = true;
         }
     }, 10);
 
@@ -34,12 +29,12 @@ export class Game {
      * @note 检测语言和文本类型, 打印对应文本的同时循环播放音效, 结束后等待点击。
      */
     private _printTextAndWC = async (enText: string, zhcnText: string, type?: 'warning' | 'hint') => {
-        const text = this._gameData.system.language === 'en' ? enText : zhcnText;
+        const text = gameData.system.language === 'en' ? enText : zhcnText;
         // 仅在非快进模式时, 才有声音
         sfx.play('sfx_print', { loop: true });
-        await this._fsDialog.printTextAsync(text, type);
+        await fullScreenDialog.printTextAsync(text, type);
         sfx.stop('sfx_print');
-        await this._fsDialog.waitForClick();
+        await fullScreenDialog.waitForClick();
     }
 
     /**
@@ -49,21 +44,21 @@ export class Game {
      * @note 检测语言, 输出对应可点击文本。
      */
     private _printClickableText = async (enText: string, zhcnText: string, func: () => void) => {
-        const text = this._gameData.system.language === 'en' ? enText : zhcnText;
-        this._fsDialog.printClickableText(text, func);
+        const text = gameData.system.language === 'en' ? enText : zhcnText;
+        fullScreenDialog.printClickableText(text, func);
     }
 
     public process = async () => {
         // 选择语言
-        this._fsDialog.printClickableText('English version', () => {
-            this._gameData.system.language = 'en';
+        fullScreenDialog.printClickableText('English version', () => {
+            gameData.system.language = 'en';
         });
-        this._fsDialog.printClickableText('中文版', () => {
-            this._gameData.system.language = 'zhcn';
+        fullScreenDialog.printClickableText('中文版', () => {
+            gameData.system.language = 'zhcn';
         });
         // 等待语言选择
-        await this._fsDialog.waitFor(() => this._gameData.system.language !== '');
-        this._fsDialog.clearDialog();
+        await fullScreenDialog.waitFor(() => gameData.system.language !== '');
+        fullScreenDialog.clearDialog();
         await this._printTextAndWC(
             'Welcome to WordSD!',
             '欢迎来到 WordSD!'
@@ -72,14 +67,14 @@ export class Game {
             'Press F11 to enter full screen mode for the best gaming experience.',
             '按下 F11 进入全屏模式以获得最好的游戏体验。'
         );
-        this._fsDialog.clearDialog();
+        fullScreenDialog.clearDialog();
         await this._creatNewWorldLine();
     }
 
     private _creatNewWorldLine = async () => {
         // 重置玩家属性
         this._resetPlayerStatus();
-        this._fsDialog.clearDialog();
+        fullScreenDialog.clearDialog();
         await bgm.play('sightless-storm-ii');
 
         await this._printTextAndWC(
@@ -90,38 +85,38 @@ export class Game {
             'Just then, you received a phone call.',
             '就在这时, 你收到了一个电话。'
         );
-        this._fsDialog.clearDialog();
+        fullScreenDialog.clearDialog();
         await this._printTextAndWC(
             '"The Rentouma Company will provide you with the most thoughtful service."',
             '“人头马公司将竭诚为您, 提供最周到的服务。”'
         );
-        this._fsDialog.clearDialog();
+        fullScreenDialog.clearDialog();
         await this._printTextAndWC(
             'In less than a week, you moved into the apartment arranged by the Rentouma Company.',
             '不到一周, 你就搬进了人头马公司安排的公寓。'
         );
         await this._printTextAndWC(
-            `【 Day ${this._gameData.system.currentDay} 】\nToday is the day you moved in.`,
-            `【 第 ${this._gameData.system.currentDay} 天 】\n今天是入住日。`,
+            `【 Day ${gameData.system.currentDay} 】\nToday is the day you moved in.`,
+            `【 第 ${gameData.system.currentDay} 天 】\n今天是入住日。`,
         );
         await this._printTextAndWC(
-            `Maybe you can stay for 【 ${this._gameData.system.totlaDays} days 】 first, \nsee the situation, and then decide whether to stay for a long time.`,
-            `也许可以先住到【 第 ${this._gameData.system.totlaDays} 天 】, \n看看情况, 再决定要不要长住。`,
+            `Maybe you can stay for 【 ${gameData.system.totlaDays} days 】 first, \nsee the situation, and then decide whether to stay for a long time.`,
+            `也许可以先住到【 第 ${gameData.system.totlaDays} 天 】, \n看看情况, 再决定要不要长住。`,
         );
-        this._fsDialog.clearDialog();
+        fullScreenDialog.clearDialog();
         await this._printTextAndWC(
-            `【 Food: ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\nAlthough the trip was hasty, you still remembered to bring some food.`,
-            `【 存粮： ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\n尽管此行匆忙, 但你还是记得带上了一些食物。`
-        );
-        await this._printTextAndWC(
-            `【 Sanity: ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】\nThe inherent breath of the room always makes people breathless.`,
-            `【 理智： ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】\n房间固有的气息总有些让人喘不过气。`
+            `【 Food: ${gameData.player.food} / ${gameData.player.foodMax} 】\nAlthough the trip was hasty, you still remembered to bring some food.`,
+            `【 存粮： ${gameData.player.food} / ${gameData.player.foodMax} 】\n尽管此行匆忙, 但你还是记得带上了一些食物。`
         );
         await this._printTextAndWC(
-            `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nBut it's better than being killed by someone unknown outside.`,
-            `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n但也好过在外头被不知名的某人夺了性命。`
+            `【 Sanity: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\nThe inherent breath of the room always makes people breathless.`,
+            `【 理智： ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\n房间固有的气息总有些让人喘不过气。`
         );
-        this._fsDialog.clearDialog();
+        await this._printTextAndWC(
+            `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nBut it's better than being killed by someone unknown outside.`,
+            `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n但也好过在外头被不知名的某人夺了性命。`
+        );
+        fullScreenDialog.clearDialog();
         // 如果有道具, 进入道具检查环节
         await this._checkItem();
         // 如果有遗留物, 进入遗留物检查环节
@@ -129,8 +124,8 @@ export class Game {
         // 如果有收集物, 进入收集物检查环节
         await this._checkCollection();
         await this._printTextAndWC(
-            `【 Time: ${this._gameData.system.currentTime} o'clock 】\nYou have been busy moving, and it was already night.`,
-            `【 时间：${this._gameData.system.currentTime} 点 】\n一直忙着搬家, 不知不觉, 已经到了晚上。`
+            `【 Time: ${gameData.system.currentTime} o'clock 】\nYou have been busy moving, and it was already night.`,
+            `【 时间：${gameData.system.currentTime} 点 】\n一直忙着搬家, 不知不觉, 已经到了晚上。`
         );
         await this._printTextAndWC(
             `You can go out and have a look, maybe you can meet new neighbors and say hello.`,
@@ -146,34 +141,34 @@ export class Game {
     }
 
     private _resetPlayerStatus = () => {
-        this._gameData.player.health = this._gameData.player.healthMax;
-        this._gameData.player.sanity = this._gameData.player.sanityMax;
-        this._gameData.player.food = this._gameData.player.foodMax;
-        this._gameData.player.credibility = 0;
-        this._gameData.player.isNoteProcessed = false;
+        gameData.player.health = gameData.player.healthMax;
+        gameData.player.sanity = gameData.player.sanityMax;
+        gameData.player.food = gameData.player.foodMax;
+        gameData.player.credibility = 0;
+        gameData.player.isNoteProcessed = false;
     }
 
     private _checkItem = async () => {
-        if (this._gameData.item.CorpsePieces > 0) {
+        if (gameData.item.CorpsePieces > 0) {
             await this._printTextAndWC(
                 `By chance, you find something strange in the room...`,
                 `偶然间, 你发现房间里有一些奇怪的东西......`
             );
             await this._printTextAndWC(
-                `【 Corpse pieces (Item): ${this._gameData.item.CorpsePieces} 】`,
-                `【 尸块（道具）： ${this._gameData.item.CorpsePieces} 】`,
+                `【 Corpse pieces (Item): ${gameData.item.CorpsePieces} 】`,
+                `【 尸块（道具）： ${gameData.item.CorpsePieces} 】`,
                 'hint'
             );
             await this._printTextAndWC(
                 `Considering that it might come in handy, you put them back where they were, and didn't inform the Rentouma Company.`,
                 `考虑到也许能派上用处, 你将它们放回了原地, \n并没有通知人头马公司。`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
         }
     }
 
     private _checkLegacy = async () => {
-        if (this._gameData.legacy.humanCorpse > 0) {
+        if (gameData.legacy.humanCorpse > 0) {
             await this._printTextAndWC(
                 `Later, you find a box in the room, which seems to be left over from the previous occupant.`,
                 `之后, 你又在房间里发现了一个箱子, \n似乎是前住户遗留下来的。`
@@ -182,18 +177,18 @@ export class Game {
                 `Out of curiosity, you turned it on.`,
                 `出于好奇, 你将它打开了。`
             );
-            if (this._gameData.legacy.humanCorpse > 0) {
+            if (gameData.legacy.humanCorpse > 0) {
                 await this._printTextAndWC(
-                    `【 Human corpse: ${this._gameData.legacy.humanCorpse} 】`,
-                    `【 人的尸体： ${this._gameData.legacy.humanCorpse} 】`,
+                    `【 Human corpse: ${gameData.legacy.humanCorpse} 】`,
+                    `【 人的尸体： ${gameData.legacy.humanCorpse} 】`,
                     'hint'
                 );
             }
-            this._fsDialog.clearDialog();
-            this._gameData.player.sanity -= 5;
+            fullScreenDialog.clearDialog();
+            gameData.player.sanity -= 5;
             await this._printTextAndWC(
-                `【 Sanity - ${5}. Currently ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】\nA strange smell stimulates you.`,
-                `【 理智 - ${5} 。当前为: ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】\n一股异味刺激着你。`,
+                `【 Sanity - ${5}. Currently ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\nA strange smell stimulates you.`,
+                `【 理智 - ${5} 。当前为: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\n一股异味刺激着你。`,
                 'warning'
             );
             await this._printTextAndWC(
@@ -208,29 +203,29 @@ export class Game {
                 `- Decompose the corpse`,
                 `- 分解尸体`,
                 async () => {
-                    this._fsDialog.clearDialog();
-                    this._gameData.item.CorpsePieces += this._gameData.legacy.humanCorpse * 10;
-                    const decreaseSanity = this._gameData.legacy.humanCorpse * 50 > this._gameData.player.sanity ? this._gameData.player.sanity : this._gameData.legacy.humanCorpse * 50;
-                    this._gameData.player.sanity -= decreaseSanity;
+                    fullScreenDialog.clearDialog();
+                    gameData.item.CorpsePieces += gameData.legacy.humanCorpse * 10;
+                    const decreaseSanity = gameData.legacy.humanCorpse * 50 > gameData.player.sanity ? gameData.player.sanity : gameData.legacy.humanCorpse * 50;
+                    gameData.player.sanity -= decreaseSanity;
                     await this._printTextAndWC(
-                        `【 Corpse pieces (Item) + ${this._gameData.legacy.humanCorpse * 10}. Currently: ${this._gameData.item.CorpsePieces} 】`,
-                        `【 尸块（道具） + ${this._gameData.legacy.humanCorpse * 10} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
+                        `【 Corpse pieces (Item) + ${gameData.legacy.humanCorpse * 10}. Currently: ${gameData.item.CorpsePieces} 】`,
+                        `【 尸块（道具） + ${gameData.legacy.humanCorpse * 10} 。当前为: ${gameData.item.CorpsePieces} 】`,
                         'hint'
                     );
                     await this._printTextAndWC(
-                        `【 Sanity - ${decreaseSanity}. Currently: ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】\nYour mental state is not very good.`,
-                        `【 理智 - ${decreaseSanity} 。当前为: ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】\n你的精神状态有些不太好。`,
+                        `【 Sanity - ${decreaseSanity}. Currently: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\nYour mental state is not very good.`,
+                        `【 理智 - ${decreaseSanity} 。当前为: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\n你的精神状态有些不太好。`,
                         'warning'
                     );
-                    this._fsDialog.clearDialog();
-                    this._gameData.legacy.humanCorpse = 0;
+                    fullScreenDialog.clearDialog();
+                    gameData.legacy.humanCorpse = 0;
                 }
             );
             this._printClickableText(
                 `- Turn over the corpse`,
                 `- 将尸体上缴`,
                 async () => {
-                    this._fsDialog.clearDialog();
+                    fullScreenDialog.clearDialog();
                     await this._printTextAndWC(
                         `You close the box and put it at the door, go back to the room and wash your hands, and the box is gone.`,
                         `你将箱子关好并放在门口, 回到房间里洗手的功夫, 箱子就消失了。`
@@ -247,23 +242,23 @@ export class Game {
                         `"Thank you sincerely for your great help."`,
                         `“真挚地感谢您的大力帮助。”`
                     );
-                    this._gameData.player.credibility += this._gameData.legacy.humanCorpse * 30;
+                    gameData.player.credibility += gameData.legacy.humanCorpse * 30;
                     await this._printTextAndWC(
-                        `【 Reputation + ${this._gameData.player.credibility} 】\nIt seems to be appreciated by the Rentouma Company.`,
-                        `【 信誉 + ${this._gameData.legacy.humanCorpse * 30} , 当前为: ${this._gameData.player.credibility} 】\n似乎得到了人头马公司的赞赏。`,
+                        `【 Reputation + ${gameData.player.credibility} 】\nIt seems to be appreciated by the Rentouma Company.`,
+                        `【 信誉 + ${gameData.legacy.humanCorpse * 30} , 当前为: ${gameData.player.credibility} 】\n似乎得到了人头马公司的赞赏。`,
                         'hint'
                     );
-                    this._fsDialog.clearDialog();
-                    this._gameData.legacy.humanCorpse = 0;
+                    fullScreenDialog.clearDialog();
+                    gameData.legacy.humanCorpse = 0;
                 }
             );
             // 等待尸体处理
-            await this._fsDialog.waitFor(() => this._gameData.legacy.humanCorpse <= 0);
+            await fullScreenDialog.waitFor(() => gameData.legacy.humanCorpse <= 0);
         }
     }
 
     private _checkCollection = async () => {
-        if (this._gameData.collection.smilingAngel_1 || this._gameData.collection.smilingAngel_2) {
+        if (gameData.collection.smilingAngel_1 || gameData.collection.smilingAngel_2) {
             await this._printTextAndWC(
                 `In the corner of the living room, there is a bunch of lifeless flowers.`,
                 `客厅的桌角, 摆放着一捧毫无生气的花。`
@@ -276,25 +271,25 @@ export class Game {
                 `At the bottom of the container, there was a piece of paper with a scribbled note on it.`,
                 `容器的底部, 压着一片纸条, 上头有一段字迹潦草的笔记。`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
             this._printClickableText(
                 `- Read the note`,
                 `- 阅读笔记`,
                 async () => {
-                    this._fsDialog.clearDialog();
-                    if (this._gameData.collection.smilingAngel_1) {
+                    fullScreenDialog.clearDialog();
+                    if (gameData.collection.smilingAngel_1) {
                         await this._printTextAndWC(
                             `【 Collection: Smiling Angel Part 1 】\nIt loves us wholeheartedly and sincerely. Carescing, licking, and sexual intercourse are not enough, only by truly blending together can we return this love.`,
                             `【 有害物词条： 微笑天使 part1 】\n它全心全意, 由衷地爱着我们。抚摸, 舔舐, 性交尚不足以, 唯有真正融为一体, 方能回报这份恋心。`
                         );
                     }
-                    if (this._gameData.collection.smilingAngel_2) {
+                    if (gameData.collection.smilingAngel_2) {
                         await this._printTextAndWC(
                             `【 Collection: Smiling Angel Part 2 】\nIt still can't understand why anyone would reject its love. How bitter lovesickness is! It spends its time in loveless satiety, mournfully waiting for the next dawn.`,
                             `【 有害物词条： 微笑天使 part2 】\n它至今无法明白, 为何会有人拒绝了它的爱情。\n相思何其苦涩！\n它在无爱的饱腹中虚度光阴, 哀愁地等待下一个黎明。`
                         );
                     }
-                    this._fsDialog.clearDialog();
+                    fullScreenDialog.clearDialog();
                     await this._printTextAndWC(
                         `...... Somewhat inexplicable.`,
                         `......有些莫名其妙。`
@@ -307,15 +302,15 @@ export class Game {
                         `You put the notes back in their place.`,
                         `你将笔记放回原处。`
                     );
-                    this._fsDialog.clearDialog();
-                    this._gameData.player.isNoteProcessed = true;
+                    fullScreenDialog.clearDialog();
+                    gameData.player.isNoteProcessed = true;
                 }
             )
             this._printClickableText(
                 `- Throw away the note`,
                 `- 丢弃笔记`,
                 async () => {
-                    this._fsDialog.clearDialog();
+                    fullScreenDialog.clearDialog();
                     await this._printTextAndWC(
                         `You threw your notes in the trash.`,
                         `你将笔记丢进了垃圾桶。`
@@ -328,12 +323,12 @@ export class Game {
                         `You think so.`,
                         `你这么认为。`
                     );
-                    this._fsDialog.clearDialog();
-                    this._gameData.player.isNoteProcessed = true;
+                    fullScreenDialog.clearDialog();
+                    gameData.player.isNoteProcessed = true;
                 }
             )
             // 等待笔记处理
-            await this._fsDialog.waitFor(() => this._gameData.player.isNoteProcessed);
+            await fullScreenDialog.waitFor(() => gameData.player.isNoteProcessed);
         }
     }
 
@@ -343,7 +338,7 @@ export class Game {
             `- Go out`,
             `- 外出`,
             async () => {
-                this._fsDialog.clearDialog();
+                fullScreenDialog.clearDialog();
                 await this._printTextAndWC(
                     `You open the door, take a step, and a smiling face suddenly appears at your feet.`,
                     `你打开门, 迈出一步, 一张笑脸突然出现在你脚边。`
@@ -360,29 +355,29 @@ export class Game {
                     `Your teeth collide with its teeth, its saliva burns your tongue, and you can't cry out.`,
                     `你的牙齿与它的牙齿相撞, 它的唾液烧烂了你的舌头, 你喊不出声了。`
                 );
-                this._fsDialog.clearDialog();
+                fullScreenDialog.clearDialog();
                 await this._printTextAndWC(
                     `Its blood-stained smile fills the field of vision, you hear the sound of sucking, and there is a spicy tingling sensation in the eye sockets,`,
                     `它染血的微笑充满了视野, 你听见吸吮的声音, \n眼窝中传来辛辣的刺痛感。`
                 );
-                this._gameData.player.health = 0;
-                this._gameData.story.sledDogDeathSceneI = true;
-                this._gameData.legacy.humanCorpse += 1;
+                gameData.player.health = 0;
+                gameData.story.sledDogDeathSceneI = true;
+                gameData.legacy.humanCorpse += 1;
                 await this._printTextAndWC(
-                    `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nYou finally realize that its snort is exhaling into your brain.`,
-                    `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n你最后意识到它的鼻息呼入了脑颅。`,
+                    `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nYou finally realize that its snort is exhaling into your brain.`,
+                    `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n你最后意识到它的鼻息呼入了脑颅。`,
                     'warning'
                 );
                 // 创建新的世界线
                 await this._creatNewWorldLine();
             }
         );
-        if (this._gameData.story.sledDogDeathSceneI) {
+        if (gameData.story.sledDogDeathSceneI) {
             this._printClickableText(
                 `- View the door eye`,
                 `- 查看门眼`,
                 async () => {
-                    this._fsDialog.clearDialog();
+                    fullScreenDialog.clearDialog();
                     await this._printTextAndWC(
                         `In the dim light, a snow-white sled dog sleepily lies in front of the door.`,
                         `在昏暗的光线下, 一条雪白的雪橇犬趴在门前昏昏欲睡。`
@@ -391,7 +386,7 @@ export class Game {
                         `- Go out`,
                         `- 出门`,
                         async () => {
-                            this._fsDialog.clearDialog();
+                            fullScreenDialog.clearDialog();
                             await this._printTextAndWC(
                                 `You open the door, carefully pass it,`,
                                 `你打开门, 小心翼翼地经过它, `
@@ -416,12 +411,12 @@ export class Game {
                                 `......`,
                                 `......`,
                             );
-                            this._gameData.player.health = 0;
-                            this._gameData.story.sledDogDeathSceneII = true;
-                            this._gameData.legacy.humanCorpse += 1;
+                            gameData.player.health = 0;
+                            gameData.story.sledDogDeathSceneII = true;
+                            gameData.legacy.humanCorpse += 1;
                             await this._printTextAndWC(
-                                `【 Health: ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\nA snow-white sled dog whispered with joy, and it licked the last piece of minced meat with pity,`,
-                                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n一条雪白的雪橇犬满心欢喜地低鸣着, \n它怜惜地舔尽最后一块碎肉, `,
+                                `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nA snow-white sled dog whispered with joy, and it licked the last piece of minced meat with pity,`,
+                                `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n一条雪白的雪橇犬满心欢喜地低鸣着, \n它怜惜地舔尽最后一块碎肉, `,
                                 'warning'
                             );
                             await this._printTextAndWC(
@@ -432,8 +427,8 @@ export class Game {
                                 `It wagged its tail, trotted towards the stairs, and left.`,
                                 `它摇晃着尾巴, 小步跑向楼梯, 离开了。`
                             );
-                            if (this._gameData.story.sledDogDeathSceneII && !this._gameData.collection.smilingAngel_1) {
-                                this._gameData.collection.smilingAngel_1 = true;
+                            if (gameData.story.sledDogDeathSceneII && !gameData.collection.smilingAngel_1) {
+                                gameData.collection.smilingAngel_1 = true;
                                 await this._printTextAndWC(
                                     `Colletion: Smiling Angel Part 1`,
                                     `收录有害物词条： 微笑天使 part1`,
@@ -444,12 +439,12 @@ export class Game {
                             await this._creatNewWorldLine();
                         }
                     );
-                    if (this._gameData.collection.smilingAngel_1 && this._gameData.item.CorpsePieces > 0) {
+                    if (gameData.collection.smilingAngel_1 && gameData.item.CorpsePieces > 0) {
                         this._printClickableText(
                             `- Feed the corpse pieces (Item)`,
                             `- 喂食尸块（道具）`,
                             async () => {
-                                this._fsDialog.clearDialog();
+                                fullScreenDialog.clearDialog();
                                 await this._printTextAndWC(
                                     `You open the door. Toss it a piece of meat.`,
                                     `你打开门。丢给它一块肉。`
@@ -462,22 +457,22 @@ export class Game {
                                     `The sled dog licks its lips, stares at you meaningfully for a moment, and turns away.`,
                                     `雪橇犬舔舔嘴唇, 意味深长地盯着你看了会儿, 转身离开。`
                                 );
-                                this._fsDialog.clearDialog();
-                                this._gameData.item.CorpsePieces -= 1;
+                                fullScreenDialog.clearDialog();
+                                gameData.item.CorpsePieces -= 1;
                                 await this._printTextAndWC(
-                                    `【 Corpse pieces (Item) - ${1}. Currently: ${this._gameData.item.CorpsePieces} 】`,
-                                    `【 尸块（道具） - ${1} 。当前为: ${this._gameData.item.CorpsePieces} 】`,
+                                    `【 Corpse pieces (Item) - ${1}. Currently: ${gameData.item.CorpsePieces} 】`,
+                                    `【 尸块（道具） - ${1} 。当前为: ${gameData.item.CorpsePieces} 】`,
                                     'warning'
                                 );
-                                if (!this._gameData.collection.smilingAngel_2) {
-                                    this._gameData.collection.smilingAngel_2 = true;
+                                if (!gameData.collection.smilingAngel_2) {
+                                    gameData.collection.smilingAngel_2 = true;
                                     await this._printTextAndWC(
                                         `Collection: Smiling Angel Part 2`,
                                         `收录有害物词条： 微笑天使 part2`,
                                         'hint'
                                     );
                                 }
-                                this._fsDialog.clearDialog();
+                                fullScreenDialog.clearDialog();
                                 await this._printTextAndWC(
                                     `Suddenly, something creepy.`,
                                     `突然间, 有些毛骨悚然。`
@@ -486,7 +481,7 @@ export class Game {
                                     `You close the door and go back to the room.`,
                                     `你关上门, 回到房间里。`
                                 );
-                                this._fsDialog.clearDialog();
+                                fullScreenDialog.clearDialog();
                                 sledDogSceneClear = true;
                             }
                         );
@@ -494,7 +489,7 @@ export class Game {
                 }
             );
         }
-        await this._fsDialog.waitFor(() => sledDogSceneClear);
+        await fullScreenDialog.waitFor(() => sledDogSceneClear);
     }
 
     /**
@@ -503,18 +498,18 @@ export class Game {
     private _dayEndPhase = async () => {
         await this._printTextAndWC(
             ``,
-            `入住后的第 ${this._gameData.system.currentDay} 天, 就要结束了。`
+            `入住后的第 ${gameData.system.currentDay} 天, 就要结束了。`
         );
         await this._printTextAndWC(
             ``,
             `躺在床上, 思考着至今为止发生过的事情。`
         );
-        this._fsDialog.clearDialog();
+        fullScreenDialog.clearDialog();
         // 因 理智 < 50 ，住户违约搬出，触发尾随事件，死亡
-        if (this._gameData.player.sanity < 50) {
+        if (gameData.player.sanity < 50) {
             await this._printTextAndWC(
                 ``,
-                `【 理智： ${this._gameData.player.sanity} < ${50} 】\n遭遇的事件过于离奇, 加上没有得到充分的休息, \n越是思考越是觉得混乱。`,
+                `【 理智： ${gameData.player.sanity} < ${50} 】\n遭遇的事件过于离奇, 加上没有得到充分的休息, \n越是思考越是觉得混乱。`,
                 'warning'
             );
             await this._printTextAndWC(
@@ -525,7 +520,7 @@ export class Game {
                 ``,
                 `你不由自主地站起身, 开始收拾起东西......`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
             await this._printTextAndWC(
                 ``,
                 `..`
@@ -538,7 +533,7 @@ export class Game {
                 ``,
                 `......`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
             await this._printTextAndWC(
                 ``,
                 `深夜的楼道静得有些诡异。`
@@ -551,7 +546,7 @@ export class Game {
                 ``,
                 `即便如此, \n总感觉在身后某处黑暗的角落里，有人的气息。`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
             await this._printTextAndWC(
                 ``,
                 `也许是错觉吧。`
@@ -564,7 +559,7 @@ export class Game {
                 ``,
                 `只是偷偷提个行李箱出去，入住时用的也是假身份，不会有问题的。`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
             await this._printTextAndWC(
                 ``,
                 `不会有问题的。`
@@ -577,7 +572,7 @@ export class Game {
                 ``,
                 `什么都没发生过。`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
             await this._printTextAndWC(
                 ``,
                 `逐渐地，你开始计划起今后的安排。该去哪儿租房，是不是该离开这座城市？`
@@ -586,16 +581,16 @@ export class Game {
                 ``,
                 `“砰！”`
             );
-            this._fsDialog.clearDialog();
-            this._gameData.player.health = 0;
+            fullScreenDialog.clearDialog();
+            gameData.player.health = 0;
             await this._printTextAndWC(
                 ``,
-                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n那是你在这个世界上意识到的最后一声。`,
+                `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n那是你在这个世界上意识到的最后一声。`,
                 'warning'
             );
-            this._gameData.legacy.humanCorpse += 1;
+            gameData.legacy.humanCorpse += 1;
             await this._creatNewWorldLine();
-        } else if (this._gameData.system.currentDay === 1) {
+        } else if (gameData.system.currentDay === 1) {
             await this._printTextAndWC(
                 `..`,
                 `..`
@@ -636,7 +631,7 @@ export class Game {
                 `Determined, you close your eyes and fall asleep.`,
                 `下定决心的你，闭上眼睛, 进入了梦乡。`
             );
-            this._fsDialog.clearDialog();
+            fullScreenDialog.clearDialog();
             // 进入第二天
             await this._secondDay();
         }
@@ -651,22 +646,22 @@ export class Game {
             `到了晚餐时间。`
         );
         // 消耗8小时的食物
-        this._gameData.player.food -= this._gameData.player.foodConsumePerHour * 8;
+        gameData.player.food -= gameData.player.foodConsumePerHour * 8;
         await this._printTextAndWC(
-            `【 Food - ${this._gameData.player.foodConsumePerHour * 8}. Currently: ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\nAfter a simple dinner solution in the living room, you return to the bedroom. `,
-            `【 存粮 - ${this._gameData.player.foodConsumePerHour * 8} 。当前为: ${this._gameData.player.food} / ${this._gameData.player.foodMax} 】\n在客厅简单解决掉晚饭后, 你回到了卧室。`,
+            `【 Food - ${gameData.player.foodConsumePerHour * 8}. Currently: ${gameData.player.food} / ${gameData.player.foodMax} 】\nAfter a simple dinner solution in the living room, you return to the bedroom. `,
+            `【 存粮 - ${gameData.player.foodConsumePerHour * 8} 。当前为: ${gameData.player.food} / ${gameData.player.foodMax} 】\n在客厅简单解决掉晚饭后, 你回到了卧室。`,
             'warning'
         );
-        this._fsDialog.clearDialog();
+        fullScreenDialog.clearDialog();
     }
 
     private _secondDay = async () => {
         // 消耗8小时的睡眠
-        const increaseSanity = this._gameData.player.sanityIncreasePerHour * 8 > this._gameData.player.sanityMax - this._gameData.player.sanity ? this._gameData.player.sanityMax - this._gameData.player.sanity : this._gameData.player.sanityIncreasePerHour * 8;
-        this._gameData.player.sanity += increaseSanity;
+        const increaseSanity = gameData.player.sanityIncreasePerHour * 8 > gameData.player.sanityMax - gameData.player.sanity ? gameData.player.sanityMax - gameData.player.sanity : gameData.player.sanityIncreasePerHour * 8;
+        gameData.player.sanity += increaseSanity;
         await this._printTextAndWC(
-            `【 Sanity + ${increaseSanity}. Currently: ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】`,
-            `【 理智 + ${increaseSanity} 。当前为: ${this._gameData.player.sanity} / ${this._gameData.player.sanityMax} 】`,
+            `【 Sanity + ${increaseSanity}. Currently: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】`,
+            `【 理智 + ${increaseSanity} 。当前为: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】`,
             'hint'
         );
         await this._printTextAndWC(

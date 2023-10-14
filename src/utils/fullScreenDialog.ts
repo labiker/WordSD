@@ -1,28 +1,25 @@
 import * as PIXI from 'pixi.js';
 import { Text } from 'pixi.js';
+import { app } from './app';
 
 /**
  * 全屏对话框
  * 
  * @since 1.0.0
  */
-export default class FullScreenDialog {
+class FullScreenDialog {
   /**
    * 自动启动 `ctrl` 键检测。按下时为快进模式，松开时为普通模式。
-   * @param app Pixijs App
    * @note 快进模式下，文本显示速度更快，且不会等待点击。
    */
-  constructor(app: PIXI.Application<HTMLCanvasElement>) {
-    this.app = app;
-    this.width = app.view.width;
-    this.height = app.view.height;
+  constructor() {
     this.marginBottom = 200;
     this.lineSpacing = 6;
     this.normalModeTextSpeed = 30;
     this.textSpeed = this.normalModeTextSpeed;
     this.skipMode = false;
     this.skipModeTextSpeed = 0.3;
-    this.background = new Background(this.width, this.height);
+    this.background = new Background(app.view.width, app.view.height);
     this.showObject(this.background);
     this.enableKeyDetection();
   }
@@ -32,7 +29,7 @@ export default class FullScreenDialog {
    */
   public clearDialog() {
     this.messages.forEach((message) => {
-      this.app.stage.removeChild(message);
+      app.stage.removeChild(message);
     });
     this.messages = [];
   }
@@ -48,14 +45,14 @@ export default class FullScreenDialog {
    * @param type 文本类型。
    */
   public printText(text: string, type?: 'warning' | 'hint'): void {
-    const message = new Message(text, this.width);
+    const message = new Message(text, app.view.width);
 
     if (this.messages.length !== 0) {
       const lastTextChild = this.messages[this.messages.length - 1];
       if (lastTextChild.eventMode !== 'static') {
         lastTextChild.alpha = 0.5;
       }
-      if (lastTextChild.y + lastTextChild.height + this.lineSpacing + this.marginBottom > this.height) {
+      if (lastTextChild.y + lastTextChild.height + this.lineSpacing + this.marginBottom > app.view.height) {
         this.clearDialog();
       } else {
         message.y = lastTextChild.y + lastTextChild.height + this.lineSpacing;
@@ -240,24 +237,19 @@ export default class FullScreenDialog {
   /**
    * 显示对象到舞台。
    * 
-   * 调用 `this.app.stage.addChildAt()` ，将对象显示到舞台中。
+   * 调用 `app.stage.addChildAt()` ，将对象显示到舞台中。
    * 同时，将对象添加到 `this.showingObjects` 中。
    * 如果该对象是 `Message` 类型，并且 `isRecorded` 为 `true`，则将对象添加到 `this.messages` 中。
    * @param object 要显示的对象。
    * @param isRecorded 是否记录到 `this.messages` 中。
    */
   private showObject(object: PIXI.DisplayObject, isRecorded?: boolean) {
-    this.app.stage.addChildAt(object, this.app.stage.children.length);
+    app.stage.addChildAt(object, app.stage.children.length);
     this.showingObjects.push(object);
     if (object instanceof Message && isRecorded !== false) {
       this.messages.push(object);
     }
   }
-
-  /**
-   * 绑定的 `Pixijs app` 对象。
-   */
-  private app: PIXI.Application<HTMLCanvasElement>;
 
   /** 
    * 对话框背景。
@@ -286,7 +278,7 @@ export default class FullScreenDialog {
 
   /**
    * 是否启用全局按键检测。
-   * @note 出于开发缺陷，键盘事件是直接绑定到 `window` 上的，因此无法通过 `this.app.stage` 来阻止事件传递。
+   * @note 出于开发缺陷，键盘事件是直接绑定到 `window` 上的，因此无法通过 `app.stage` 来阻止事件传递。
    * 单独使用 `FullScreenDialog` 时，并不会有什么问题，但是如果要与其它模块（比如 `BackLog`）一同使用时，就会出现问题。
    * 请根据程序需求，在必要的地方自定义需要禁用全局按键检测的逻辑。
    */
@@ -425,3 +417,5 @@ class Message extends Text {
    */
   public hintTextStyle: PIXI.TextStyle;
 }
+
+export const fullScreenDialog = new FullScreenDialog();

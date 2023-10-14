@@ -42,7 +42,6 @@ WordSeed is currently in its infancy, and anyone interested in developing a game
 
   ```ts
   import { sound } from '@pixi/sound';
-  import { Assets } from 'pixi.js';
   
   /** Initialise and start loading of all assets */
   export async function initAssets() {
