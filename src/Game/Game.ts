@@ -2,7 +2,7 @@ import { gameData } from './gameData';
 import FullScreenDialog from '../module/FullScreenDialog';
 import BackLog from '../module/BackLog';
 import { app } from '../renderer';
-import { bgm, sfx } from '../module/audio';
+import { bgm, sfx } from '../utils/audio';
 
 /** A class that handles all of gameplay based features. */
 export class Game {
@@ -36,9 +36,9 @@ export class Game {
     private _printTextAndWC = async (enText: string, zhcnText: string, type?: 'warning' | 'hint') => {
         const text = this._gameData.system.language === 'en' ? enText : zhcnText;
         // 仅在非快进模式时, 才有声音
-        sfx.play('sfx_print.mp3', { loop: true });
+        sfx.play('sfx_print', { loop: true });
         await this._fsDialog.printTextAsync(text, type);
-        sfx.stop('sfx_print.mp3');
+        sfx.stop('sfx_print');
         await this._fsDialog.waitForClick();
     }
 
@@ -80,7 +80,8 @@ export class Game {
         // 重置玩家属性
         this._resetPlayerStatus();
         this._fsDialog.clearDialog();
-        await bgm.play('sightless-storm-ii.mp3');
+        await bgm.play('sightless-storm-ii');
+
         await this._printTextAndWC(
             'For various reasons, you have to find a place to hide.',
             '因为种种原因, 你不得不找个地方避避风头。'
@@ -589,7 +590,8 @@ export class Game {
             this._gameData.player.health = 0;
             await this._printTextAndWC(
                 ``,
-                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】那是你在这个世界上意识到的最后一声。`
+                `【 生命： ${this._gameData.player.health} / ${this._gameData.player.healthMax} 】\n那是你在这个世界上意识到的最后一声。`,
+                'warning'
             );
             this._gameData.legacy.humanCorpse += 1;
             await this._creatNewWorldLine();

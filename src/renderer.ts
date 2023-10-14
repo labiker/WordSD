@@ -28,8 +28,8 @@
 
 import './index.css';
 import { Application } from 'pixi.js';
-import { Game } from './Game/Game';
-import { initAssets } from './assets';
+import { Game } from './game/Game';
+import { initAssets } from './utils/assets';
 
 const appWidth = 1920;
 const appHeight = 1080;

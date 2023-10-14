@@ -47,8 +47,8 @@ WordSeed is currently in its infancy, and anyone interested in developing a game
   /** Initialise and start loading of all assets */
   export async function initAssets() {
       // Load sound assets
-      sound.add('sightless-storm-ii.mp3', 'app://assets/audio/sightless-storm-ii.mp3');
-      sound.add('sfx_print.mp3', 'app://assets/audio/sfx_print.mp3');
+      sound.add('sightless-storm-ii', 'app://assets/audio/sightless-storm-ii.mp3');
+      sound.add('sfx_print', 'app://assets/audio/sfx_print.mp3');
   }
   ```
 
@@ -61,11 +61,11 @@ WordSeed is currently in its infancy, and anyone interested in developing a game
   ```ts
   import { bgm, sfx } from '../module/audio';
   
-  bgm.play('sightless-storm-ii.mp3');
+  bgm.play('sightless-storm-ii');
   // ...
-  sfx.play('sfx_print.mp3', { loop: true });
+  sfx.play('sfx_print', { loop: true });
   // ...
-  sfx.stop('sfx_print.mp3');
+  sfx.stop('sfx_print');
   ```
 
   The audio module has been added referring to PixiJS's [open-games](https://github.com/pixijs/open-games) repository. 
