@@ -29,7 +29,7 @@
 import './index.css';
 import { app, resize } from './utils/app';
 import { initAssets } from './utils/assets';
-import { Game } from './game/Game';
+import { Scene } from './scene/Scene';
 
 /** Setup app and initialise assets */
 async function init() {
@@ -49,8 +49,8 @@ async function init() {
     await initAssets();
 
     // Load the game
-    const game = new Game();
-    game.process();
+    const scene = new Scene();
+    scene.process();
 }
 
 // Init everything

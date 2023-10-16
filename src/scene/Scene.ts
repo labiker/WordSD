@@ -4,7 +4,7 @@ import { backLog } from '../utils/backLog';
 import { bgm, sfx } from '../utils/audio';
 
 /** A class that handles all of gameplay based features. */
-export class Game {
+export class Scene {
     constructor() {
         backLog.autoRecordText = true;
         this._loopCheck;
