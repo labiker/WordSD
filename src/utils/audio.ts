@@ -47,7 +47,11 @@ class BGM {
         // Store the instance volume just in case global volume is changed
         this._instanceVolume = options?.volume ?? 1;
 
-        gsap.to(this.current, { volume: this._globalVolume * this._instanceVolume, duration: 1, ease: 'linear' });
+        gsap.to(this.current, {
+            volume: this._globalVolume * this._instanceVolume,
+            duration: 1,
+            ease: 'linear',
+        });
     }
 
     /**
@@ -132,8 +136,7 @@ export const audio = {
         sound.volumeAll = v;
         if (!v) {
             sound.muteAll();
-        }
-        else {
+        } else {
             sound.unmuteAll();
         }
     },

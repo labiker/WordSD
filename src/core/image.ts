@@ -1,6 +1,6 @@
 import { Resource, Texture } from 'pixi.js';
 
-class ImageLibrary{
+class ImageLibrary {
     /**
      * Adds a new image by alias.
      * @param alias - The image alias reference.
