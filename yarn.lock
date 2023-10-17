@@ -738,6 +738,15 @@
     "@pixi/settings" "7.3.1"
     "@pixi/utils" "7.3.1"
 
+"@pixi/ui@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.npmmirror.com/@pixi/ui/-/ui-0.9.0.tgz#d0bac02ea0584e67c52e778259cc4c4122b7ee4f"
+  integrity sha512-7T1woOiOINQ89C5txUgnf/mVwHctnwThHwmUQ+TYTKsPR3kCaspE4Y1+GMMjShdMCitlWzDNKL/SIcPOGVLwcA==
+  dependencies:
+    ts-mixer "^6.0.3"
+    tweedle.js "^2.1.0"
+    typed-signals "^2.5.0"
+
 "@pixi/utils@7.3.1":
   version "7.3.1"
   resolved "https://registry.npmmirror.com/@pixi/utils/-/utils-7.3.1.tgz#7e4148e29f2972ee6fb7286b41bfd381602e0a19"
@@ -5909,6 +5918,11 @@ ts-loader@^9.2.2:
     micromatch "^4.0.0"
     semver "^7.3.4"
 
+ts-mixer@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.npmmirror.com/ts-mixer/-/ts-mixer-6.0.3.tgz#69bd50f406ff39daa369885b16c77a6194c7cae6"
+  integrity sha512-k43M7uCG1AkTyxgnmI5MPwKoUvS/bRvLvUb7+Pgpdlmok8AoqmUaZxUUw8zKM5B1lqZrt41GjYgnvAi0fppqgQ==
+
 ts-node@^10.0.0:
   version "10.9.1"
   resolved "https://registry.npmjs.org/ts-node/-/ts-node-10.9.1.tgz"
@@ -5942,6 +5956,11 @@ tslib@^2.0.3, tslib@^2.1.0:
   version "2.6.2"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.6.2.tgz"
   integrity sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==
+
+tweedle.js@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmmirror.com/tweedle.js/-/tweedle.js-2.1.0.tgz#523f5d50e5223c3c809b1aa627c6e9648e576d93"
+  integrity sha512-0ReQgVjepoZkE6t0upWNgCRbplHkQJQYk1LStXugwSR728GLFmGDRuaQJlxeC/iBlxud6+P1RdODjaO25vHAqw==
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
@@ -6011,6 +6030,11 @@ typed-array-length@^1.0.4:
     call-bind "^1.0.2"
     for-each "^0.3.3"
     is-typed-array "^1.1.9"
+
+typed-signals@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.npmmirror.com/typed-signals/-/typed-signals-2.5.0.tgz#7be73505c2ee0dc4e43f1c4ee002c855796bd89a"
+  integrity sha512-m9lHc3eBCJerXYdx+G0uWZihyUXdqTzzgOdqiDDsoUo75WjhFJH6vP5/6w/xhyu04zoxHUqgYhf9FEt85dk/Ng==
 
 typescript@~4.5.4:
   version "4.5.5"
