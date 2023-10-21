@@ -4,15 +4,27 @@
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/xVVk5hdkXK)
 [![Electron Forge](https://badgen.net/badge/Electron%20Forge/6.3.0/green?icon=https://www.electronjs.org/assets/img/logo.svg)](https://www.electronforge.io/config/configuration)
-[![PixiJS](https://badgen.net/badge/PixiJS/7.3.0/green)](https://pixijs.download/v7.3.0/docs/index.html)
+[![PixiJS](https://badgen.net/badge/PixiJS/7.3.1/green)](https://pixijs.download/v7.3.1/docs/index.html)
 
 Welcome to WordSD!
 
-WordSD is a 2D game engine based entirely on PixiJS.
+WordSD is a 2D game engine based entirely on [PixiJS](https://pixijs.com/).
 
 It provides the necessary features needed to develop text adventure games.
 
-WordSeed is currently in its infancy, and anyone interested in developing a game engine is welcome to join!
+WordSD is currently in its infancy, and anyone interested in developing a game engine is welcome to join!
+
+## Why develop WordSD?
+
+I am an AVG enthusiast, and for a long time I have been trying to write a JavaScript-like language using the [Kirikiri](https://web.archive.org/web/20171216224325/http://kikyou.info/tvp) engine to develop games. 
+
+However, the `TJS2` programming language used by Kirikiri does not support many functions that are convenient for programmers to develop a software like the current `JavaScript` and `TypeScript`.
+
+In addition, the update progress of Kirikiri-related open source projects has been slow in recent years, and the atmosphere of the domestic Kirikiri game development community has become rigid, so I've given up on using the Kirikiri engine.
+
+Nevertheless, after using the `HTML5` engine `PixiJS` for a period of time, I found that its functions are very complete, its update speed is very fast, and its related game development components are also very comprehensive.
+
+It is very suitable for developing AVG, so I came up with the idea of using it to develop a AVG and a game engine similar to Kirikiri but with personal characteristics, so I started developing WordSD.
 
 ## Current features
 
@@ -42,12 +54,22 @@ WordSeed is currently in its infancy, and anyone interested in developing a game
 
   ```ts
   import { sound } from '@pixi/sound';
+  import { image } from '../core/image';
+  import { Assets } from 'pixi.js';
   
   /** Initialise and start loading of all assets */
   export async function initAssets() {
       // Load sound assets
       sound.add('sightless-storm-ii', 'app://assets/audio/sightless-storm-ii.mp3');
       sound.add('sfx_print', 'app://assets/audio/sfx_print.mp3');
+
+      // Load image assets
+      await image.add('player', 'app://assets/images/player.png');
+      await image.add('play-btn-up', 'app://assets/images/play-btn-up.png');
+
+      // Load font assets
+      await Assets.load('app://assets/fonts/Ma_Shan_Zheng/Ma_Shan_Zheng.ttf');
+      await Assets.load('app://assets/fonts/ZCOOL_XiaoWei/ZCOOL_XiaoWei.ttf');
   }
   ```
 
@@ -71,6 +93,33 @@ WordSeed is currently in its infancy, and anyone interested in developing a game
 
   You can refer to the official game code to use audio in this project.
 
+- Image
+
+  ```ts
+  import { image } from '../../core/image';
+  const player = new Sprite(image.find('player'));
+  ```
+  The method of importing and using image is similar to sound. You need to use the `image.add` function to import the texture in 
+
+  advance, and then use the `image.find` function to obtain it. Note that the `image.add` function is an `async` function.
+
+- Font
+
+  ```ts
+  const title = new Text('WordSD');
+  title.style.fontFamily = 'Ma Shan Zheng';
+  ```
+
+  Font materials are imported through [Assets](https://pixijs.com/guides/components/assets).
+
+  It should be noted that when using imported fonts, the corresponding key may be different from the file name. 
+  
+  For example, the key of `Ma_Shan_Zheng.ttf` will be set to `Ma Shan Zheng` and the key of `ZCOOL_XiaoWei.ttf` will be set to `Zcool Xiaowei`. 
+  
+  The rule is that `-` and `_` will be replaced with `space`, and then spaces are used to divide strings. Only the first letter of each string will be capitalized.
+  
+  In addition, there are other rules, please see the [relevant source code](https://github.com/pixijs/pixijs/blob/dev/packages/assets/src/loader/parsers/loadWebFont.ts) for details.
+
 ## How to start
 
 - Node JS
@@ -85,5 +134,5 @@ yarn
 Then, to start the engine, run:
 
 ```sh
-yarn run start
+yarn start
 ```
