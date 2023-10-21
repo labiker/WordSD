@@ -29,7 +29,7 @@
 import './index.css';
 import { app, resize } from './utils/app';
 import { initAssets } from './utils/assets';
-import { Scene } from './scene/Scene';
+import { Title } from './scene/Title/Title';
 
 /** Setup app and initialise assets */
 async function init() {
@@ -48,9 +48,10 @@ async function init() {
     // Setup assets bundles (see assets.ts) and start up loading everything in background
     await initAssets();
 
-    // Load the game
-    const scene = new Scene();
-    scene.process();
+    // Add the title scene to the stage
+    const title = new Title();
+    app.stage.addChild(title);
+    title.resize(app.view.width, app.view.height);
 }
 
 // Init everything
