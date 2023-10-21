@@ -1,13 +1,16 @@
-import * as PIXI from 'pixi.js';
-import { Text } from 'pixi.js';
-import { app } from './app';
+import { Container } from 'pixi.js';
+import { Background } from './Background';
+import { Message } from './Message';
 
 /**
  * 全屏对话框
  *
  * @since 1.0.0
  */
-class FullScreenDialog {
+export class FullScreenDialog {
+    /** The container instance that is the root of all visuals in this class */
+    public view = new Container();
+
     /**
      * 自动启动 `ctrl` 键检测。按下时为快进模式，松开时为普通模式。
      * @note 快进模式下，文本显示速度更快，且不会等待点击。
@@ -19,7 +22,7 @@ class FullScreenDialog {
         this.textSpeed = this.normalModeTextSpeed;
         this.skipMode = false;
         this.skipModeTextSpeed = 0.3;
-        this.background = new Background(app.view.width, app.view.height);
+        this.background = new Background();
         this.showObject(this.background);
         this.enableKeyDetection();
     }
@@ -29,7 +32,7 @@ class FullScreenDialog {
      */
     public clearDialog() {
         this.messages.forEach((message) => {
-            app.stage.removeChild(message);
+            this.view.removeChild(message.view);
         });
         this.messages = [];
     }
@@ -45,33 +48,33 @@ class FullScreenDialog {
      * @param type 文本类型。
      */
     public printText(text: string, type?: 'warning' | 'hint'): void {
-        const message = new Message(text, app.view.width);
+        const message = new Message(text, this.width);
 
         if (this.messages.length !== 0) {
-            const lastTextChild = this.messages[this.messages.length - 1];
-            if (lastTextChild.eventMode !== 'static') {
-                lastTextChild.alpha = 0.5;
+            const lastMessage = this.messages[this.messages.length - 1];
+            if (lastMessage.text.eventMode !== 'static') {
+                lastMessage.text.alpha = 0.5;
             }
             if (
-                lastTextChild.y + lastTextChild.height + this.lineSpacing + this.marginBottom >
-                app.view.height
+                lastMessage.text.y + lastMessage.text.height + this.lineSpacing + this.marginBottom >
+                this.height
             ) {
                 this.clearDialog();
             } else {
-                message.y = lastTextChild.y + lastTextChild.height + this.lineSpacing;
+                message.text.y = lastMessage.text.y + lastMessage.text.height + this.lineSpacing;
             }
         }
 
         switch (type) {
-            case 'warning':
-                message.style = message.warningTextStyle;
-                break;
-            case 'hint':
-                message.style = message.hintTextStyle;
-                break;
-            default:
-                message.style = message.normalTextStyle;
-                break;
+        case 'warning':
+            message.text.style = message.warningTextStyle;
+            break;
+        case 'hint':
+            message.text.style = message.hintTextStyle;
+            break;
+        default:
+            message.text.style = message.normalTextStyle;
+            break;
         }
 
         this.showObject(message);
@@ -87,23 +90,23 @@ class FullScreenDialog {
      */
     async printTextAsync(text: string, type?: 'warning' | 'hint'): Promise<void> {
         this.printText('_', type);
-        const lastTextChild = this.messages[this.messages.length - 1];
+        const lastMessage = this.messages[this.messages.length - 1];
         const charArray = text.split('');
         const endChar = this.skipMode ? ' ' : '_';
 
         let isClicked = false;
         const clickHandler = () => {
             isClicked = true;
-            this.background.removeEventListener('click', clickHandler, false);
+            this.background.hitArea.removeEventListener('click', clickHandler, false);
         };
-        this.background.addEventListener('click', clickHandler, false);
+        this.background.hitArea.addEventListener('click', clickHandler, false);
 
         for (const char of charArray) {
             if (isClicked) {
-                lastTextChild.text = text + endChar;
+                lastMessage.text.text = text + endChar;
                 break;
             } else {
-                lastTextChild.text = lastTextChild.text.slice(0, -1) + char + endChar;
+                lastMessage.text.text = lastMessage.text.text.slice(0, -1) + char + endChar;
                 await new Promise((resolve) => {
                     setTimeout(() => {
                         resolve(true);
@@ -112,7 +115,7 @@ class FullScreenDialog {
             }
         }
 
-        lastTextChild.text = lastTextChild.text.slice(0, -1) + ' ';
+        lastMessage.text.text = lastMessage.text.text.slice(0, -1) + ' ';
     }
 
     /**
@@ -125,11 +128,17 @@ class FullScreenDialog {
      */
     public printClickableText(text: string, func: () => void): void {
         this.printText(text);
-        const lastTextChild = this.messages[this.messages.length - 1];
-        lastTextChild.style = lastTextChild.clickableTextStyle;
-        lastTextChild.eventMode = 'static';
-        lastTextChild.cursor = 'pointer';
-        lastTextChild.on('pointerdown', func);
+        const lastMessage = this.messages[this.messages.length - 1];
+        lastMessage.text.style = lastMessage.clickableTextStyle;
+        lastMessage.text.eventMode = 'static';
+        lastMessage.text.cursor = 'pointer';
+        lastMessage.text.on('pointerdown', func);
+    }
+
+    public resize(w: number, h: number) {
+        this.width = w;
+        this.height = h;
+        this.background.draw(w, h);
     }
 
     /**
@@ -160,57 +169,60 @@ class FullScreenDialog {
      */
     public waitForClick() {
         if (this.skipMode) {
-            return;
+            return new Promise<void>((resolve) => {
+                resolve();
+            });
         }
 
-        const lastTextChild = this.messages[this.messages.length - 1];
-        if (lastTextChild === undefined) {
+        const lastMessage = this.messages[this.messages.length - 1];
+
+        if (lastMessage === undefined) {
             return new Promise<void>((resolve) => {
-                this.background.addEventListener('click', () => {
+                this.background.hitArea.addEventListener('click', () => {
                     resolve();
                 });
             });
-        } else {
-            const timer = setInterval(() => {
-                if (lastTextChild.text.endsWith('_')) {
-                    lastTextChild.text = lastTextChild.text.slice(0, -1) + ' ';
-                } else if (lastTextChild.text.endsWith(' ')) {
-                    lastTextChild.text = lastTextChild.text.slice(0, -1) + '_';
-                }
-            }, 500);
+        }
 
-            const clearTimer = () => {
-                clearInterval(timer);
-                lastTextChild.text = lastTextChild.text.slice(0, -1);
-            };
+        const timer = setInterval(() => {
+            if (lastMessage.text.text.endsWith('_')) {
+                lastMessage.text.text = lastMessage.text.text.slice(0, -1) + ' ';
+            } else if (lastMessage.text.text.endsWith(' ')) {
+                lastMessage.text.text = lastMessage.text.text.slice(0, -1) + '_';
+            }
+        }, 500);
 
-            const clickHandler = () => {
+        const clearTimer = () => {
+            clearInterval(timer);
+            lastMessage.text.text = lastMessage.text.text.slice(0, -1);
+        };
+
+        const clickHandler = () => {
+            clearTimer();
+            this.background.hitArea.removeEventListener('click', clickHandler, false);
+        };
+
+        const keyHandler = (event: KeyboardEvent) => {
+            if (!this.enableGlobalKeyDetection) return;
+            if (event.ctrlKey) {
                 clearTimer();
-                this.background.removeEventListener('click', clickHandler, false);
-            };
+                window.removeEventListener('keydown', keyHandler, false);
+            }
+        };
 
-            const keyHandler = (event: KeyboardEvent) => {
+        return new Promise<void>((resolve) => {
+            this.background.hitArea.addEventListener('click', clickHandler, false);
+            window.addEventListener('keydown', keyHandler, false);
+            this.background.hitArea.addEventListener('click', () => {
+                resolve();
+            });
+            window.addEventListener('keydown', (event: KeyboardEvent) => {
                 if (!this.enableGlobalKeyDetection) return;
                 if (event.ctrlKey) {
-                    clearTimer();
-                    window.removeEventListener('keydown', keyHandler, false);
-                }
-            };
-
-            return new Promise<void>((resolve) => {
-                this.background.addEventListener('click', clickHandler, false);
-                window.addEventListener('keydown', keyHandler, false);
-                this.background.addEventListener('click', () => {
                     resolve();
-                });
-                window.addEventListener('keydown', (event: KeyboardEvent) => {
-                    if (!this.enableGlobalKeyDetection) return;
-                    if (event.ctrlKey) {
-                        resolve();
-                    }
-                });
+                }
             });
-        }
+        });
     }
 
     /**
@@ -244,15 +256,15 @@ class FullScreenDialog {
     /**
      * 显示对象到舞台。
      *
-     * 调用 `app.stage.addChildAt()` ，将对象显示到舞台中。
+     * 调用 `this.view.addChildAt()` ，将对象显示到舞台中。
      * 同时，将对象添加到 `this.showingObjects` 中。
      * 如果该对象是 `Message` 类型，并且 `isRecorded` 为 `true`，则将对象添加到 `this.messages` 中。
      * @param object 要显示的对象。
      * @param isRecorded 是否记录到 `this.messages` 中。
      */
-    private showObject(object: PIXI.DisplayObject, isRecorded?: boolean) {
-        app.stage.addChildAt(object, app.stage.children.length);
-        this.showingObjects.push(object);
+    private showObject(object: Message | Background, isRecorded?: boolean) {
+        this.view.addChildAt(object.view, this.view.children.length);
+        this.showingObjects.push(object.view);
         if (object instanceof Message && isRecorded !== false) {
             this.messages.push(object);
         }
@@ -267,7 +279,7 @@ class FullScreenDialog {
     /**
      * 全屏对话框中正在显示的 Pixi 对象。
      */
-    private showingObjects: PIXI.DisplayObject[] = [];
+    private showingObjects: Container[] = [];
 
     /**
      * 快进模式。
@@ -285,7 +297,7 @@ class FullScreenDialog {
 
     /**
      * 是否启用全局按键检测。
-     * @note 出于开发缺陷，键盘事件是直接绑定到 `window` 上的，因此无法通过 `app.stage` 来阻止事件传递。
+     * @note 出于开发缺陷，键盘事件是直接绑定到 `window` 上的，因此无法通过 `this.view.stage` 来阻止事件传递。
      * 单独使用 `FullScreenDialog` 时，并不会有什么问题，但是如果要与其它模块（比如 `BackLog`）一同使用时，就会出现问题。
      * 请根据程序需求，在必要的地方自定义需要禁用全局按键检测的逻辑。
      */
@@ -334,95 +346,3 @@ class FullScreenDialog {
      */
     private width: number;
 }
-
-/**
- * 背景。
- * @note 用于绑定点击事件。最先加入舞台，位于最底层。
- * @since 1.0.0
- */
-class Background extends PIXI.Graphics {
-    constructor(width?: number, height?: number) {
-        super();
-        this.beginFill(0x000000, 0.5);
-        this.drawRect(0, 0, width, height);
-        this.endFill();
-        this.eventMode = 'static';
-        this.on('click', (event) => {
-            event.stopPropagation();
-        });
-    }
-}
-
-/**
- * 对话框中的文本。
- * @since 1.0.0
- */
-class Message extends Text {
-    /**
-     * @param text 要显示的文本
-     * @param backLogWidth 日志宽度
-     */
-    constructor(text: string, backLogWidth: number) {
-        super(text);
-        this.x = 320;
-        this.y = 150;
-        this.normalTextStyle = new PIXI.TextStyle({
-            fill: '#ffffff',
-            fontFamily: '"Comic Sans MS", cursive, sans-serif',
-            fontSize: 49,
-            wordWrap: true,
-            breakWords: true,
-            wordWrapWidth: backLogWidth - this.x - this.x,
-        });
-        this.clickableTextStyle = new PIXI.TextStyle({
-            fill: ['#a0a0ff', '#ffffff'],
-            fontFamily: '"Comic Sans MS", cursive, sans-serif',
-            fontSize: 49,
-            fontWeight: 'bold',
-            wordWrap: true,
-            breakWords: true,
-            wordWrapWidth: backLogWidth - this.x - this.x,
-        });
-        this.warningTextStyle = new PIXI.TextStyle({
-            fill: ['#ff9e9e', '#ffffff'],
-            fontFamily: '"Comic Sans MS", cursive, sans-serif',
-            fontSize: 49,
-            fontWeight: 'bold',
-            wordWrap: true,
-            breakWords: true,
-            wordWrapWidth: backLogWidth - this.x - this.x,
-        });
-        this.hintTextStyle = new PIXI.TextStyle({
-            fill: ['#9effa0', '#ffffff'],
-            fontFamily: '"Comic Sans MS", cursive, sans-serif',
-            fontSize: 49,
-            fontWeight: 'bold',
-            wordWrap: true,
-            breakWords: true,
-            wordWrapWidth: backLogWidth - this.x - this.x,
-        });
-        this.style = this.normalTextStyle;
-    }
-
-    /**
-     * 普通文本的样式。
-     */
-    public normalTextStyle: PIXI.TextStyle;
-
-    /**
-     * 可响应点击事件的文本的样式。
-     */
-    public clickableTextStyle: PIXI.TextStyle;
-
-    /**
-     * 警告文本的样式。
-     */
-    public warningTextStyle: PIXI.TextStyle;
-
-    /**
-     * 提示文本的样式。
-     */
-    public hintTextStyle: PIXI.TextStyle;
-}
-
-export const fullScreenDialog = new FullScreenDialog();
