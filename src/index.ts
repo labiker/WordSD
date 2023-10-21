@@ -79,8 +79,8 @@ app.on('activate', () => {
 app.whenReady().then(() => {
     protocol.handle('app', (req) => {
         const { host, pathname } = new URL(req.url);
-        const soundPath = path.join(__dirname, host, pathname);
-        const audioData = fs.readFileSync(soundPath);
-        return new Response(audioData);
+        const filePath = path.join(__dirname, host, pathname);
+        const fileData = fs.readFileSync(filePath);
+        return new Response(fileData);
     });
 });

@@ -10,7 +10,7 @@ export function resize(container: HTMLElement) {
     const appScale = innerHeight / appHeight;
     const marginLeft = (innerWidth - appWidth * appScale) / 2;
 
-    container.style.transformOrigin = `0 0`;
+    container.style.transformOrigin = '0 0';
     container.style.transform = `scale(${appScale})`;
 
     // Horizontal centering

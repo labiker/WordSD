@@ -14,9 +14,9 @@ class ImageLibrary {
     }
 
     /**
-     * Find a sound by alias.
-     * @param alias - The sound alias reference.
-     * @return Sound object.
+     * Find a image by alias.
+     * @param alias - The image alias reference.
+     * @return image object.
      */
     public find(alias: string) {
         return this.imageLibrary[alias];
