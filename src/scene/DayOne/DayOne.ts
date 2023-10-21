@@ -344,7 +344,7 @@ export class DayOne extends Container implements AppScene {
                 '客厅的桌角, 摆放着一捧毫无生气的花。',
             );
             await this._printTextAndWC(
-                'I don\'t know how long it has been left on, there is neither rancid nor aromatic.',
+                'You don\'t know how long it has been left on, there is neither rancid nor aromatic.',
                 '不知道放了多久, 既无腐臭, 也无芳香。',
             );
             await this._printTextAndWC(
@@ -545,58 +545,60 @@ export class DayOne extends Container implements AppScene {
      * 入住日结算环节
      */
     private _dayEndPhase = async () => {
-        await this._printTextAndWC('', `入住后的第 ${gameData.system.currentDay} 天, 就要结束了。`);
-        await this._printTextAndWC('', '躺在床上, 思考着至今为止发生过的事情。');
+        await this._printTextAndWC(`The ${gameData.system.currentDay} day after check-in is about to end.`, `入住后的第 ${gameData.system.currentDay} 天, 就要结束了。`);
+        await this._printTextAndWC('Lying in bed, thinking about what happened so far.', '躺在床上, 思考着至今为止发生过的事情。');
         this._fsDialog.clearDialog();
         // 因 理智 < 50 ，住户违约搬出，触发尾随事件，死亡
         if (gameData.player.sanity < 50) {
             await this._printTextAndWC(
-                '',
+                `【 Sanity: ${
+                    gameData.player.sanity
+                } < ${50} 】\nThe events encountered were too bizarre, and coupled with the lack of adequate rest, \nthe more you thought about it, the more confused you became.`,
                 `【 理智： ${
                     gameData.player.sanity
                 } < ${50} 】\n遭遇的事件过于离奇, 加上没有得到充分的休息, \n越是思考越是觉得混乱。`,
                 'warning',
             );
             await this._printTextAndWC(
-                '',
+                'Glancing towards the bed and looking at the unpacked suitcase, a dangerous thought forms in your mind.',
                 '瞟向床边, 看着尚未收纳的行李箱, \n一种危险的想法在你的脑海中形成。',
             );
-            await this._printTextAndWC('', '你不由自主地站起身, 开始收拾起东西......');
+            await this._printTextAndWC('You stood up involuntarily and started to pack your things...', '你不由自主地站起身, 开始收拾起东西......');
             this._fsDialog.clearDialog();
-            await this._printTextAndWC('', '..');
-            await this._printTextAndWC('', '....');
-            await this._printTextAndWC('', '......');
+            await this._printTextAndWC('..', '..');
+            await this._printTextAndWC('....', '....');
+            await this._printTextAndWC('......', '......');
             this._fsDialog.clearDialog();
-            await this._printTextAndWC('', '深夜的楼道静得有些诡异。');
+            await this._printTextAndWC('The corridor was eerily quiet late at night.', '深夜的楼道静得有些诡异。');
             await this._printTextAndWC(
-                '',
+                'You kept your footsteps as low as possible and \nwalked through the corridors carrying your \nslightly heavy suitcase.',
                 '尽可能地压低脚步声, \n提着稍显沉重的行李箱穿行在走廊间。',
             );
             await this._printTextAndWC(
-                '',
+                'Even so, \nyou feel someone\'s presence in a dark corner behind you.',
                 '即便如此, \n总感觉在身后某处黑暗的角落里，有人的气息。',
             );
             this._fsDialog.clearDialog();
-            await this._printTextAndWC('', '也许是错觉吧。');
-            await this._printTextAndWC('', '近来发生了太多事，压力太大了。');
+            await this._printTextAndWC('Maybe it\'s an illusion.', '也许是错觉吧。');
+            await this._printTextAndWC('Too much has happened recently and you are under too much pressure.', '近来发生了太多事，压力太大了。');
             await this._printTextAndWC(
-                '',
+                'You just secretly carried a suitcase out and \nused a false identity when checking in, \nso there would be no problem.',
                 '只是偷偷提个行李箱出去，入住时用的也是假身份，不会有问题的。',
             );
             this._fsDialog.clearDialog();
-            await this._printTextAndWC('', '不会有问题的。');
-            await this._printTextAndWC('', '逃走就好了。');
-            await this._printTextAndWC('', '什么都没发生过。');
+            await this._printTextAndWC('There will be no problem. ', '不会有问题的。');
+            await this._printTextAndWC('Just run away.', '逃走就好了。');
+            await this._printTextAndWC('Nothing happened.', '什么都没发生过。');
             this._fsDialog.clearDialog();
             await this._printTextAndWC(
-                '',
+                'As you walk, you start to plan your future \narrangements. Where should you rent an apartment? \nShould you leave the city?',
                 '逐渐地，你开始计划起今后的安排。该去哪儿租房，是不是该离开这座城市？',
             );
-            await this._printTextAndWC('', '“砰！”');
+            await this._printTextAndWC('boom!', '“砰！”');
             this._fsDialog.clearDialog();
             gameData.player.health = 0;
             await this._printTextAndWC(
-                '',
+                `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nThat was the last sound you heard in this world.`,
                 `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n那是你在这个世界上意识到的最后一声。`,
                 'warning',
             );

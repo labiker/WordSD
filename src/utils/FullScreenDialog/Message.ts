@@ -23,6 +23,10 @@ export class Message {
      * @param screenWidth 日志宽度
      */
     constructor(text: string, screenWidth: number) {
+        this.text.text = text;
+        this.text.x = 320;
+        this.text.y = 150;
+
         this.normalTextStyle = new TextStyle({
             fill: '#ffffff',
             fontFamily: '"Comic Sans MS", cursive, sans-serif',
@@ -62,9 +66,6 @@ export class Message {
             wordWrapWidth: screenWidth - this.text.x - this.text.x,
         });
 
-        this.text.text = text;
-        this.text.x = 320;
-        this.text.y = 150;
         this.text.style = this.normalTextStyle;
 
         this.view.addChild(this.text);

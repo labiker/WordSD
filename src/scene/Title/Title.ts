@@ -42,6 +42,8 @@ export class Title extends Container implements AppScene {
 
         // Add all parent containers to screen
         this.addChild(this._topAnimContainer, this._midAnimContainer, this._bottomAnimContainer);
+
+        this.show();
     }
 
     /** Called before `show` function, can receive `data` */
@@ -72,6 +74,54 @@ export class Title extends Container implements AppScene {
             duration: 0.75,
             ease: 'elastic.out(1, 0.5)',
         };
+
+        // 创建蹦跳动画
+        gsap.from(this._player.view, {
+            y: 800, // 垂直方向上的位移
+            height: 150, // 高度缩放
+        });
+        gsap.to(this._player.view, {
+            duration: 0.45, // 动画持续时间（秒）
+            y: 720, // 垂直方向上的位移
+            height: 200, // 高度缩放
+            ease: 'power1.out', // 缓动函数
+            repeat: -1, // 无限重复
+            yoyo: true, // 往返动画
+        });
+
+        // 创建闹鬼灯效果
+        gsap.to(this._titleText.view, {
+            duration: 0.1,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power1.inOut',
+            onStart: () => {
+                this._titleText.view.alpha = 0.8;
+            },
+            onRepeat: () => {
+                const randomDelay = Number(Math.random());
+                const randomBrightness = 0.5 + Math.random() * 0.5;
+                gsap.to(this._titleText.view, {
+                    duration: randomDelay * 2,
+                    delay: 0.1,
+                    onComplete: () => {
+                        this._titleText.view.alpha = randomBrightness;
+                    },
+                });
+            },
+        });
+
+        // 创建标题文字晃动效果
+        gsap.from(this._titleText.view, {
+            rotation: -0.05,
+        });
+        gsap.to(this._titleText.view, {
+            duration: 5, // 动画持续时间（秒）
+            ease: 'slow(0.7,0.7,false)',
+            repeat: -1, // 无限重复
+            yoyo: true, // 往返动画
+            rotation: 0.05,
+        });
 
         // Tween the containers back to their original position
         gsap.to(this._topAnimContainer, endData);
