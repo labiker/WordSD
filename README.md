@@ -3,8 +3,8 @@
 ![wordsd_github_logo](https://github.com/labiker/WordSD/assets/49630998/12ad2a25-e914-4c31-9dfe-91ad8c2d5b1f)
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/xVVk5hdkXK)
-[![Electron Forge](https://badgen.net/badge/Electron%20Forge/6.3.0/green?icon=https://www.electronjs.org/assets/img/logo.svg)](https://www.electronforge.io/config/configuration)
-[![PixiJS](https://badgen.net/badge/PixiJS/7.3.1/green)](https://pixijs.download/v7.3.1/docs/index.html)
+[![Electron Forge](https://badgen.net/badge/Electron%20Forge/6.4.2/green?icon=https://www.electronjs.org/assets/img/logo.svg)](https://www.electronforge.io/config/configuration)
+[![PixiJS](https://badgen.net/badge/PixiJS/7.3.2/green)](https://pixijs.download/v7.3.2/docs/index.html)
 
 Welcome to WordSD!
 
@@ -97,6 +97,7 @@ It is very suitable for developing AVG, so I came up with the idea of using it t
 
   ```ts
   import { image } from '../../core/image';
+
   const player = new Sprite(image.find('player'));
   ```
   The method of importing and using image is similar to sound. You need to use the `image.add` function to import the texture in 
