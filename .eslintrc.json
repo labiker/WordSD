@@ -19,8 +19,10 @@
     "no-unused-vars": "error",                                 // 禁止未使用的变量。
     "no-undef": "error",                                       // 禁止使用未声明的变量。
     "no-console": ["error", { "allow": ["warn", "error"] }],   // 禁止使用`console`对象的方法，但允许使用`console.warn`和`console.error`方法。
-    "indent": ["error", 4],                                    // 强制一致的缩进。
-    "quotes": ["error", "single"],                             // 强制使用一致的单引号。
+    "indent": ["error", 4, {                                   // 强制一致的缩进。
+      "SwitchCase": 1                                          // 强制`switch`语句中的`case`子句的缩进级别。
+    }],
+    "quotes": ["error", "single", { "avoidEscape": true }],    // 强制使用一致的单引号。
     "no-trailing-spaces": "error",                             // 禁用行尾空格。
     "comma-dangle": ["error", "always-multiline"],             // 要求在对象和数组字面量中，多行元素的末尾必须加上逗号。
     "no-cond-assign": ["error", "except-parens"],              // 禁止在条件语句中出现赋值操作符（例如 =），除非用括号明确指定。

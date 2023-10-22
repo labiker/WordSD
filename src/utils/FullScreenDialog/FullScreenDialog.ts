@@ -56,7 +56,10 @@ export class FullScreenDialog {
                 lastMessage.text.alpha = 0.5;
             }
             if (
-                lastMessage.text.y + lastMessage.text.height + this.lineSpacing + this.marginBottom >
+                lastMessage.text.y +
+                    lastMessage.text.height +
+                    this.lineSpacing +
+                    this.marginBottom >
                 this.height
             ) {
                 this.clearDialog();
@@ -65,17 +68,7 @@ export class FullScreenDialog {
             }
         }
 
-        switch (type) {
-        case 'warning':
-            message.text.style = message.warningTextStyle;
-            break;
-        case 'hint':
-            message.text.style = message.hintTextStyle;
-            break;
-        default:
-            message.text.style = message.normalTextStyle;
-            break;
-        }
+        message.setTextStyle(type);
 
         this.showObject(message);
     }
@@ -129,7 +122,7 @@ export class FullScreenDialog {
     public printClickableText(text: string, func: () => void): void {
         this.printText(text);
         const lastMessage = this.messages[this.messages.length - 1];
-        lastMessage.text.style = lastMessage.clickableTextStyle;
+        lastMessage.setTextStyle('clickable');
         lastMessage.text.eventMode = 'static';
         lastMessage.text.cursor = 'pointer';
         lastMessage.text.on('pointerdown', func);

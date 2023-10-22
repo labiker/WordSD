@@ -76,18 +76,21 @@ export class BackLog {
             } else if (
                 event.deltaY > 0 &&
                 this.isShowing &&
-                this.getLastPixiText().y + this.getLastPixiText().height > this.height - this.marginBottom
+                this.getLastPixiText().y + this.getLastPixiText().height >
+                    this.height - this.marginBottom
             ) {
                 const step = Math.min(
                     30,
-                    this.getLastPixiText().y + this.getLastPixiText().height - (this.height - this.marginBottom),
+                    this.getLastPixiText().y +
+                        this.getLastPixiText().height -
+                        (this.height - this.marginBottom),
                 );
                 this.pixiTexts.forEach((pixiText) => {
                     pixiText.y -= step;
                 });
             }
 
-            if(this.isShowing) {
+            if (this.isShowing) {
                 this.scroll.drawScroll({
                     y:
                         150 +
@@ -99,7 +102,9 @@ export class BackLog {
                             (this.scroll.background.height - this.scroll.scroll.height),
                     height:
                         ((this.height - this.marginTop) /
-                            (this.getLastPixiText().y + this.getLastPixiText().height - this.getFirstPixiText().y)) *
+                            (this.getLastPixiText().y +
+                                this.getLastPixiText().height -
+                                this.getFirstPixiText().y)) *
                         this.scroll.background.height,
                 });
             }
@@ -146,7 +151,8 @@ export class BackLog {
                     });
                 } else if (
                     stepY > 0 &&
-                    this.getLastPixiText().y + this.getLastPixiText().height > this.height - this.marginBottom
+                    this.getLastPixiText().y + this.getLastPixiText().height >
+                        this.height - this.marginBottom
                 ) {
                     const step = Math.min(
                         (stepY / this.scroll.background.height) *
@@ -156,7 +162,7 @@ export class BackLog {
                                 this.marginBottom +
                                 this.marginTop),
                         this.getLastPixiText().y +
-                                this.getLastPixiText().height -
+                            this.getLastPixiText().height -
                             (this.height - this.marginBottom),
                     );
                     this.pixiTexts.forEach((pixiText) => {
@@ -261,8 +267,7 @@ export class BackLog {
         if (this.pixiTexts.length > 0) {
             const lastTextChild = this.pixiTexts[this.pixiTexts.length - 1];
             const lastTextChildBottom = lastTextChild.y + lastTextChild.height;
-            const lastTextChildBottomMargin =
-                this.height - this.marginBottom - lastTextChildBottom;
+            const lastTextChildBottomMargin = this.height - this.marginBottom - lastTextChildBottom;
             if (lastTextChildBottomMargin < 0) {
                 this.pixiTexts.forEach((pixiText) => {
                     pixiText.y += lastTextChildBottomMargin;
@@ -333,7 +338,10 @@ export class BackLog {
      * @param object 要显示的对象。
      * @param isRecorded 是否记录到 `BackLog.pixiTexts` 中。
      */
-    private showObject(object: Background | Message | Scroll | BottomMask | TopMask | Title | CloseButton, isRecorded?: boolean) {
+    private showObject(
+        object: Background | Message | Scroll | BottomMask | TopMask | Title | CloseButton,
+        isRecorded?: boolean,
+    ) {
         this.view.addChildAt(object.view, this.view.children.length);
         this.showingObjects.push(object.view);
         if (object instanceof Message && isRecorded !== false) {

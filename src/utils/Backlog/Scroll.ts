@@ -74,13 +74,13 @@ export class Scroll {
         const topLimit = 150;
         const bottomLimit = 150 + this.background.height - this.scroll.height;
 
-        if(nextY < topLimit) {
+        if (nextY < topLimit) {
             nextY = topLimit;
-        } else if(nextY > bottomLimit) {
+        } else if (nextY > bottomLimit) {
             nextY = bottomLimit;
         }
 
-        if(nextY !== this._scrollY) {
+        if (nextY !== this._scrollY) {
             this._scrollY = nextY;
             this.drawScroll();
             return true;
@@ -102,7 +102,13 @@ export class Scroll {
         const border = options?.border ?? 4;
         this.scroll.clear();
         this.scroll.beginFill(options?.color ?? 0xe5e5e5);
-        this.scroll.drawRoundedRect(x, this._scrollY, width - border * 2, this._scrollHeight, radius);
+        this.scroll.drawRoundedRect(
+            x,
+            this._scrollY,
+            width - border * 2,
+            this._scrollHeight,
+            radius,
+        );
         this.scroll.endFill();
     };
 
@@ -121,7 +127,13 @@ export class Scroll {
         console.log('height', height); */
         this.background.clear();
         this.background.beginFill(options?.color ?? 0x727272);
-        this.background.drawRoundedRect(x, this.absoluteBackgroundY, width - border * 2, height - border * 2, radius);
+        this.background.drawRoundedRect(
+            x,
+            this.absoluteBackgroundY,
+            width - border * 2,
+            height - border * 2,
+            radius,
+        );
         this.background.endFill();
     };
 }

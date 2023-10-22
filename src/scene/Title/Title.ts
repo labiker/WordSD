@@ -47,17 +47,15 @@ export class Title extends Container implements AppScene {
     }
 
     /** Called before `show` function, can receive `data` */
-    public prepare()
-    {
+    public prepare() {
         // Reset the positions of the group containers
         gsap.set(this._topAnimContainer, { y: -350 });
-        gsap.set(this._midAnimContainer, {x: 200 });
-        gsap.set(this._bottomAnimContainer, {y: 350 });
+        gsap.set(this._midAnimContainer, { x: 200 });
+        gsap.set(this._bottomAnimContainer, { y: 350 });
     }
 
     /** Called when the screen is being shown. */
-    public async show()
-    {
+    public async show() {
         // Kill tweens of the screen container
         gsap.killTweensOf(this);
 
@@ -130,8 +128,7 @@ export class Title extends Container implements AppScene {
     }
 
     /** Called when the screen is being hidden. */
-    public async hide()
-    {
+    public async hide() {
         // Kill tweens of the screen container
         gsap.killTweensOf(this);
 
@@ -164,24 +161,20 @@ export class Title extends Container implements AppScene {
     /**
      * Remove screen from the stage.
      */
-    public async remove()
-    {
+    public async remove() {
         // Hide screen if method is available
-        if (this.hide)
-        {
+        if (this.hide) {
             await this.hide();
         }
 
         // Remove screen from its parent (usually app.stage, if not changed)
-        if (this.parent)
-        {
+        if (this.parent) {
             this.parent.removeChild(this);
         }
     }
 
     /** Add buttons to screen. */
-    private _buildButtons()
-    {
+    private _buildButtons() {
         // Add the forkGithub button
         const defaultViewContainer = new Container();
         defaultViewContainer.addChild(new Sprite(image.find('wordsd-btn-up')));
@@ -220,11 +213,22 @@ export class Title extends Container implements AppScene {
         });
 
         this._playBtn.onPress.connect(async () => {
+            // Play audio
+            this._playBtn.playSfx('primary-button-press');
+
             // Go to game screen when user presses play button
             await this.remove();
             const sceneDayOne = new DayOne();
             app.stage.addChild(sceneDayOne);
             sceneDayOne.resize(app.view.width, app.view.height);
+        });
+
+        this._playBtn.onHover.connect(() => {
+            this._playBtn.setTextStyleStroke(0xbdb76b);
+        });
+
+        this._playBtn.onOut.connect(() => {
+            this._playBtn.setTextStyleStroke(0x4682b4);
         });
 
         this._bottomAnimContainer.addChild(this._playBtn);

@@ -73,25 +73,21 @@ export class PrimaryButton extends FancyButton {
         });
     }
 
-    public override hover() {
+    /**
+     * Set the stroke color of the text.
+     * @param fill - The color of the stroke.
+     */
+    public setTextStyleStroke(fill: number) {
         const text = this.textView as Text;
-        text.style.stroke = 0xBDB76B;
-        this.textView = text;
-    }
-
-    public override out() {
-        const text = this.textView as Text;
-        text.style.stroke = 0x4682B4;
+        text.style.stroke = fill;
         this.textView = text;
     }
 
     /**
-     * Override function for the FancyButton, called when button is pressed
+     * Play the button's sound effect.
+     * @param alias - The alias of the sound effect to play.
      */
-    public override press() {
-        // Since this is a common button, all button responses are done outside of this class
-
-        // Play audio
-        sfx.play('primary-button-press');
+    public playSfx(alias: string) {
+        sfx.play(alias);
     }
 }

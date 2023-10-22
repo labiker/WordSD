@@ -164,8 +164,7 @@ export class DayOne extends Container implements AppScene {
     };
 
     /** Called when the screen is being hidden. */
-    public async hide()
-    {
+    public async hide() {
         // Kill tweens of the screen container
         gsap.killTweensOf(this);
 
@@ -176,17 +175,14 @@ export class DayOne extends Container implements AppScene {
     /**
      * Remove screen from the stage.
      */
-    public async remove()
-    {
+    public async remove() {
         // Hide screen if method is available
-        if (this.hide)
-        {
+        if (this.hide) {
             await this.hide();
         }
 
         // Remove screen from its parent (usually app.stage, if not changed)
-        if (this.parent)
-        {
+        if (this.parent) {
             this.parent.removeChild(this);
         }
     }
@@ -238,7 +234,7 @@ export class DayOne extends Container implements AppScene {
                 'hint',
             );
             await this._printTextAndWC(
-                'Considering that it might come in handy, you put them back where they were, and didn\'t inform the Rentouma Company.',
+                "Considering that it might come in handy, you put them back where they were, and didn't inform the Rentouma Company.",
                 '考虑到也许能派上用处, 你将它们放回了原地, \n并没有通知人头马公司。',
             );
             this._fsDialog.clearDialog();
@@ -344,7 +340,7 @@ export class DayOne extends Container implements AppScene {
                 '客厅的桌角, 摆放着一捧毫无生气的花。',
             );
             await this._printTextAndWC(
-                'You don\'t know how long it has been left on, there is neither rancid nor aromatic.',
+                "You don't know how long it has been left on, there is neither rancid nor aromatic.",
                 '不知道放了多久, 既无腐臭, 也无芳香。',
             );
             await this._printTextAndWC(
@@ -362,7 +358,7 @@ export class DayOne extends Container implements AppScene {
                 }
                 if (gameData.collection.smilingAngel_2) {
                     await this._printTextAndWC(
-                        '【 Collection: Smiling Angel Part 2 】\nIt still can\'t understand why anyone would reject its love. How bitter lovesickness is! It spends its time in loveless satiety, mournfully waiting for the next dawn.',
+                        "【 Collection: Smiling Angel Part 2 】\nIt still can't understand why anyone would reject its love. How bitter lovesickness is! It spends its time in loveless satiety, mournfully waiting for the next dawn.",
                         '【 有害物词条： 微笑天使 part2 】\n它至今无法明白, 为何会有人拒绝了它的爱情。\n相思何其苦涩！\n它在无爱的饱腹中虚度光阴, 哀愁地等待下一个黎明。',
                     );
                 }
@@ -386,7 +382,7 @@ export class DayOne extends Container implements AppScene {
                     '你将笔记丢进了垃圾桶。',
                 );
                 await this._printTextAndWC(
-                    'You don\'t have to know everything.',
+                    "You don't have to know everything.",
                     '并不是什么都要知道。',
                 );
                 await this._printTextAndWC('You think so.', '你这么认为。');
@@ -415,7 +411,7 @@ export class DayOne extends Container implements AppScene {
                 '它将你扑倒在地, 温柔地舔舐你的泪水, 咬烂了你的脸颊。',
             );
             await this._printTextAndWC(
-                'Your teeth collide with its teeth, its saliva burns your tongue, and you can\'t cry out.',
+                "Your teeth collide with its teeth, its saliva burns your tongue, and you can't cry out.",
                 '你的牙齿与它的牙齿相撞, 它的唾液烧烂了你的舌头, 你喊不出声了。',
             );
             this._fsDialog.clearDialog();
@@ -545,8 +541,14 @@ export class DayOne extends Container implements AppScene {
      * 入住日结算环节
      */
     private _dayEndPhase = async () => {
-        await this._printTextAndWC(`The ${gameData.system.currentDay} day after check-in is about to end.`, `入住后的第 ${gameData.system.currentDay} 天, 就要结束了。`);
-        await this._printTextAndWC('Lying in bed, thinking about what happened so far.', '躺在床上, 思考着至今为止发生过的事情。');
+        await this._printTextAndWC(
+            `The ${gameData.system.currentDay} day after check-in is about to end.`,
+            `入住后的第 ${gameData.system.currentDay} 天, 就要结束了。`,
+        );
+        await this._printTextAndWC(
+            'Lying in bed, thinking about what happened so far.',
+            '躺在床上, 思考着至今为止发生过的事情。',
+        );
         this._fsDialog.clearDialog();
         // 因 理智 < 50 ，住户违约搬出，触发尾随事件，死亡
         if (gameData.player.sanity < 50) {
@@ -563,24 +565,33 @@ export class DayOne extends Container implements AppScene {
                 'Glancing towards the bed and looking at the unpacked suitcase, a dangerous thought forms in your mind.',
                 '瞟向床边, 看着尚未收纳的行李箱, \n一种危险的想法在你的脑海中形成。',
             );
-            await this._printTextAndWC('You stood up involuntarily and started to pack your things...', '你不由自主地站起身, 开始收拾起东西......');
+            await this._printTextAndWC(
+                'You stood up involuntarily and started to pack your things...',
+                '你不由自主地站起身, 开始收拾起东西......',
+            );
             this._fsDialog.clearDialog();
             await this._printTextAndWC('..', '..');
             await this._printTextAndWC('....', '....');
             await this._printTextAndWC('......', '......');
             this._fsDialog.clearDialog();
-            await this._printTextAndWC('The corridor was eerily quiet late at night.', '深夜的楼道静得有些诡异。');
+            await this._printTextAndWC(
+                'The corridor was eerily quiet late at night.',
+                '深夜的楼道静得有些诡异。',
+            );
             await this._printTextAndWC(
                 'You kept your footsteps as low as possible and \nwalked through the corridors carrying your \nslightly heavy suitcase.',
                 '尽可能地压低脚步声, \n提着稍显沉重的行李箱穿行在走廊间。',
             );
             await this._printTextAndWC(
-                'Even so, \nyou feel someone\'s presence in a dark corner behind you.',
+                "Even so, \nyou feel someone's presence in a dark corner behind you.",
                 '即便如此, \n总感觉在身后某处黑暗的角落里，有人的气息。',
             );
             this._fsDialog.clearDialog();
-            await this._printTextAndWC('Maybe it\'s an illusion.', '也许是错觉吧。');
-            await this._printTextAndWC('Too much has happened recently and you are under too much pressure.', '近来发生了太多事，压力太大了。');
+            await this._printTextAndWC("Maybe it's an illusion.", '也许是错觉吧。');
+            await this._printTextAndWC(
+                'Too much has happened recently and you are under too much pressure.',
+                '近来发生了太多事，压力太大了。',
+            );
             await this._printTextAndWC(
                 'You just secretly carried a suitcase out and \nused a false identity when checking in, \nso there would be no problem.',
                 '只是偷偷提个行李箱出去，入住时用的也是假身份，不会有问题的。',
@@ -610,23 +621,23 @@ export class DayOne extends Container implements AppScene {
             await this._printTextAndWC('....', '....');
             await this._printTextAndWC('......', '......');
             await this._printTextAndWC(
-                'Although you are staying in a shared room, you don\'t see your roommates for a whole day.',
+                "Although you are staying in a shared room, you don't see your roommates for a whole day.",
                 '虽说是以合租的形式入住, \n但你整整一天都没有见到室友。',
             );
             await this._printTextAndWC(
-                'There were three rooms with the doors tightly closed, and it didn\'t seem like anyone was there.',
+                "There were three rooms with the doors tightly closed, and it didn't seem like anyone was there.",
                 '有三个房间的门紧紧地关着, 里面似乎也不像是有人在的样子。',
             );
             await this._printTextAndWC(
-                'You think, maybe they\'re office workers and they\'re not at home during the day.',
+                "You think, maybe they're office workers and they're not at home during the day.",
                 '你想, 也许他们都是上班族, 白天都不在家。',
             );
             await this._printTextAndWC(
-                'You\'re lying in bed, thinking about what happened today.',
+                "You're lying in bed, thinking about what happened today.",
                 '你躺在床上, 想着今天发生的事情。',
             );
             await this._printTextAndWC(
-                'It\'s not good here, like the mutilated body that was found. But right now, there\'s nowhere else to go.',
+                "It's not good here, like the mutilated body that was found. But right now, there's nowhere else to go.",
                 '虽然这里很不妙, 比如发现的那具残破尸体。\n但眼下，也没有其它的去处了。',
             );
             await this._printTextAndWC(
@@ -647,7 +658,7 @@ export class DayOne extends Container implements AppScene {
      * 晚餐环节
      */
     private _dinnerPhase = async () => {
-        await this._printTextAndWC('It\'s time for dinner.', '到了晚餐时间。');
+        await this._printTextAndWC("It's time for dinner.", '到了晚餐时间。');
         // 消耗8小时的食物
         gameData.player.food -= gameData.player.foodConsumePerHour * 8;
         await this._printTextAndWC(
@@ -678,7 +689,7 @@ export class DayOne extends Container implements AppScene {
             'hint',
         );
         await this._printTextAndWC(
-            'When you wake up, it\'s the next morning.',
+            "When you wake up, it's the next morning.",
             '你醒来时, 已经是第二天的早上了。',
         );
         await this._printTextAndWC(

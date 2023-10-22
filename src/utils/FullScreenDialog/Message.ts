@@ -8,15 +8,17 @@ export class Message {
     /** The container instance that is the root of all visuals in this class */
     public view = new Container();
     /** The text to display */
-    public text = new Text;
+    public text = new Text();
+    /** 文本类型。 */
+    public type: 'normal' | 'clickable' | 'warning' | 'hint' = 'normal';
     /** 普通文本的样式。 */
-    public normalTextStyle: TextStyle;
+    private normalTextStyle: TextStyle;
     /** 可响应点击事件的文本的样式。 */
-    public clickableTextStyle: TextStyle;
+    private clickableTextStyle: TextStyle;
     /** 警告文本的样式。 */
-    public warningTextStyle: TextStyle;
+    private warningTextStyle: TextStyle;
     /** 提示文本的样式。 */
-    public hintTextStyle: TextStyle;
+    private hintTextStyle: TextStyle;
 
     /**
      * @param text 要显示的文本
@@ -66,8 +68,33 @@ export class Message {
             wordWrapWidth: screenWidth - this.text.x - this.text.x,
         });
 
-        this.text.style = this.normalTextStyle;
+        this.setTextStyle(this.type);
 
         this.view.addChild(this.text);
+    }
+
+    /**
+     * 设置文本样式。
+     * @param type 文本类型。
+     */
+    public setTextStyle(type: 'normal' | 'clickable' | 'warning' | 'hint'): void {
+        switch (type) {
+            case 'normal':
+                this.text.style = this.normalTextStyle;
+                break;
+            case 'clickable':
+                this.text.style = this.clickableTextStyle;
+                break;
+            case 'warning':
+                this.text.style = this.warningTextStyle;
+                break;
+            case 'hint':
+                this.text.style = this.hintTextStyle;
+                break;
+            default:
+                this.text.style = this.normalTextStyle;
+                break;
+        }
+        this.type = type;
     }
 }
