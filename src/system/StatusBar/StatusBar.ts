@@ -25,7 +25,9 @@ export class StatusBar {
     /** The container instance that is the root of all visuals in this class */
     public view = new Container();
     /** The array of status icons */
-    private _statusIcons: { [key: string]: { container: Container, position: 'bottomLeft' | 'bottomRight' | 'none' } } = {};
+    private _statusIcons: {
+        [key: string]: { container: Container; position: 'bottomLeft' | 'bottomRight' | 'none' };
+    } = {};
 
     /**
      * Creat a new status icon  with the given image and value
@@ -42,7 +44,10 @@ export class StatusBar {
         icon.anchor.set(0.5, 0);
 
         // Create a text object to display the value
-        const text = new Text(props.value ? props.value.toString() : '', { fontSize: 26, fill: 'white' });
+        const text = new Text(props.value ? props.value.toString() : '', {
+            fontSize: 26,
+            fill: 'white',
+        });
         text.anchor.set(0.5, 0);
 
         // Position the sprite and text object normally
@@ -55,11 +60,15 @@ export class StatusBar {
 
         // If the position is bottom left, position the sprite and text object at the bottom left of the last bottom left icon
         if (props.position === 'bottomLeft' || props.position === 'bottomRight') {
-            const lastBottomIcon = Object.values(this._statusIcons).filter((icon) => icon && icon.position === props.position).pop();
+            const lastBottomIcon = Object.values(this._statusIcons)
+                .filter((icon) => icon && icon.position === props.position)
+                .pop();
             if (lastBottomIcon) {
                 const lastIcon = lastBottomIcon.container.getChildAt(0) as Sprite;
                 const lastText = lastBottomIcon.container.getChildAt(1) as Text;
-                icon.x = lastIcon.x + ( props.position === 'bottomLeft' ? lastIcon.width : -lastIcon.width );
+                icon.x =
+                    lastIcon.x +
+                    (props.position === 'bottomLeft' ? lastIcon.width : -lastIcon.width);
                 text.x = icon.x;
                 icon.y = lastIcon.y;
                 text.y = lastText.y;
@@ -75,7 +84,10 @@ export class StatusBar {
         statusIcon.addChild(icon, text);
 
         // Add the container to the status icons array
-        this._statusIcons[props.key] = {container: statusIcon, position: props.position ?? 'none'};
+        this._statusIcons[props.key] = {
+            container: statusIcon,
+            position: props.position ?? 'none',
+        };
 
         // Add the status icon to the view
         this.view.addChild(this._statusIcons[props.key].container);
@@ -109,7 +121,10 @@ export class StatusBar {
         text.y = props.y ? props.y + icon.height * 0.95 : text.y;
 
         // Add the status icon to the view
-        this._statusIcons[props.key] = {container: statusIcon, position: props.position ?? this._statusIcons[props.key].position};
+        this._statusIcons[props.key] = {
+            container: statusIcon,
+            position: props.position ?? this._statusIcons[props.key].position,
+        };
 
         return this._statusIcons[props.key].container;
     }

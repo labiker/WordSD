@@ -32,8 +32,14 @@ export async function initAssets() {
     await image.add('Current_time', 'app://assets/images/Current_time.png');
     await image.add('Item_human_corpse', 'app://assets/images/Item_human_corpse.png');
     await image.add('Item_corpse_pieces', 'app://assets/images/Item_corpse_pieces.png');
-    await image.add('Collection_smiling_angel_1', 'app://assets/images/Collection_smiling_angel_1.png');
-    await image.add('Collection_smiling_angel_2', 'app://assets/images/Collection_smiling_angel_2.png');
+    await image.add(
+        'Collection_smiling_angel_1',
+        'app://assets/images/Collection_smiling_angel_1.png',
+    );
+    await image.add(
+        'Collection_smiling_angel_2',
+        'app://assets/images/Collection_smiling_angel_2.png',
+    );
 
     // Load font assets
     await Assets.load('app://assets/fonts/Ma_Shan_Zheng/Ma_Shan_Zheng.ttf');

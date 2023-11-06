@@ -68,7 +68,7 @@ export class DayOne extends Container implements AppScene {
      */
     private _printClickableText = async (enText: string, zhcnText: string, func: () => void) => {
         const text = gameData.system.language === 'en' ? enText : zhcnText;
-        this._fsDialog.printClickableText(text, ()=>{
+        this._fsDialog.printClickableText(text, () => {
             sfx.play('sfx_button_press');
             func();
         });
