@@ -43,9 +43,9 @@ export class PrimaryButton extends FancyButton {
         };
 
         const defaultViewContainer = new Container();
-        defaultViewContainer.addChild(new Sprite(image.find('play-btn-up')));
+        defaultViewContainer.addChild(new Sprite(image.find('play_btn_up')));
         const pressedViewContainer = new Container();
-        pressedViewContainer.addChild(new Sprite(image.find('play-btn-down')));
+        pressedViewContainer.addChild(new Sprite(image.find('play_btn_down')));
 
         super({
             // Assign the default view

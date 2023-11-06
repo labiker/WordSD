@@ -1,5 +1,5 @@
 import { Text, Container, FederatedPointerEvent } from 'pixi.js';
-import { app } from '../app';
+import { app } from '../../utils/app';
 import { Message } from './Message';
 import { Background } from './Background';
 import { Scroll } from './Scroll';

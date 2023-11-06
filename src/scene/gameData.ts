@@ -17,6 +17,7 @@ export const gameData = {
     },
     system: {
         language: '', // Language
+        firstTime: true, // Whether it is the first time to play
         RoundsPerDay: 4, // Number of rounds per day
         totlaDays: 7, // Total number of days
         currentDay: 1, // Current day
@@ -24,7 +25,7 @@ export const gameData = {
         isEnableToGoOut: false, // Whether to enable going out
     },
     player: {
-        credibility: 0, // Credibility
+        credibility: 50, // Credibility
         survival: true, // Whether to survive
         playerPosition: 0, // Player position
         place: {
@@ -39,10 +40,11 @@ export const gameData = {
         healthMax: 100, // Maximum health
         health: 100, // Current health
         healthIncreasePerHour: 10, // health recovery per hour
-        sanityMax: 100, // Maximum sanity
-        sanity: 100, // Current sanity
-        sanityConsumePerHour: 10, // sanity consumption per hour
-        sanityIncreasePerHour: 3, // sanity recovery per hour (when sleeping)
+        stressLevel: 0, // Stress level
+        stressMax: 100, // Maximum stress
+        stress: 0, // Current stress
+        stressConsumePerHour: 10, // stress consumption per hour
+        stressDecreasePerHour: 3, // stress recovery per hour (when sleeping)
         foodMax: 100, // Food (upper limit)
         food: 100, // Food
         foodConsumePerHour: 1, // Food consumption per hour

@@ -214,7 +214,7 @@ export class Title extends Container implements AppScene {
 
         this._playBtn.onPress.connect(async () => {
             // Play audio
-            this._playBtn.playSfx('primary-button-press');
+            this._playBtn.playSfx('sfx_primary_button_press');
 
             // Go to game screen when user presses play button
             await this.remove();

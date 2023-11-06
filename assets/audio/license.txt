@@ -1,0 +1,67 @@
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+
+> sfx_primary_button_press.mp3
+
+This file licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+
+> sfx_print.mp3
+
+This file licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+
+> sfx_select_button_press.mp3
+
+This work has been identified as being free of known restrictions under copyright law, including all related and neighboring rights.
+You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission. 
+
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+
+This project uses these sounds from freesound:
+
+> "sfx_button_press.mp3" by Eponn ( https://freesound.org/people/Eponn/sounds/420997/ ) 
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "bgm_middle_east_sound.mp3" by achiass ( https://freesound.org/people/achiass/sounds/222988/ ) 
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_girl_says_game_over.mp3" by satchdev ( https://freesound.org/people/satchdev/sounds/325411/ ) 
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_sleep.mp3" by xndrive ( https://freesound.org/people/xndrive/sounds/428158/ ) 
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_cancelmiss.mp3" by Raclure ( https://freesound.org/people/Raclure/sounds/405548/ ) 
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_item_got.mp3" by Kastenfrosch ( https://freesound.org/people/Kastenfrosch/sounds/162467/ ) 
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_item_lost.mp3" by Kastenfrosch ( https://freesound.org/people/Kastenfrosch/sounds/162465/ ) 
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+
+This project uses these sounds from [ear0]( https://www.ear0.com/ ):
+
+> "sfx_cartoon_dangling.mp3" by roob ( https://www.ear0.com/sound/show/soundid-36276 )
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_death_knell.mp3" by 861603430yyx ( https://www.ear0.com/sound/show/soundid-37052 )
+  licensed under the [CC BY License]( https://creativecommons.org/licenses/by/4.0/ ).
+
+> "sfx_bottle_open.mp3" by 君莫浪 ( https://www.ear0.com/sound/show/soundid-38282 )
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_bubble.mp3" by Shawlj ( https://www.ear0.com/sound/show/soundid-39241 )
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).
+
+> "sfx_girl_smile.mp3" by Laoidheach ( https://www.ear0.com/sound/show/soundid-10047 )
+  licensed under the [Creative Commons 0 License]( https://creativecommons.org/publicdomain/zero/1.0/ ).

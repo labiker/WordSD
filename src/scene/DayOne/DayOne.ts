@@ -1,12 +1,14 @@
 import { gameData } from '../gameData';
 import { gsap } from 'gsap/gsap-core';
-import { FullScreenDialog } from '../../utils/FullScreenDialog/FullScreenDialog';
-import { BackLog } from '../../utils/Backlog/BackLog';
+import { FullScreenDialog } from '../../system/FullScreenDialog/FullScreenDialog';
+import { BackLog } from '../../system/Backlog/BackLog';
 import { bgm, sfx } from '../../utils/audio';
 import { Container } from 'pixi.js';
 import { AppScene } from '../AppScene';
 import { app } from '../../utils/app';
 import { Title } from '../Title/Title';
+import { image } from '../../core/image';
+import { StatusBar } from '../../system/StatusBar/StatusBar';
 
 /** The scene class for the DayOne scene */
 export class DayOne extends Container implements AppScene {
@@ -14,6 +16,8 @@ export class DayOne extends Container implements AppScene {
     private _fsDialog = new FullScreenDialog();
     /** A container to group backlog elements */
     private _backLog = new BackLog();
+    /** A container to group top status bar elements */
+    private _StatusBar = new StatusBar();
 
     constructor() {
         super();
@@ -30,7 +34,7 @@ export class DayOne extends Container implements AppScene {
             }
         }, 10);
 
-        this.addChild(this._fsDialog.view, this._backLog.view);
+        this.addChild(this._fsDialog.view, this._backLog.view, this._StatusBar.view);
 
         // Execute the default script
         this.process();
@@ -60,30 +64,43 @@ export class DayOne extends Container implements AppScene {
      * 宏
      * @param enText 英文文本
      * @param zhcnText 中文文本
-     * @note 检测语言, 输出对应可点击文本。
+     * @note 检测语言, 输出对应可点击文本。点击后会播放音效, 并执行回调函数。
      */
     private _printClickableText = async (enText: string, zhcnText: string, func: () => void) => {
         const text = gameData.system.language === 'en' ? enText : zhcnText;
-        this._fsDialog.printClickableText(text, func);
+        this._fsDialog.printClickableText(text, ()=>{
+            sfx.play('sfx_button_press');
+            func();
+        });
     };
 
     public process = async () => {
         // 选择语言
         this._fsDialog.printClickableText('English version', () => {
+            sfx.play('sfx_button_press');
             gameData.system.language = 'en';
         });
         this._fsDialog.printClickableText('中文版', () => {
+            sfx.play('sfx_button_press');
             gameData.system.language = 'zhcn';
         });
+
         // 等待语言选择
         await this._fsDialog.waitFor(() => gameData.system.language !== '');
         this._fsDialog.clearDialog();
-        await this._printTextAndWC('Welcome to WordSD!', '欢迎来到 WordSD!');
-        await this._printTextAndWC(
-            'Press F11 to enter full screen mode for the best gaming experience.',
-            '按下 F11 进入全屏模式以获得最好的游戏体验。',
-        );
-        this._fsDialog.clearDialog();
+
+        // 如果是第一次游玩，提示玩家按 F11 进入全屏模式
+        if (gameData.system.firstTime) {
+            await this._printTextAndWC('Welcome to WordSD!', '欢迎来到 WordSD!');
+            await this._printTextAndWC(
+                'Press F11 to enter full screen mode for the best gaming experience.',
+                '按下 F11 进入全屏模式以获得最好的游戏体验。',
+            );
+            gameData.system.firstTime = false;
+            this._fsDialog.clearDialog();
+        }
+
+        // 创建新世界线
         await this._creatNewWorldLine();
     };
 
@@ -91,7 +108,7 @@ export class DayOne extends Container implements AppScene {
         // 重置玩家属性
         this._resetPlayerStatus();
         this._fsDialog.clearDialog();
-        await bgm.play('sightless-storm-ii');
+        await bgm.play('sightless_storm_ii');
 
         await this._printTextAndWC(
             'For various reasons, you have to find a place to hide.',
@@ -125,11 +142,11 @@ export class DayOne extends Container implements AppScene {
             `【 存粮： ${gameData.player.food} / ${gameData.player.foodMax} 】\n尽管此行匆忙, 但你还是记得带上了一些食物。`,
         );
         await this._printTextAndWC(
-            `【 Sanity: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\nThe inherent breath of the room always makes people breathless.`,
-            `【 理智： ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\n房间固有的气息总有些让人喘不过气。`,
+            `【 Stress: ${gameData.player.stress} / ${gameData.player.stressMax} 】\nThe inherent breath of the room always makes people breathless.`,
+            `【 压力： ${gameData.player.stress} / ${gameData.player.stressMax} 】\n房间固有的气息总有些让人喘不过气。`,
         );
         await this._printTextAndWC(
-            `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nBut it's better than being killed by someone unknown outside.`,
+            `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\n`,
             `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n但也好过在外头被不知名的某人夺了性命。`,
         );
         this._fsDialog.clearDialog();
@@ -139,6 +156,15 @@ export class DayOne extends Container implements AppScene {
         await this._checkLegacy();
         // 如果有收集物, 进入收集物检查环节
         await this._checkCollection();
+        gameData.system.currentTime = 18;
+        this._StatusBar.updateStatusIcon({
+            key: 'CurrentDay',
+            image: image.find('Current_night'),
+        });
+        this._StatusBar.updateStatusIcon({
+            key: 'CurrentTime',
+            value: gameData.system.currentTime,
+        });
         await this._printTextAndWC(
             `【 Time: ${gameData.system.currentTime} o'clock 】\nYou have been busy moving, and it was already night.`,
             `【 时间：${gameData.system.currentTime} 点 】\n一直忙着搬家, 不知不觉, 已经到了晚上。`,
@@ -156,10 +182,76 @@ export class DayOne extends Container implements AppScene {
     };
 
     private _resetPlayerStatus = () => {
-        gameData.player.health = gameData.player.healthMax;
-        gameData.player.sanity = gameData.player.sanityMax;
+        gameData.system.currentDay = 1;
+        this._StatusBar.creatStatusIcon({
+            key: 'CurrentDay',
+            image: image.find('Current_day'),
+            value: gameData.system.currentDay,
+            x: 30,
+            y: 0,
+        });
+        gameData.system.currentTime = 14;
+        this._StatusBar.creatStatusIcon({
+            key: 'CurrentTime',
+            image: image.find('Current_time'),
+            value: gameData.system.currentTime,
+            x: 90,
+            y: 0,
+        });
+        gameData.player.health = gameData.player.healthMax - 46;
+        this._StatusBar.creatStatusIcon({
+            key: 'Health',
+            image: image.find('Health'),
+            value: gameData.player.health,
+            x: 1680,
+            y: 0,
+        });
+        gameData.player.stress = 50;
+        gameData.player.stressLevel = 0;
+        this._StatusBar.creatStatusIcon({
+            key: 'Stress',
+            image: image.find('Stress_level_0'),
+            value: gameData.player.stress,
+            x: 1740,
+            y: 0,
+        });
         gameData.player.food = gameData.player.foodMax;
-        gameData.player.credibility = 0;
+        this._StatusBar.creatStatusIcon({
+            key: 'Food',
+            image: image.find('Supplies'),
+            value: gameData.player.food,
+            x: 1800,
+            y: 0,
+        });
+        gameData.player.credibility = 50;
+        this._StatusBar.creatStatusIcon({
+            key: 'Credibility',
+            image: image.find('Friend'),
+            value: gameData.player.credibility,
+            x: 1860,
+            y: 0,
+        });
+
+        if (gameData.collection.smilingAngel_1) {
+            this._StatusBar.creatStatusIcon({
+                key: 'Collection_smiling_angel_1',
+                image: image.find('Collection_smiling_angel_1'),
+                x: app.view.width - 60,
+                y: app.view.height - 90,
+                position: 'bottomRight',
+            });
+        }
+
+        if (gameData.collection.smilingAngel_2) {
+            this._StatusBar.creatStatusIcon({
+                key: 'Collection_smiling_angel_2',
+                image: image.find('Collection_smiling_angel_2'),
+                x: app.view.width - 60,
+                y: app.view.height - 90,
+                position: 'bottomRight',
+            });
+        }
+
         gameData.player.isNoteProcessed = false;
     };
 
@@ -188,6 +280,7 @@ export class DayOne extends Container implements AppScene {
     }
 
     private _deadAndReturnToTitle = async () => {
+        sfx.play('sfx_death_knell');
         await this.remove();
         const sceneTitle = new Title();
         app.stage.addChild(sceneTitle);
@@ -201,25 +294,6 @@ export class DayOne extends Container implements AppScene {
      */
     public resize(w: number, h: number) {
         this._fsDialog.resize(w, h);
-        /* this._fsDialog.view.width = w;
-        this._fsDialog.view.height = h;
-        this._backLog.view.width = w;
-        this._backLog.view.height = h; */
-        // Set visuals to their respective locations
-        /* this._titleText.view.x = w * 0.83;
-        this._titleText.view.y = 160;
-
-        this._player.view.x = w * 0.73;
-        this._player.view.y = h * 0.7;
-
-        this._playBtn.x = w * 0.88;
-        this._playBtn.y = h * 0.7;
-
-        this._forkBtn.x = w - 55;
-        this._forkBtn.y = h - 40 + this._forkBtn.height * 0.5 - 5; */
-
-        // Set hit area of hit container to fit screen
-        // Leave a little room to prevent interaction bellow the cannon
     }
 
     private _checkItem = async () => {
@@ -228,6 +302,15 @@ export class DayOne extends Container implements AppScene {
                 'By chance, you find something strange in the room...',
                 '偶然间, 你发现房间里有一些奇怪的东西......',
             );
+            sfx.play('sfx_item_got');
+            this._StatusBar.creatStatusIcon({
+                key: 'Item_corpse_pieces',
+                image: image.find('Item_corpse_pieces'),
+                value: gameData.item.CorpsePieces,
+                x: 30,
+                y: app.view.height - 90,
+                position: 'bottomLeft',
+            });
             await this._printTextAndWC(
                 `【 Corpse pieces (Item): ${gameData.item.CorpsePieces} 】`,
                 `【 尸块（道具）： ${gameData.item.CorpsePieces} 】`,
@@ -252,20 +335,35 @@ export class DayOne extends Container implements AppScene {
                 '出于好奇, 你将它打开了。',
             );
             if (gameData.legacy.humanCorpse > 0) {
+                this._StatusBar.creatStatusIcon({
+                    key: 'Item_human_corpse',
+                    image: image.find('Item_human_corpse'),
+                    value: gameData.legacy.humanCorpse,
+                    x: 30,
+                    y: app.view.height - 90,
+                    position: 'bottomLeft',
+                });
+                sfx.play('sfx_item_got');
                 await this._printTextAndWC(
-                    `【 Human corpse: ${gameData.legacy.humanCorpse} 】`,
-                    `【 人的尸体： ${gameData.legacy.humanCorpse} 】`,
+                    `【 Human corpse + ${gameData.legacy.humanCorpse} 】`,
+                    `【 人的尸体 + ${gameData.legacy.humanCorpse} 】`,
                     'hint',
                 );
             }
             this._fsDialog.clearDialog();
-            gameData.player.sanity -= 5;
+            gameData.player.stress += 5;
+            this._StatusBar.updateStatusIcon({
+                key: 'Stress',
+                image: image.find('Stress_level_0'),
+                value: gameData.player.stress,
+            });
+            sfx.play('sfx_item_lost');
             await this._printTextAndWC(
-                `【 Sanity - ${5}. Currently ${gameData.player.sanity} / ${
-                    gameData.player.sanityMax
+                `【 Stress + ${5}. Currently ${gameData.player.stress} / ${
+                    gameData.player.stressMax
                 } 】\nA strange smell stimulates you.`,
-                `【 理智 - ${5} 。当前为: ${gameData.player.sanity} / ${
-                    gameData.player.sanityMax
+                `【 压力 + ${5} 。当前为: ${gameData.player.stress} / ${
+                    gameData.player.stressMax
                 } 】\n一股异味刺激着你。`,
                 'warning',
             );
@@ -276,12 +374,27 @@ export class DayOne extends Container implements AppScene {
             await this._printTextAndWC('What should you do?', '你该怎么办？');
             this._printClickableText('- Decompose the corpse', '- 分解尸体', async () => {
                 this._fsDialog.clearDialog();
+                sfx.play('sfx_item_lost');
+                this._StatusBar.removeStatusIcon('Item_human_corpse');
+                await this._printTextAndWC(
+                    `【 Human corpse - ${gameData.legacy.humanCorpse} 】`,
+                    `【 人的尸体 - ${gameData.legacy.humanCorpse} 】`,
+                    'warning',
+                );
                 gameData.item.CorpsePieces += gameData.legacy.humanCorpse * 10;
-                const decreaseSanity =
-                    gameData.legacy.humanCorpse * 50 > gameData.player.sanity
-                        ? gameData.player.sanity
-                        : gameData.legacy.humanCorpse * 50;
-                gameData.player.sanity -= decreaseSanity;
+                const increaseStress =
+                    gameData.legacy.humanCorpse * 100 > gameData.player.stress
+                        ? gameData.player.stressMax - gameData.player.stress
+                        : gameData.legacy.humanCorpse * 100;
+                sfx.play('sfx_item_got');
+                this._StatusBar.creatStatusIcon({
+                    key: 'Item_corpse_pieces',
+                    image: image.find('Item_corpse_pieces'),
+                    value: gameData.item.CorpsePieces,
+                    x: 30,
+                    y: app.view.height - 90,
+                    position: 'bottomLeft',
+                });
                 await this._printTextAndWC(
                     `【 Corpse pieces (Item) + ${gameData.legacy.humanCorpse * 10}. Currently: ${
                         gameData.item.CorpsePieces
@@ -291,9 +404,26 @@ export class DayOne extends Container implements AppScene {
                     } 】`,
                     'hint',
                 );
+                gameData.player.stress += increaseStress;
+                if (gameData.player.stress >= 100) {
+                    gameData.player.stress = 0;
+                    gameData.player.stressLevel += 1;
+                    this._StatusBar.updateStatusIcon({
+                        key: 'Stress',
+                        image: image.find('Stress_level_1'),
+                        value: gameData.player.stress,
+                    });
+                } else {
+                    this._StatusBar.updateStatusIcon({
+                        key: 'Stress',
+                        image: image.find('Stress_level_0'),
+                        value: gameData.player.stress,
+                    });
+                }
+                sfx.play('sfx_item_lost');
                 await this._printTextAndWC(
-                    `【 Sanity - ${decreaseSanity}. Currently: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\nYour mental state is not very good.`,
-                    `【 理智 - ${decreaseSanity} 。当前为: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】\n你的精神状态有些不太好。`,
+                    `【 Stress + ${increaseStress}. Currently: ${gameData.player.stress} / ${gameData.player.stressMax} 】\nYour mental state is not very good.`,
+                    `【 压力 + ${increaseStress} 。当前为: ${gameData.player.stress} / ${gameData.player.stressMax} 】\n你的精神状态有些不太好。`,
                     'warning',
                 );
                 this._fsDialog.clearDialog();
@@ -301,9 +431,16 @@ export class DayOne extends Container implements AppScene {
             });
             this._printClickableText('- Turn over the corpse', '- 将尸体上缴', async () => {
                 this._fsDialog.clearDialog();
+                sfx.play('sfx_item_lost');
+                this._StatusBar.removeStatusIcon('Item_human_corpse');
                 await this._printTextAndWC(
-                    'You close the box and put it at the door, go back to the room and wash your hands, and the box is gone.',
-                    '你将箱子关好并放在门口, 回到房间里洗手的功夫, 箱子就消失了。',
+                    `【 Human corpse - ${gameData.legacy.humanCorpse} 】`,
+                    `【 人的尸体 - ${gameData.legacy.humanCorpse} 】`,
+                    'warning',
+                );
+                await this._printTextAndWC(
+                    'You close the box and put it at the door, \ngo back to the room and wash your hands, \nand the box is gone.',
+                    '你将箱子关好并放在门口, 回到房间里洗手的功夫, \n箱子就消失了。',
                 );
                 await this._printTextAndWC(
                     'In its place was a note that read:',
@@ -317,10 +454,26 @@ export class DayOne extends Container implements AppScene {
                     '"Thank you sincerely for your great help."',
                     '“真挚地感谢您的大力帮助。”',
                 );
-                gameData.player.credibility += gameData.legacy.humanCorpse * 30;
+                sfx.play('sfx_item_got');
+                gameData.player.credibility += gameData.legacy.humanCorpse * 10;
+                if (gameData.player.credibility >= 60) {
+                    this._StatusBar.updateStatusIcon({
+                        key: 'Credibility',
+                        image: image.find('Best_friend'),
+                        value: gameData.player.credibility,
+                    });
+                } else {
+                    this._StatusBar.updateStatusIcon({
+                        key: 'Credibility',
+                        image: image.find('Friend'),
+                        value: gameData.player.credibility,
+                    });
+                }
                 await this._printTextAndWC(
-                    `【 Reputation + ${gameData.player.credibility} 】\nIt seems to be appreciated by the Rentouma Company.`,
-                    `【 信誉 + ${gameData.legacy.humanCorpse * 30} , 当前为: ${
+                    `【 Reputation + ${gameData.legacy.humanCorpse * 10}. Currently: ${
+                        gameData.player.credibility
+                    } 】\nIt seems to be appreciated by the Rentouma Company.`,
+                    `【 信誉 + ${gameData.legacy.humanCorpse * 10} , 当前为: ${
                         gameData.player.credibility
                     } 】\n似乎得到了人头马公司的赞赏。`,
                     'hint',
@@ -420,15 +573,20 @@ export class DayOne extends Container implements AppScene {
                 '它染血的微笑充满了视野, 你听见吸吮的声音, \n眼窝中传来辛辣的刺痛感。',
             );
             gameData.player.health = 0;
+            this._StatusBar.updateStatusIcon({
+                key: 'Health',
+                image: image.find('Health_negative'),
+                value: gameData.player.health,
+            });
             gameData.story.sledDogDeathSceneI = true;
             gameData.legacy.humanCorpse += 1;
+            sfx.play('sfx_item_lost');
             await this._printTextAndWC(
                 `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nYou finally realize that its snort is exhaling into your brain.`,
                 `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n你最后意识到它的鼻息呼入了脑颅。`,
                 'warning',
             );
-            // 创建新的世界线
-            // await this._creatNewWorldLine();
+            // 死亡并返回标题
             await this._deadAndReturnToTitle();
         });
         if (gameData.story.sledDogDeathSceneI) {
@@ -456,8 +614,14 @@ export class DayOne extends Container implements AppScene {
                     await this._printTextAndWC('....', '....');
                     await this._printTextAndWC('......', '......');
                     gameData.player.health = 0;
+                    this._StatusBar.updateStatusIcon({
+                        key: 'Health',
+                        image: image.find('Health_negative'),
+                        value: gameData.player.health,
+                    });
                     gameData.story.sledDogDeathSceneII = true;
                     gameData.legacy.humanCorpse += 1;
+                    sfx.play('sfx_item_lost');
                     await this._printTextAndWC(
                         `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nA snow-white sled dog whispered with joy, and it licked the last piece of minced meat with pity,`,
                         `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n一条雪白的雪橇犬满心欢喜地低鸣着, \n它怜惜地舔尽最后一块碎肉, `,
@@ -472,15 +636,22 @@ export class DayOne extends Container implements AppScene {
                         '它摇晃着尾巴, 小步跑向楼梯, 离开了。',
                     );
                     if (gameData.story.sledDogDeathSceneII && !gameData.collection.smilingAngel_1) {
+                        sfx.play('sfx_item_got');
                         gameData.collection.smilingAngel_1 = true;
+                        this._StatusBar.creatStatusIcon({
+                            key: 'Collection_smiling_angel_1',
+                            image: image.find('Collection_smiling_angel_1'),
+                            x: app.view.width - 60,
+                            y: app.view.height - 90,
+                            position: 'bottomRight',
+                        });
                         await this._printTextAndWC(
                             'Colletion: Smiling Angel Part 1',
                             '收录有害物词条： 微笑天使 part1',
                             'hint',
                         );
                     }
-                    // 创建新的世界线
-                    // await this._creatNewWorldLine();
+                    // 死亡并返回标题
                     await this._deadAndReturnToTitle();
                 });
                 if (gameData.collection.smilingAngel_1 && gameData.item.CorpsePieces > 0) {
@@ -489,6 +660,19 @@ export class DayOne extends Container implements AppScene {
                         '- 喂食尸块（道具）',
                         async () => {
                             this._fsDialog.clearDialog();
+                            sfx.play('sfx_item_lost');
+                            gameData.item.CorpsePieces -= 1;
+                            this._StatusBar.updateStatusIcon({
+                                key: 'Item_corpse_pieces',
+                                value: gameData.item.CorpsePieces,
+                            });
+                            await this._printTextAndWC(
+                                `【 Corpse pieces (Item) - ${1}. Currently: ${
+                                    gameData.item.CorpsePieces
+                                } 】`,
+                                `【 尸块（道具） - ${1} 。当前为: ${gameData.item.CorpsePieces} 】`,
+                                'warning',
+                            );
                             await this._printTextAndWC(
                                 'You open the door. Toss it a piece of meat.',
                                 '你打开门。丢给它一块肉。',
@@ -502,16 +686,16 @@ export class DayOne extends Container implements AppScene {
                                 '雪橇犬舔舔嘴唇, 意味深长地盯着你看了会儿, 转身离开。',
                             );
                             this._fsDialog.clearDialog();
-                            gameData.item.CorpsePieces -= 1;
-                            await this._printTextAndWC(
-                                `【 Corpse pieces (Item) - ${1}. Currently: ${
-                                    gameData.item.CorpsePieces
-                                } 】`,
-                                `【 尸块（道具） - ${1} 。当前为: ${gameData.item.CorpsePieces} 】`,
-                                'warning',
-                            );
                             if (!gameData.collection.smilingAngel_2) {
+                                sfx.play('sfx_item_got');
                                 gameData.collection.smilingAngel_2 = true;
+                                this._StatusBar.creatStatusIcon({
+                                    key: 'Collection_smiling_angel_2',
+                                    image: image.find('Collection_smiling_angel_2'),
+                                    x: app.view.width - 60,
+                                    y: app.view.height - 90,
+                                    position: 'bottomRight',
+                                });
                                 await this._printTextAndWC(
                                     'Collection: Smiling Angel Part 2',
                                     '收录有害物词条： 微笑天使 part2',
@@ -550,15 +734,16 @@ export class DayOne extends Container implements AppScene {
             '躺在床上, 思考着至今为止发生过的事情。',
         );
         this._fsDialog.clearDialog();
-        // 因 理智 < 50 ，住户违约搬出，触发尾随事件，死亡
-        if (gameData.player.sanity < 50) {
+        // 因 压力等级 >= 1 ，住户违约搬出，触发尾随事件，死亡
+        if (gameData.player.stressLevel >= 1) {
+            sfx.play('sfx_item_lost');
             await this._printTextAndWC(
-                `【 Sanity: ${
-                    gameData.player.sanity
-                } < ${50} 】\nThe events encountered were too bizarre, and coupled with the lack of adequate rest, \nthe more you thought about it, the more confused you became.`,
-                `【 理智： ${
-                    gameData.player.sanity
-                } < ${50} 】\n遭遇的事件过于离奇, 加上没有得到充分的休息, \n越是思考越是觉得混乱。`,
+                `【 Stress level: ${
+                    gameData.player.stressLevel
+                } >= ${1} 】\nThe events encountered were too bizarre, and coupled with the lack of adequate rest, \nthe more you thought about it, the more confused you became.`,
+                `【 压力等级： ${
+                    gameData.player.stressLevel
+                } >= ${1} 】\n遭遇的事件过于离奇, 加上没有得到充分的休息, \n越是思考越是觉得混乱。`,
                 'warning',
             );
             await this._printTextAndWC(
@@ -608,13 +793,19 @@ export class DayOne extends Container implements AppScene {
             await this._printTextAndWC('boom!', '“砰！”');
             this._fsDialog.clearDialog();
             gameData.player.health = 0;
+            this._StatusBar.updateStatusIcon({
+                key: 'Health',
+                image: image.find('Health_negative'),
+                value: gameData.player.health,
+            });
+            sfx.play('sfx_item_lost');
             await this._printTextAndWC(
                 `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nThat was the last sound you heard in this world.`,
                 `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n那是你在这个世界上意识到的最后一声。`,
                 'warning',
             );
             gameData.legacy.humanCorpse += 1;
-            // await this._creatNewWorldLine();
+            // 死亡并返回标题
             await this._deadAndReturnToTitle();
         } else if (gameData.system.currentDay === 1) {
             await this._printTextAndWC('..', '..');
@@ -626,7 +817,7 @@ export class DayOne extends Container implements AppScene {
             );
             await this._printTextAndWC(
                 "There were three rooms with the doors tightly closed, and it didn't seem like anyone was there.",
-                '有三个房间的门紧紧地关着, 里面似乎也不像是有人在的样子。',
+                '有三个房间的门紧紧地关着, \n里面似乎也不像是有人在的样子。',
             );
             await this._printTextAndWC(
                 "You think, maybe they're office workers and they're not at home during the day.",
@@ -649,6 +840,7 @@ export class DayOne extends Container implements AppScene {
                 '下定决心的你，闭上眼睛, 进入了梦乡。',
             );
             this._fsDialog.clearDialog();
+            sfx.play('sfx_sleep');
             // 进入第二天
             await this._secondDay();
         }
@@ -661,6 +853,12 @@ export class DayOne extends Container implements AppScene {
         await this._printTextAndWC("It's time for dinner.", '到了晚餐时间。');
         // 消耗8小时的食物
         gameData.player.food -= gameData.player.foodConsumePerHour * 8;
+        this._StatusBar.updateStatusIcon({
+            key: 'Food',
+            image: image.find('Supplies'),
+            value: gameData.player.food,
+        });
+        sfx.play('sfx_item_lost');
         await this._printTextAndWC(
             `【 Food - ${gameData.player.foodConsumePerHour * 8}. Currently: ${
                 gameData.player.food
@@ -677,15 +875,20 @@ export class DayOne extends Container implements AppScene {
 
     private _secondDay = async () => {
         // 消耗8小时的睡眠
-        const increaseSanity =
-            gameData.player.sanityIncreasePerHour * 8 >
-            gameData.player.sanityMax - gameData.player.sanity
-                ? gameData.player.sanityMax - gameData.player.sanity
-                : gameData.player.sanityIncreasePerHour * 8;
-        gameData.player.sanity += increaseSanity;
+        const decreaseStress =
+            gameData.player.stressDecreasePerHour * 8 >
+            gameData.player.stressMax - gameData.player.stress
+                ? gameData.player.stressMax - gameData.player.stress
+                : gameData.player.stressDecreasePerHour * 8;
+        gameData.player.stress -= decreaseStress;
+        this._StatusBar.updateStatusIcon({
+            key: 'Stress',
+            image: image.find('Stress_level_0'),
+            value: gameData.player.stress,
+        });
         await this._printTextAndWC(
-            `【 Sanity + ${increaseSanity}. Currently: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】`,
-            `【 理智 + ${increaseSanity} 。当前为: ${gameData.player.sanity} / ${gameData.player.sanityMax} 】`,
+            `【 Stress - ${decreaseStress}. Currently: ${gameData.player.stress} / ${gameData.player.stressMax} 】`,
+            `【 压力 - ${decreaseStress} 。当前为: ${gameData.player.stress} / ${gameData.player.stressMax} 】`,
             'hint',
         );
         await this._printTextAndWC(

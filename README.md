@@ -56,16 +56,16 @@ It is very suitable for developing AVG, so I came up with the idea of using it t
   import { sound } from '@pixi/sound';
   import { image } from '../core/image';
   import { Assets } from 'pixi.js';
-  
+
   /** Initialise and start loading of all assets */
   export async function initAssets() {
       // Load sound assets
-      sound.add('sightless-storm-ii', 'app://assets/audio/sightless-storm-ii.mp3');
+      sound.add('sightless_storm_ii', 'app://assets/audio/sightless_storm_ii.mp3');
       sound.add('sfx_print', 'app://assets/audio/sfx_print.mp3');
 
       // Load image assets
       await image.add('player', 'app://assets/images/player.png');
-      await image.add('play-btn-up', 'app://assets/images/play-btn-up.png');
+      await image.add('play_btn_up', 'app://assets/images/play_btn_up.png');
 
       // Load font assets
       await Assets.load('app://assets/fonts/Ma_Shan_Zheng/Ma_Shan_Zheng.ttf');
@@ -82,7 +82,7 @@ It is very suitable for developing AVG, so I came up with the idea of using it t
   ```ts
   import { bgm, sfx } from '../module/audio';
   
-  bgm.play('sightless-storm-ii');
+  bgm.play('sightless_storm_ii');
   // ...
   sfx.play('sfx_print', { loop: true });
   // ...
