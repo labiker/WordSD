@@ -133,7 +133,7 @@ export class BackLog {
         this.background.hitArea.on('pointermove', (e: FederatedPointerEvent) => {
             if (!this.scroll.pressing) return;
 
-            const stepY = e.movementY * 2;
+            const stepY = (e.movementY * app.view.width) / window.innerWidth;
 
             if (this.scroll.moveScroll(stepY)) {
                 if (stepY < 0 && this.getFirstPixiText().y < this.marginTop) {

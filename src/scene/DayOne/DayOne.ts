@@ -3,21 +3,24 @@ import { gsap } from 'gsap/gsap-core';
 import { FullScreenDialog } from '../../system/FullScreenDialog/FullScreenDialog';
 import { BackLog } from '../../system/Backlog/BackLog';
 import { bgm, sfx } from '../../utils/audio';
-import { Container } from 'pixi.js';
+import { Container, Sprite } from 'pixi.js';
 import { AppScene } from '../AppScene';
 import { app } from '../../utils/app';
 import { Title } from '../Title/Title';
 import { image } from '../../core/image';
 import { StatusBar } from '../../system/StatusBar/StatusBar';
+import { Tooltip } from '../../system/Tooltip/Tooltip';
 
 /** The scene class for the DayOne scene */
 export class DayOne extends Container implements AppScene {
     /** A container to group full screen dialog elements */
     private _fsDialog = new FullScreenDialog();
-    /** A container to group backlog elements */
-    private _backLog = new BackLog();
     /** A container to group top status bar elements */
     private _StatusBar = new StatusBar();
+    /** A container to group backlog elements */
+    private _backLog = new BackLog();
+    /** A container to group tooltip elements */
+    private _tooltip = new Tooltip();
 
     constructor() {
         super();
@@ -34,7 +37,12 @@ export class DayOne extends Container implements AppScene {
             }
         }, 10);
 
-        this.addChild(this._fsDialog.view, this._backLog.view, this._StatusBar.view);
+        this.addChild(
+            this._fsDialog.view,
+            this._StatusBar.view,
+            this._backLog.view,
+            this._tooltip.view,
+        );
 
         // Execute the default script
         this.process();
@@ -189,6 +197,19 @@ export class DayOne extends Container implements AppScene {
             value: gameData.system.currentDay,
             x: 30,
             y: 0,
+            hover: (e) => {
+                const bounds = (e.currentTarget as Sprite).getBounds();
+                this._tooltip.show({
+                    value:
+                        (gameData.system.language === 'en' ? 'Current day: ' : '天数: ') +
+                        gameData.system.currentDay,
+                    x: bounds.x,
+                    y: bounds.y,
+                });
+            },
+            out: () => {
+                this._tooltip.hide();
+            },
         });
         gameData.system.currentTime = 14;
         this._StatusBar.creatStatusIcon({
@@ -197,6 +218,19 @@ export class DayOne extends Container implements AppScene {
             value: gameData.system.currentTime,
             x: 90,
             y: 0,
+            hover: (e) => {
+                const bounds = (e.currentTarget as Sprite).getBounds();
+                this._tooltip.show({
+                    value:
+                        (gameData.system.language === 'en' ? 'Current time: ' : '时间: ') +
+                        gameData.system.currentTime,
+                    x: bounds.x,
+                    y: bounds.y,
+                });
+            },
+            out: () => {
+                this._tooltip.hide();
+            },
         });
         gameData.player.health = gameData.player.healthMax - 46;
         this._StatusBar.creatStatusIcon({
@@ -205,6 +239,19 @@ export class DayOne extends Container implements AppScene {
             value: gameData.player.health,
             x: 1680,
             y: 0,
+            hover: (e) => {
+                const bounds = (e.currentTarget as Sprite).getBounds();
+                this._tooltip.show({
+                    value:
+                        (gameData.system.language === 'en' ? 'Health: ' : '生命: ') +
+                        gameData.player.health,
+                    x: bounds.x,
+                    y: bounds.y,
+                });
+            },
+            out: () => {
+                this._tooltip.hide();
+            },
         });
         gameData.player.stress = 50;
         gameData.player.stressLevel = 0;
@@ -214,6 +261,19 @@ export class DayOne extends Container implements AppScene {
             value: gameData.player.stress,
             x: 1740,
             y: 0,
+            hover: (e) => {
+                const bounds = (e.currentTarget as Sprite).getBounds();
+                this._tooltip.show({
+                    value:
+                        (gameData.system.language === 'en' ? 'Stress: ' : '压力: ') +
+                        gameData.player.stress,
+                    x: bounds.x,
+                    y: bounds.y,
+                });
+            },
+            out: () => {
+                this._tooltip.hide();
+            },
         });
         gameData.player.food = gameData.player.foodMax;
         this._StatusBar.creatStatusIcon({
@@ -222,6 +282,19 @@ export class DayOne extends Container implements AppScene {
             value: gameData.player.food,
             x: 1800,
             y: 0,
+            hover: (e) => {
+                const bounds = (e.currentTarget as Sprite).getBounds();
+                this._tooltip.show({
+                    value:
+                        (gameData.system.language === 'en' ? 'Food: ' : '存粮: ') +
+                        gameData.player.food,
+                    x: bounds.x,
+                    y: bounds.y,
+                });
+            },
+            out: () => {
+                this._tooltip.hide();
+            },
         });
         gameData.player.credibility = 50;
         this._StatusBar.creatStatusIcon({
@@ -230,6 +303,19 @@ export class DayOne extends Container implements AppScene {
             value: gameData.player.credibility,
             x: 1860,
             y: 0,
+            hover: (e) => {
+                const bounds = (e.currentTarget as Sprite).getBounds();
+                this._tooltip.show({
+                    value:
+                        (gameData.system.language === 'en' ? 'Credibility: ' : '信誉: ') +
+                        gameData.player.credibility,
+                    x: bounds.x,
+                    y: bounds.y,
+                });
+            },
+            out: () => {
+                this._tooltip.hide();
+            },
         });
 
         if (gameData.collection.smilingAngel_1) {
@@ -239,6 +325,20 @@ export class DayOne extends Container implements AppScene {
                 x: app.view.width - 60,
                 y: app.view.height - 90,
                 position: 'bottomRight',
+                hover: (e) => {
+                    const bounds = (e.currentTarget as Sprite).getBounds();
+                    this._tooltip.show({
+                        value:
+                            gameData.system.language === 'en'
+                                ? '【 Collection: Smiling Angel Part 1 】\nIt loves us wholeheartedly and sincerely. Carescing, licking, and sexual intercourse are not enough, only by truly blending together can we return this love.'
+                                : '【 有害物词条： 微笑天使 part1 】\n它全心全意, 由衷地爱着我们。抚摸, 舔舐, 性交尚不足以, 唯有真正融为一体, 方能回报这份恋心。',
+                        x: bounds.x,
+                        y: bounds.y,
+                    });
+                },
+                out: () => {
+                    this._tooltip.hide();
+                },
             });
         }
 
@@ -249,6 +349,20 @@ export class DayOne extends Container implements AppScene {
                 x: app.view.width - 60,
                 y: app.view.height - 90,
                 position: 'bottomRight',
+                hover: (e) => {
+                    const bounds = (e.currentTarget as Sprite).getBounds();
+                    this._tooltip.show({
+                        value:
+                            gameData.system.language === 'en'
+                                ? "【 Collection: Smiling Angel Part 2 】\nIt still can't understand why anyone would reject its love. How bitter lovesickness is! It spends its time in loveless satiety, mournfully waiting for the next dawn."
+                                : '【 有害物词条： 微笑天使 part2 】\n它至今无法明白, 为何会有人拒绝了它的爱情。\n相思何其苦涩！\n它在无爱的饱腹中虚度光阴, 哀愁地等待下一个黎明。',
+                        x: bounds.x,
+                        y: bounds.y,
+                    });
+                },
+                out: () => {
+                    this._tooltip.hide();
+                },
             });
         }
 
@@ -310,6 +424,20 @@ export class DayOne extends Container implements AppScene {
                 x: 30,
                 y: app.view.height - 90,
                 position: 'bottomLeft',
+                hover: (e) => {
+                    const bounds = (e.currentTarget as Sprite).getBounds();
+                    this._tooltip.show({
+                        value:
+                            (gameData.system.language === 'en'
+                                ? 'Item - Corpse pieces: '
+                                : '道具 - 尸块: ') + gameData.item.CorpsePieces,
+                        x: bounds.x,
+                        y: bounds.y,
+                    });
+                },
+                out: () => {
+                    this._tooltip.hide();
+                },
             });
             await this._printTextAndWC(
                 `【 Corpse pieces (Item): ${gameData.item.CorpsePieces} 】`,
@@ -342,6 +470,20 @@ export class DayOne extends Container implements AppScene {
                     x: 30,
                     y: app.view.height - 90,
                     position: 'bottomLeft',
+                    hover: (e) => {
+                        const bounds = (e.currentTarget as Sprite).getBounds();
+                        this._tooltip.show({
+                            value:
+                                (gameData.system.language === 'en'
+                                    ? 'Item - Human corpse: '
+                                    : '道具 - 尸体: ') + gameData.legacy.humanCorpse,
+                            x: bounds.x,
+                            y: bounds.y,
+                        });
+                    },
+                    out: () => {
+                        this._tooltip.hide();
+                    },
                 });
                 sfx.play('sfx_item_got');
                 await this._printTextAndWC(
@@ -394,6 +536,20 @@ export class DayOne extends Container implements AppScene {
                     x: 30,
                     y: app.view.height - 90,
                     position: 'bottomLeft',
+                    hover: (e) => {
+                        const bounds = (e.currentTarget as Sprite).getBounds();
+                        this._tooltip.show({
+                            value:
+                                (gameData.system.language === 'en'
+                                    ? 'Item - Corpse pieces: '
+                                    : '道具 - 尸块: ') + gameData.item.CorpsePieces,
+                            x: bounds.x,
+                            y: bounds.y,
+                        });
+                    },
+                    out: () => {
+                        this._tooltip.hide();
+                    },
                 });
                 await this._printTextAndWC(
                     `【 Corpse pieces (Item) + ${gameData.legacy.humanCorpse * 10}. Currently: ${
@@ -644,6 +800,20 @@ export class DayOne extends Container implements AppScene {
                             x: app.view.width - 60,
                             y: app.view.height - 90,
                             position: 'bottomRight',
+                            hover: (e) => {
+                                const bounds = (e.currentTarget as Sprite).getBounds();
+                                this._tooltip.show({
+                                    value:
+                                        gameData.system.language === 'en'
+                                            ? '【 Collection: Smiling Angel Part 1 】\nIt loves us wholeheartedly and sincerely. Carescing, licking, and sexual intercourse are not enough, only by truly blending together can we return this love.'
+                                            : '【 有害物词条： 微笑天使 part1 】\n它全心全意, 由衷地爱着我们。抚摸, 舔舐, 性交尚不足以, 唯有真正融为一体, 方能回报这份恋心。',
+                                    x: bounds.x,
+                                    y: bounds.y,
+                                });
+                            },
+                            out: () => {
+                                this._tooltip.hide();
+                            },
                         });
                         await this._printTextAndWC(
                             'Colletion: Smiling Angel Part 1',
@@ -695,6 +865,20 @@ export class DayOne extends Container implements AppScene {
                                     x: app.view.width - 60,
                                     y: app.view.height - 90,
                                     position: 'bottomRight',
+                                    hover: (e) => {
+                                        const bounds = (e.currentTarget as Sprite).getBounds();
+                                        this._tooltip.show({
+                                            value:
+                                                gameData.system.language === 'en'
+                                                    ? "【 Collection: Smiling Angel Part 2 】\nIt still can't understand why anyone would reject its love. How bitter lovesickness is! It spends its time in loveless satiety, mournfully waiting for the next dawn."
+                                                    : '【 有害物词条： 微笑天使 part2 】\n它至今无法明白, 为何会有人拒绝了它的爱情。\n相思何其苦涩！\n它在无爱的饱腹中虚度光阴, 哀愁地等待下一个黎明。',
+                                            x: bounds.x,
+                                            y: bounds.y,
+                                        });
+                                    },
+                                    out: () => {
+                                        this._tooltip.hide();
+                                    },
                                 });
                                 await this._printTextAndWC(
                                     'Collection: Smiling Angel Part 2',

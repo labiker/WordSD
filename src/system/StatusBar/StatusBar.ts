@@ -1,4 +1,4 @@
-import { Container, Sprite, Text, Texture } from 'pixi.js';
+import { Container, FederatedPointerEvent, Sprite, Text, Texture } from 'pixi.js';
 
 /** The props for the status icon */
 interface IStatusIconProps {
@@ -14,6 +14,11 @@ interface IStatusIconProps {
     y?: number;
     /** The position of the status icon */
     position?: 'bottomLeft' | 'bottomRight' | 'none';
+    /** The callback function when the status icon is hovered */
+    // eslint-disable-next-line no-unused-vars
+    hover?: (e: FederatedPointerEvent) => void;
+    /** The callback function when the status icon is hovered out */
+    out?: () => void;
 }
 
 /**
@@ -77,6 +82,18 @@ export class StatusBar {
             }
         } else {
             setPositionNormally();
+        }
+
+        if (props.hover || props.out) {
+            icon.eventMode = 'static';
+            if (props.hover) {
+                icon.on('mouseover', (e: FederatedPointerEvent) => {
+                    props.hover(e);
+                });
+            }
+            if (props.out) {
+                icon.on('mouseout', props.out);
+            }
         }
 
         // Add the sprite and text to a container
