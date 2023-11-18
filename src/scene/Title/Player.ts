@@ -1,10 +1,6 @@
 import { Container, Sprite } from 'pixi.js';
 import { image } from '../../core/image';
 
-/* import type { BubbleType } from '../boardConfig';
-import { boardConfig } from '../boardConfig';
-import { BubbleView } from './BubbleView'; */
-
 /** A class representing the player. */
 export class Player {
     /** The Container instance which contains all the visual elements for this class. */

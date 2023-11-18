@@ -1,23 +1,15 @@
 import { Container, Sprite, Text, Texture } from 'pixi.js';
-import { app } from '../../utils/app';
-
-/** The props for the tooltip */
-interface ITooltipProps {
-    /** The value for the tooltip */
-    value: string;
-    /** The x position of the tooltip */
-    x: number;
-    /** The y position of the tooltip */
-    y: number;
-}
+import { ITooltipProps } from './ITooltipProps';
+import { appWidth, appHeight } from '../../utils/app';
+import { ISystem } from '../ISystem';
 
 /**
  * The tooltip over the scene
  *
  * @since 1.0.0
  */
-export class Tooltip {
-    /** The container instance that is the root of all visuals in this class */
+export class Tooltip implements ISystem {
+    public SYSTEM_ID = 'Tooltip';
     public view = new Container();
 
     /**
@@ -51,14 +43,14 @@ export class Tooltip {
             background.x = background.width * 0.5;
         }
 
-        if (background.x + background.width * 0.5 > app.view.width) {
-            text.x = app.view.width - text.width * 0.5;
-            background.x = app.view.width - background.width * 0.5;
+        if (background.x + background.width * 0.5 > appWidth) {
+            text.x = appWidth - text.width * 0.5;
+            background.x = appWidth - background.width * 0.5;
         }
 
-        if (background.y + background.height > app.view.height) {
-            text.y = app.view.height - background.height;
-            background.y = app.view.height - background.height;
+        if (background.y + background.height > appHeight) {
+            text.y = appHeight - background.height;
+            background.y = appHeight - background.height;
         }
 
         // Add the text and background to the view

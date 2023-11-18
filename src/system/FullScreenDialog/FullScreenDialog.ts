@@ -1,13 +1,15 @@
 import { Container } from 'pixi.js';
 import { Background } from './Background';
 import { Message } from './Message';
+import { ISystem } from '../ISystem';
 
 /**
  * 全屏对话框
  *
  * @since 1.0.0
  */
-export class FullScreenDialog {
+export class FullScreenDialog implements ISystem {
+    public SYSTEM_ID = 'FullScreenDialog';
     /** The container instance that is the root of all visuals in this class */
     public view = new Container();
 

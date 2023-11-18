@@ -1,5 +1,6 @@
 import { Text, Container, FederatedPointerEvent } from 'pixi.js';
-import { app } from '../../utils/app';
+import { app, appWidth, appHeight } from '../../utils/app';
+import { ISystem } from '../ISystem';
 import { Message } from './Message';
 import { Background } from './Background';
 import { Scroll } from './Scroll';
@@ -13,7 +14,8 @@ import { CloseButton } from './CloseButton';
  *
  * @since 1.0.0
  */
-export class BackLog {
+export class BackLog implements ISystem {
+    public SYSTEM_ID = 'BackLog';
     /** The container instance that is the root of all visuals in this class */
     public view = new Container();
 
@@ -133,7 +135,7 @@ export class BackLog {
         this.background.hitArea.on('pointermove', (e: FederatedPointerEvent) => {
             if (!this.scroll.pressing) return;
 
-            const stepY = (e.movementY * app.view.width) / window.innerWidth;
+            const stepY = (e.movementY * appWidth) / window.innerWidth;
 
             if (this.scroll.moveScroll(stepY)) {
                 if (stepY < 0 && this.getFirstPixiText().y < this.marginTop) {
@@ -250,7 +252,7 @@ export class BackLog {
         }
 
         // Resize
-        this.resize(app.view.width, app.view.height);
+        this.resize(appWidth, appHeight);
 
         this.background = new Background(this.width, this.height);
         this.showObject(this.background);
@@ -332,7 +334,7 @@ export class BackLog {
     /**
      * 显示对象到舞台。
      *
-     * 调用 `BackLog.app.stage.addChildAt()` ，将对象显示到舞台中。
+     * 调用 `BackLog.addChildAt()` ，将对象显示到舞台中。
      * 同时，将对象添加到 `BackLog.showingObjects` 中。
      * 如果该对象是 `PIXI.Text` 类型，并且 `isRecorded` 为 `true`，则将对象添加到 `BackLog.pixiTexts` 中。
      * @param object 要显示的对象。
@@ -352,7 +354,7 @@ export class BackLog {
     /**
      * 从舞台中移除所有对象。
      *
-     * 调用 `BackLog.app.stage.removeChild()` ，将对象从舞台中移除。
+     * 调用 `BackLog.removeChild()` ，将对象从舞台中移除。
      * 同时，清空 `BackLog.showingObjects` 和 `BackLog.pixiTexts`。
      */
     private removeAllObjects() {

@@ -3,8 +3,10 @@ import { Container } from 'pixi.js';
 /* eslint-disable no-unused-vars */
 
 /** Interface for app Scenes */
-export interface AppScene<T = unknown> extends Container {
-    prepare?: (data?: T) => void;
+export interface IScene extends Container {
+    /** The unique id of the scene. */
+    SCENE_ID: string;
+    prepare?: () => void;
     show?: () => Promise<void>;
     hide?: () => Promise<void>;
     update?: (delta: number) => void;

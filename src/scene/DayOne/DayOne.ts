@@ -1,18 +1,19 @@
-import { gameData } from '../gameData';
 import { gsap } from 'gsap/gsap-core';
+import { Container, Sprite } from 'pixi.js';
+import { gameData } from '../gameData';
+import { IScene } from '../IScene';
 import { FullScreenDialog } from '../../system/FullScreenDialog/FullScreenDialog';
 import { BackLog } from '../../system/Backlog/BackLog';
-import { bgm, sfx } from '../../utils/audio';
-import { Container, Sprite } from 'pixi.js';
-import { AppScene } from '../AppScene';
-import { app } from '../../utils/app';
-import { Title } from '../Title/Title';
-import { image } from '../../core/image';
 import { StatusBar } from '../../system/StatusBar/StatusBar';
 import { Tooltip } from '../../system/Tooltip/Tooltip';
+import { image } from '../../core/image';
+import { bgm, sfx } from '../../utils/audio';
+import { app, initSystems, endSystems } from '../../utils/app';
+import { Title } from '../Title/Title';
 
 /** The scene class for the DayOne scene */
-export class DayOne extends Container implements AppScene {
+export class DayOne extends Container implements IScene {
+    public SCENE_ID: 'DayOne';
     /** A container to group full screen dialog elements */
     private _fsDialog = new FullScreenDialog();
     /** A container to group top status bar elements */
@@ -37,12 +38,7 @@ export class DayOne extends Container implements AppScene {
             }
         }, 10);
 
-        this.addChild(
-            this._fsDialog.view,
-            this._StatusBar.view,
-            this._backLog.view,
-            this._tooltip.view,
-        );
+        initSystems([this._fsDialog, this._StatusBar, this._backLog, this._tooltip]);
 
         // Execute the default script
         this.process();
@@ -82,6 +78,7 @@ export class DayOne extends Container implements AppScene {
         });
     };
 
+    /** 场景执行内容 */
     public process = async () => {
         // 选择语言
         this._fsDialog.printClickableText('English version', () => {
@@ -115,72 +112,16 @@ export class DayOne extends Container implements AppScene {
     private _creatNewWorldLine = async () => {
         // 重置玩家属性
         this._resetPlayerStatus();
-        this._fsDialog.clearDialog();
-        await bgm.play('sightless_storm_ii');
-
-        await this._printTextAndWC(
-            'For various reasons, you have to find a place to hide.',
-            '因为种种原因, 你不得不找个地方避避风头。',
-        );
-        await this._printTextAndWC(
-            'Just then, you received a phone call.',
-            '就在这时, 你收到了一个电话。',
-        );
-        this._fsDialog.clearDialog();
-        await this._printTextAndWC(
-            '"The Rentouma Company will provide you with the most thoughtful service."',
-            '“人头马公司将竭诚为您, 提供最周到的服务。”',
-        );
-        this._fsDialog.clearDialog();
-        await this._printTextAndWC(
-            'In less than a week, you moved into the apartment arranged by the Rentouma Company.',
-            '不到一周, 你就搬进了人头马公司安排的公寓。',
-        );
-        await this._printTextAndWC(
-            `【 Day ${gameData.system.currentDay} 】\nToday is the day you moved in.`,
-            `【 第 ${gameData.system.currentDay} 天 】\n今天是入住日。`,
-        );
-        await this._printTextAndWC(
-            `Maybe you can stay for 【 ${gameData.system.totlaDays} days 】 first, \nsee the situation, and then decide whether to stay for a long time.`,
-            `也许可以先住到【 第 ${gameData.system.totlaDays} 天 】, \n看看情况, 再决定要不要长住。`,
-        );
-        this._fsDialog.clearDialog();
-        await this._printTextAndWC(
-            `【 Food: ${gameData.player.food} / ${gameData.player.foodMax} 】\nAlthough the trip was hasty, you still remembered to bring some food.`,
-            `【 存粮： ${gameData.player.food} / ${gameData.player.foodMax} 】\n尽管此行匆忙, 但你还是记得带上了一些食物。`,
-        );
-        await this._printTextAndWC(
-            `【 Stress: ${gameData.player.stress} / ${gameData.player.stressMax} 】\nThe inherent breath of the room always makes people breathless.`,
-            `【 压力： ${gameData.player.stress} / ${gameData.player.stressMax} 】\n房间固有的气息总有些让人喘不过气。`,
-        );
-        await this._printTextAndWC(
-            `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\n`,
-            `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n但也好过在外头被不知名的某人夺了性命。`,
-        );
-        this._fsDialog.clearDialog();
+        // 加载状态栏
+        this._loadStatusBar();
+        // 背景及机制介绍
+        await this._backgroundAndMechanism();
         // 如果有道具, 进入道具检查环节
         await this._checkItem();
         // 如果有遗留物, 进入遗留物检查环节
         await this._checkLegacy();
         // 如果有收集物, 进入收集物检查环节
         await this._checkCollection();
-        gameData.system.currentTime = 18;
-        this._StatusBar.updateStatusIcon({
-            key: 'CurrentDay',
-            image: image.find('Current_night'),
-        });
-        this._StatusBar.updateStatusIcon({
-            key: 'CurrentTime',
-            value: gameData.system.currentTime,
-        });
-        await this._printTextAndWC(
-            `【 Time: ${gameData.system.currentTime} o'clock 】\nYou have been busy moving, and it was already night.`,
-            `【 时间：${gameData.system.currentTime} 点 】\n一直忙着搬家, 不知不觉, 已经到了晚上。`,
-        );
-        await this._printTextAndWC(
-            'You can go out and have a look, maybe you can meet new neighbors and say hello.',
-            '可以出去看看, 也许能碰到新的邻居, 打个招呼。',
-        );
         // 雪橇犬事件
         await this._sledDogScene();
         // 晚餐环节
@@ -189,14 +130,46 @@ export class DayOne extends Container implements AppScene {
         await this._dayEndPhase();
     };
 
+    /** 重置玩家属性 */
     private _resetPlayerStatus = () => {
         gameData.system.currentDay = 1;
+        gameData.system.currentTime = 14;
+        gameData.player.health = gameData.player.healthMax - 46;
+        gameData.player.stress = 50;
+        gameData.player.stressLevel = 0;
+        gameData.player.food = gameData.player.foodMax;
+        gameData.player.credibility = 50;
+        gameData.player.isNoteProcessed = false;
+    };
+
+    /** 加载状态栏 */
+    private _loadStatusBar = () => {
         this._StatusBar.creatStatusIcon({
             key: 'CurrentDay',
             image: image.find('Current_day'),
             value: gameData.system.currentDay,
             x: 30,
             y: 0,
+            update: (key: 'CurrentDay') => {
+                const currentDay = gameData.system.currentDay;
+                const currentTime = gameData.system.currentTime;
+                this._StatusBar.updateStatusIcon({
+                    key,
+                    value: currentDay,
+                });
+
+                if (currentTime >= 18 || currentTime < 6) {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Current_night'),
+                    });
+                } else {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Current_day'),
+                    });
+                }
+            },
             hover: (e) => {
                 const bounds = (e.currentTarget as Sprite).getBounds();
                 this._tooltip.show({
@@ -211,13 +184,19 @@ export class DayOne extends Container implements AppScene {
                 this._tooltip.hide();
             },
         });
-        gameData.system.currentTime = 14;
         this._StatusBar.creatStatusIcon({
             key: 'CurrentTime',
             image: image.find('Current_time'),
             value: gameData.system.currentTime,
             x: 90,
             y: 0,
+            update: (key: 'CurrentTime') => {
+                const currentTime = gameData.system.currentTime;
+                this._StatusBar.updateStatusIcon({
+                    key,
+                    value: currentTime,
+                });
+            },
             hover: (e) => {
                 const bounds = (e.currentTarget as Sprite).getBounds();
                 this._tooltip.show({
@@ -232,13 +211,36 @@ export class DayOne extends Container implements AppScene {
                 this._tooltip.hide();
             },
         });
-        gameData.player.health = gameData.player.healthMax - 46;
         this._StatusBar.creatStatusIcon({
             key: 'Health',
             image: image.find('Health'),
             value: gameData.player.health,
             x: 1680,
             y: 0,
+            update: (key: 'Health') => {
+                const currentHealth = gameData.player.health;
+                this._StatusBar.updateStatusIcon({
+                    key,
+                    value: currentHealth,
+                });
+
+                if (currentHealth >= 0 && currentHealth < 20) {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Health_negative'),
+                    });
+                } else if (currentHealth >= 20 && currentHealth < 80) {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Health'),
+                    });
+                } else if (currentHealth >= 80) {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Health_positive'),
+                    });
+                }
+            },
             hover: (e) => {
                 const bounds = (e.currentTarget as Sprite).getBounds();
                 this._tooltip.show({
@@ -253,20 +255,49 @@ export class DayOne extends Container implements AppScene {
                 this._tooltip.hide();
             },
         });
-        gameData.player.stress = 50;
-        gameData.player.stressLevel = 0;
         this._StatusBar.creatStatusIcon({
             key: 'Stress',
             image: image.find('Stress_level_0'),
             value: gameData.player.stress,
             x: 1740,
             y: 0,
+            update: (key: 'Stress') => {
+                const currentStress = gameData.player.stress;
+                this._StatusBar.updateStatusIcon({
+                    key,
+                    value: currentStress,
+                });
+
+                if (currentStress >= 0 && currentStress < 100) {
+                    gameData.player.stressLevel = 0;
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Stress_level_0'),
+                    });
+                } else if (currentStress >= 100 && currentStress < 200) {
+                    gameData.player.stressLevel = 1;
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Stress_level_1'),
+                    });
+                } else if (currentStress >= 200 && currentStress < 300) {
+                    gameData.player.stressLevel = 2;
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Stress_level_2'),
+                    });
+                }
+            },
             hover: (e) => {
                 const bounds = (e.currentTarget as Sprite).getBounds();
                 this._tooltip.show({
-                    value:
+                    value: `${
                         (gameData.system.language === 'en' ? 'Stress: ' : '压力: ') +
-                        gameData.player.stress,
+                        gameData.player.stress
+                    }\n${
+                        (gameData.system.language === 'en' ? 'Stress level: ' : '压力等级: ') +
+                        gameData.player.stressLevel
+                    }`,
                     x: bounds.x,
                     y: bounds.y,
                 });
@@ -275,13 +306,19 @@ export class DayOne extends Container implements AppScene {
                 this._tooltip.hide();
             },
         });
-        gameData.player.food = gameData.player.foodMax;
         this._StatusBar.creatStatusIcon({
             key: 'Food',
             image: image.find('Supplies'),
             value: gameData.player.food,
             x: 1800,
             y: 0,
+            update: (key: 'Food') => {
+                const currentFood = gameData.player.food;
+                this._StatusBar.updateStatusIcon({
+                    key,
+                    value: currentFood,
+                });
+            },
             hover: (e) => {
                 const bounds = (e.currentTarget as Sprite).getBounds();
                 this._tooltip.show({
@@ -296,13 +333,36 @@ export class DayOne extends Container implements AppScene {
                 this._tooltip.hide();
             },
         });
-        gameData.player.credibility = 50;
         this._StatusBar.creatStatusIcon({
             key: 'Credibility',
             image: image.find('Friend'),
             value: gameData.player.credibility,
             x: 1860,
             y: 0,
+            update: (key: 'Credibility') => {
+                const currentCredibility = gameData.player.credibility;
+                this._StatusBar.updateStatusIcon({
+                    key,
+                    value: currentCredibility,
+                });
+
+                if (currentCredibility >= 0 && currentCredibility < 30) {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Rival'),
+                    });
+                } else if (currentCredibility >= 30 && currentCredibility < 60) {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Friend'),
+                    });
+                } else if (currentCredibility >= 60) {
+                    this._StatusBar.updateStatusIcon({
+                        key,
+                        image: image.find('Best_friend'),
+                    });
+                }
+            },
             hover: (e) => {
                 const bounds = (e.currentTarget as Sprite).getBounds();
                 this._tooltip.show({
@@ -365,8 +425,53 @@ export class DayOne extends Container implements AppScene {
                 },
             });
         }
+    };
 
-        gameData.player.isNoteProcessed = false;
+    /** 背景及机制介绍 */
+    private _backgroundAndMechanism = async () => {
+        this._fsDialog.clearDialog();
+        await bgm.play('sightless_storm_ii');
+
+        await this._printTextAndWC(
+            'For various reasons, you have to find a place to hide.',
+            '因为种种原因, 你不得不找个地方避避风头。',
+        );
+        await this._printTextAndWC(
+            'Just then, you received a phone call.',
+            '就在这时, 你收到了一个电话。',
+        );
+        this._fsDialog.clearDialog();
+        await this._printTextAndWC(
+            '"The Rentouma Company will provide you with the most thoughtful service."',
+            '“人头马公司将竭诚为您, 提供最周到的服务。”',
+        );
+        this._fsDialog.clearDialog();
+        await this._printTextAndWC(
+            'In less than a week, you moved into the apartment arranged by the Rentouma Company.',
+            '不到一周, 你就搬进了人头马公司安排的公寓。',
+        );
+        await this._printTextAndWC(
+            `【 Day ${gameData.system.currentDay} 】\nToday is the day you moved in.`,
+            `【 第 ${gameData.system.currentDay} 天 】\n今天是入住日。`,
+        );
+        await this._printTextAndWC(
+            `Maybe you can stay for 【 ${gameData.system.totlaDays} days 】 first, \nsee the situation, and then decide whether to stay for a long time.`,
+            `也许可以先住到【 第 ${gameData.system.totlaDays} 天 】, \n看看情况, 再决定要不要长住。`,
+        );
+        this._fsDialog.clearDialog();
+        await this._printTextAndWC(
+            `【 Food: ${gameData.player.food} / ${gameData.player.foodMax} 】\nAlthough the trip was hasty, you still remembered to bring some food.`,
+            `【 存粮： ${gameData.player.food} / ${gameData.player.foodMax} 】\n尽管此行匆忙, 但你还是记得带上了一些食物。`,
+        );
+        await this._printTextAndWC(
+            `【 Stress: ${gameData.player.stress} / ${gameData.player.stressMax} 】\nThe inherent breath of the room always makes people breathless.`,
+            `【 压力： ${gameData.player.stress} / ${gameData.player.stressMax} 】\n房间固有的气息总有些让人喘不过气。`,
+        );
+        await this._printTextAndWC(
+            `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\n`,
+            `【 生命： ${gameData.player.health} / ${gameData.player.healthMax} 】\n但也好过在外头被不知名的某人夺了性命。`,
+        );
+        this._fsDialog.clearDialog();
     };
 
     /** Called when the screen is being hidden. */
@@ -387,6 +492,8 @@ export class DayOne extends Container implements AppScene {
             await this.hide();
         }
 
+        endSystems([this._fsDialog, this._StatusBar, this._backLog, this._tooltip]);
+
         // Remove screen from its parent (usually app.stage, if not changed)
         if (this.parent) {
             this.parent.removeChild(this);
@@ -399,6 +506,8 @@ export class DayOne extends Container implements AppScene {
         const sceneTitle = new Title();
         app.stage.addChild(sceneTitle);
         sceneTitle.resize(app.view.width, app.view.height);
+
+        this.destroy();
     };
 
     /**
@@ -494,11 +603,6 @@ export class DayOne extends Container implements AppScene {
             }
             this._fsDialog.clearDialog();
             gameData.player.stress += 5;
-            this._StatusBar.updateStatusIcon({
-                key: 'Stress',
-                image: image.find('Stress_level_0'),
-                value: gameData.player.stress,
-            });
             sfx.play('sfx_item_lost');
             await this._printTextAndWC(
                 `【 Stress + ${5}. Currently ${gameData.player.stress} / ${
@@ -525,7 +629,8 @@ export class DayOne extends Container implements AppScene {
                 );
                 gameData.item.CorpsePieces += gameData.legacy.humanCorpse * 10;
                 const increaseStress =
-                    gameData.legacy.humanCorpse * 100 > gameData.player.stress
+                    gameData.legacy.humanCorpse * 100 >
+                    gameData.player.stressMax - gameData.player.stress
                         ? gameData.player.stressMax - gameData.player.stress
                         : gameData.legacy.humanCorpse * 100;
                 sfx.play('sfx_item_got');
@@ -561,21 +666,6 @@ export class DayOne extends Container implements AppScene {
                     'hint',
                 );
                 gameData.player.stress += increaseStress;
-                if (gameData.player.stress >= 100) {
-                    gameData.player.stress = 0;
-                    gameData.player.stressLevel += 1;
-                    this._StatusBar.updateStatusIcon({
-                        key: 'Stress',
-                        image: image.find('Stress_level_1'),
-                        value: gameData.player.stress,
-                    });
-                } else {
-                    this._StatusBar.updateStatusIcon({
-                        key: 'Stress',
-                        image: image.find('Stress_level_0'),
-                        value: gameData.player.stress,
-                    });
-                }
                 sfx.play('sfx_item_lost');
                 await this._printTextAndWC(
                     `【 Stress + ${increaseStress}. Currently: ${gameData.player.stress} / ${gameData.player.stressMax} 】\nYour mental state is not very good.`,
@@ -612,19 +702,6 @@ export class DayOne extends Container implements AppScene {
                 );
                 sfx.play('sfx_item_got');
                 gameData.player.credibility += gameData.legacy.humanCorpse * 10;
-                if (gameData.player.credibility >= 60) {
-                    this._StatusBar.updateStatusIcon({
-                        key: 'Credibility',
-                        image: image.find('Best_friend'),
-                        value: gameData.player.credibility,
-                    });
-                } else {
-                    this._StatusBar.updateStatusIcon({
-                        key: 'Credibility',
-                        image: image.find('Friend'),
-                        value: gameData.player.credibility,
-                    });
-                }
                 await this._printTextAndWC(
                     `【 Reputation + ${gameData.legacy.humanCorpse * 10}. Currently: ${
                         gameData.player.credibility
@@ -705,6 +782,15 @@ export class DayOne extends Container implements AppScene {
 
     private _sledDogScene = async () => {
         let sledDogSceneClear = false;
+        gameData.system.currentTime = 18;
+        await this._printTextAndWC(
+            `【 Time: ${gameData.system.currentTime} o'clock 】\nYou have been busy moving, and it was already night.`,
+            `【 时间：${gameData.system.currentTime} 点 】\n一直忙着搬家, 不知不觉, 已经到了晚上。`,
+        );
+        await this._printTextAndWC(
+            'You can go out and have a look, maybe you can meet new neighbors and say hello.',
+            '可以出去看看, 也许能碰到新的邻居, 打个招呼。',
+        );
         this._printClickableText('- Go out', '- 外出', async () => {
             this._fsDialog.clearDialog();
             await this._printTextAndWC(
@@ -729,11 +815,6 @@ export class DayOne extends Container implements AppScene {
                 '它染血的微笑充满了视野, 你听见吸吮的声音, \n眼窝中传来辛辣的刺痛感。',
             );
             gameData.player.health = 0;
-            this._StatusBar.updateStatusIcon({
-                key: 'Health',
-                image: image.find('Health_negative'),
-                value: gameData.player.health,
-            });
             gameData.story.sledDogDeathSceneI = true;
             gameData.legacy.humanCorpse += 1;
             sfx.play('sfx_item_lost');
@@ -770,11 +851,6 @@ export class DayOne extends Container implements AppScene {
                     await this._printTextAndWC('....', '....');
                     await this._printTextAndWC('......', '......');
                     gameData.player.health = 0;
-                    this._StatusBar.updateStatusIcon({
-                        key: 'Health',
-                        image: image.find('Health_negative'),
-                        value: gameData.player.health,
-                    });
                     gameData.story.sledDogDeathSceneII = true;
                     gameData.legacy.humanCorpse += 1;
                     sfx.play('sfx_item_lost');
@@ -977,11 +1053,6 @@ export class DayOne extends Container implements AppScene {
             await this._printTextAndWC('boom!', '“砰！”');
             this._fsDialog.clearDialog();
             gameData.player.health = 0;
-            this._StatusBar.updateStatusIcon({
-                key: 'Health',
-                image: image.find('Health_negative'),
-                value: gameData.player.health,
-            });
             sfx.play('sfx_item_lost');
             await this._printTextAndWC(
                 `【 Health: ${gameData.player.health} / ${gameData.player.healthMax} 】\nThat was the last sound you heard in this world.`,
@@ -1037,11 +1108,6 @@ export class DayOne extends Container implements AppScene {
         await this._printTextAndWC("It's time for dinner.", '到了晚餐时间。');
         // 消耗8小时的食物
         gameData.player.food -= gameData.player.foodConsumePerHour * 8;
-        this._StatusBar.updateStatusIcon({
-            key: 'Food',
-            image: image.find('Supplies'),
-            value: gameData.player.food,
-        });
         sfx.play('sfx_item_lost');
         await this._printTextAndWC(
             `【 Food - ${gameData.player.foodConsumePerHour * 8}. Currently: ${
@@ -1065,11 +1131,6 @@ export class DayOne extends Container implements AppScene {
                 ? gameData.player.stressMax - gameData.player.stress
                 : gameData.player.stressDecreasePerHour * 8;
         gameData.player.stress -= decreaseStress;
-        this._StatusBar.updateStatusIcon({
-            key: 'Stress',
-            image: image.find('Stress_level_0'),
-            value: gameData.player.stress,
-        });
         await this._printTextAndWC(
             `【 Stress - ${decreaseStress}. Currently: ${gameData.player.stress} / ${gameData.player.stressMax} 】`,
             `【 压力 - ${decreaseStress} 。当前为: ${gameData.player.stress} / ${gameData.player.stressMax} 】`,

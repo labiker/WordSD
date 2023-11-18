@@ -1,38 +1,30 @@
-import { Container, FederatedPointerEvent, Sprite, Text, Texture } from 'pixi.js';
-
-/** The props for the status icon */
-interface IStatusIconProps {
-    /** The key for the status icon */
-    key: string;
-    /** The image for the status icon */
-    image?: Texture;
-    /** The value for the status icon */
-    value?: number;
-    /** The x position of the status icon */
-    x?: number;
-    /** The y position of the status icon */
-    y?: number;
-    /** The position of the status icon */
-    position?: 'bottomLeft' | 'bottomRight' | 'none';
-    /** The callback function when the status icon is hovered */
-    // eslint-disable-next-line no-unused-vars
-    hover?: (e: FederatedPointerEvent) => void;
-    /** The callback function when the status icon is hovered out */
-    out?: () => void;
-}
+import { Container, FederatedPointerEvent, Sprite, Text } from 'pixi.js';
+import { IStatusIconProps } from './IStatusIconProps';
+import { ISystem } from '../ISystem';
 
 /**
  * The status bar over the scene
  *
  * @since 1.0.0
  */
-export class StatusBar {
-    /** The container instance that is the root of all visuals in this class */
+export class StatusBar implements ISystem {
+    public SYSTEM_ID = 'StatusBar';
     public view = new Container();
     /** The array of status icons */
     private _statusIcons: {
         [key: string]: { container: Container; position: 'bottomLeft' | 'bottomRight' | 'none' };
     } = {};
+    /** The array of interval event ids */
+    private intervalIds: number[] = [];
+
+    public end() {
+        // Clear all interval events
+        if (this.intervalIds.length) {
+            this.intervalIds.forEach((id) => {
+                clearInterval(id);
+            });
+        }
+    }
 
     /**
      * Creat a new status icon  with the given image and value
@@ -96,6 +88,14 @@ export class StatusBar {
             }
         }
 
+        if (props.update) {
+            // 每隔一段时间更新一次
+            const intervalId = setInterval(() => {
+                props.update(props.key);
+            }, 100) as unknown as number;
+            this.intervalIds.push(intervalId);
+        }
+
         // Add the sprite and text to a container
         const statusIcon = new Container();
         statusIcon.addChild(icon, text);
@@ -157,5 +157,21 @@ export class StatusBar {
 
         this.view.removeChild(this._statusIcons[key].container);
         delete this._statusIcons[key];
+    }
+
+    /**
+     * Get the status icon's value at the given key
+     * @param key The key of the status icon to get
+     * @returns The status icon's value
+     */
+    public getStatusIconValue(key: string): number {
+        if (!this._statusIcons[key]) {
+            return -1;
+        }
+
+        const statusIcon = this._statusIcons[key].container;
+        const text = statusIcon.getChildAt(1) as Text;
+
+        return parseInt(text.text);
     }
 }

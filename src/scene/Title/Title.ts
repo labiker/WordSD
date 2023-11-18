@@ -1,6 +1,6 @@
 import { Container, Sprite } from 'pixi.js';
 import { gsap } from 'gsap/gsap-core';
-import { AppScene } from '../AppScene';
+import { IScene } from '../IScene';
 import { i18n } from '../../utils/i18n';
 import { PrimaryButton } from '../../ui/buttons/PrimaryButton';
 import { image } from '../../core/image';
@@ -11,10 +11,8 @@ import { DayOne } from '../DayOne/DayOne';
 import { app } from '../../utils/app';
 
 /** The scene presented at the start, after loading. */
-export class Title extends Container implements AppScene {
-    /** A unique identifier for the screen */
-    public static SCREEN_ID = 'title';
-
+export class Title extends Container implements IScene {
+    public SCENE_ID = 'Title';
     private _titleText!: TitleText;
     private _player!: Player;
     private _forkBtn!: PrimaryButton;
@@ -221,6 +219,8 @@ export class Title extends Container implements AppScene {
             const sceneDayOne = new DayOne();
             app.stage.addChild(sceneDayOne);
             sceneDayOne.resize(app.view.width, app.view.height);
+
+            this.destroy();
         });
 
         this._playBtn.onHover.connect(() => {

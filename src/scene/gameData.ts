@@ -41,7 +41,7 @@ export const gameData = {
         health: 100, // Current health
         healthIncreasePerHour: 10, // health recovery per hour
         stressLevel: 0, // Stress level
-        stressMax: 100, // Maximum stress
+        stressMax: 300, // Maximum stress
         stress: 0, // Current stress
         stressConsumePerHour: 10, // stress consumption per hour
         stressDecreasePerHour: 3, // stress recovery per hour (when sleeping)
