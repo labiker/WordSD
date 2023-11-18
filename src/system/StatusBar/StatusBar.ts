@@ -37,7 +37,7 @@ export class StatusBar implements ISystem {
         }
 
         // Create a sprite using the image and set its anchor to 0.5
-        const icon = new Sprite(props.image);
+        const icon = Sprite.from(props.image ?? '');
         icon.anchor.set(0.5, 0);
 
         // Create a text object to display the value
@@ -126,7 +126,7 @@ export class StatusBar implements ISystem {
         const icon = statusIcon.getChildAt(0) as Sprite;
         const text = statusIcon.getChildAt(1) as Text;
 
-        icon.texture = props.image ?? icon.texture;
+        icon.texture = props.image ? Sprite.from(props.image).texture : icon.texture;
         text.text = props.value >= 0 ? props.value.toString() : text.text;
 
         // Position the sprite

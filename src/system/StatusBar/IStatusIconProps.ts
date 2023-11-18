@@ -1,4 +1,4 @@
-import { FederatedPointerEvent, Texture } from 'pixi.js';
+import { FederatedPointerEvent } from 'pixi.js';
 
 /* eslint-disable no-unused-vars */
 
@@ -7,7 +7,7 @@ export interface IStatusIconProps {
     /** The key for the status icon */
     key: string;
     /** The image for the status icon */
-    image?: Texture;
+    image?: string;
     /** The value for the status icon */
     value?: number;
     /** The x position of the status icon */

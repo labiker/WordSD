@@ -49,6 +49,18 @@ protocol.registerSchemesAsPrivileged([
             allowServiceWorkers: true,
         },
     },
+    {
+        scheme: 'img',
+        privileges: {
+            secure: true,
+            standard: true,
+            supportFetchAPI: true,
+            corsEnabled: true,
+            bypassCSP: true,
+            stream: true,
+            allowServiceWorkers: true,
+        },
+    },
 ]);
 
 // This method will be called when Electron has finished
@@ -83,5 +95,11 @@ app.whenReady().then(() => {
         const filePath = path.join(__dirname, host, pathname);
         const fileData = fs.readFileSync(filePath);
         return new Response(fileData);
+    });
+    protocol.handle('img', (req) => {
+        const { host, pathname } = new URL(req.url);
+        const imagePath = path.join(__dirname, 'assets', 'images', host, pathname);
+        const imageData = fs.readFileSync(imagePath);
+        return new Response(imageData);
     });
 });

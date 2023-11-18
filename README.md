@@ -3,7 +3,7 @@
 ![wordsd_github_logo](https://github.com/labiker/WordSD/assets/49630998/12ad2a25-e914-4c31-9dfe-91ad8c2d5b1f)
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/xVVk5hdkXK)
-[![Electron Forge](https://badgen.net/badge/Electron%20Forge/6.4.2/green?icon=https://www.electronjs.org/assets/img/logo.svg)](https://www.electronforge.io/config/configuration)
+[![Electron Forge](https://badgen.net/badge/Electron%20Forge/7.1.0/green?icon=https://www.electronjs.org/assets/img/logo.svg)](https://www.electronforge.io/config/configuration)
 [![PixiJS](https://badgen.net/badge/PixiJS/7.3.2/green)](https://pixijs.download/v7.3.2/docs/index.html)
 
 Welcome to WordSD!
@@ -64,8 +64,8 @@ It is very suitable for developing AVG, so I came up with the idea of using it t
       sound.add('sfx_print', 'app://assets/audio/sfx_print.mp3');
 
       // Load image assets
-      await image.add('player', 'app://assets/images/player.png');
-      await image.add('play_btn_up', 'app://assets/images/play_btn_up.png');
+      await image.add('player', 'img://player.png');
+      await image.add('play_btn_up', 'img://play_btn_up.png');
 
       // Load font assets
       await Assets.load('app://assets/fonts/Ma_Shan_Zheng/Ma_Shan_Zheng.ttf');
@@ -96,13 +96,18 @@ It is very suitable for developing AVG, so I came up with the idea of using it t
 - Image
 
   ```ts
-  import { image } from '../../core/image';
-
-  const player = new Sprite(image.find('player'));
+  const player = new Sprit(image.find('player'));
   ```
-  The method of importing and using image is similar to sound. You need to use the `image.add` function to import the texture in 
 
-  advance, and then use the `image.find` function to obtain it. Note that the `image.add` function is an `async` function.
+  The method of importing and using image is similar to sound. You need to use the `image.add` function to import the texture in advance, and then use the `image.find` function to obtain it. Note that the `image.add` function is an `async` function.
+
+  Or,
+
+  ```ts
+  const player = Sprit.from('img://player.png');
+  ```
+
+  This method is to read the image under the specified path through a custom protocol, and also needs to read the resource into the cache in advance through the `image.add` function.
 
 - Font
 

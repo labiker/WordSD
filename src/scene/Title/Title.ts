@@ -3,7 +3,6 @@ import { gsap } from 'gsap/gsap-core';
 import { IScene } from '../IScene';
 import { i18n } from '../../utils/i18n';
 import { PrimaryButton } from '../../ui/buttons/PrimaryButton';
-import { image } from '../../core/image';
 import { designConfig } from '../designConfig';
 import { TitleText } from './TitleText';
 import { Player } from './Player';
@@ -149,11 +148,8 @@ export class Title extends Container implements IScene {
         this._playBtn.x = w * 0.88;
         this._playBtn.y = h * 0.7;
 
-        this._forkBtn.x = w - 55;
-        this._forkBtn.y = h - 40 + this._forkBtn.height * 0.5 - 5;
-
-        // Set hit area of hit container to fit screen
-        // Leave a little room to prevent interaction bellow the cannon
+        this._forkBtn.x = 50;
+        this._forkBtn.y = h - 20;
     }
 
     /**
@@ -175,11 +171,11 @@ export class Title extends Container implements IScene {
     private _buildButtons() {
         // Add the forkGithub button
         const defaultViewContainer = new Container();
-        defaultViewContainer.addChild(new Sprite(image.find('wordsd-btn-up')));
+        defaultViewContainer.addChild(Sprite.from('img://logo_btn_up.png'));
         const pressedViewContainer = new Container();
-        pressedViewContainer.addChild(new Sprite(image.find('wordsd-btn-down')));
+        pressedViewContainer.addChild(Sprite.from('img://logo_btn_down.png'));
         this._forkBtn = new PrimaryButton({
-            text: i18n.t('forkGithub'),
+            text: '',
             textStyle: {
                 fill: 0xe91e63,
                 fontFamily: 'Opensans Semibold',
@@ -190,6 +186,8 @@ export class Title extends Container implements IScene {
             buttonOptions: {
                 defaultView: defaultViewContainer,
                 pressedView: pressedViewContainer,
+                anchorX: 0.0,
+                anchorY: 1,
                 textOffset: {
                     default: {
                         y: -13,
@@ -211,7 +209,6 @@ export class Title extends Container implements IScene {
         });
 
         this._playBtn.onPress.connect(async () => {
-            // Play audio
             this._playBtn.playSfx('sfx_primary_button_press');
 
             // Go to game screen when user presses play button

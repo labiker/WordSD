@@ -1,5 +1,4 @@
 import { Container, Sprite } from 'pixi.js';
-import { image } from '../../core/image';
 
 /** A class representing the player. */
 export class Player {
@@ -16,7 +15,7 @@ export class Player {
      */
     private async _build() {
         // Create a sprite using the id and set its anchor to 0.5
-        const element = new Sprite(image.find('player'));
+        const element = Sprite.from('img://player.png');
         element.anchor.set(0.5);
 
         // Add the sprite to the view

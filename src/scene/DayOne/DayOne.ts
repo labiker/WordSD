@@ -6,7 +6,6 @@ import { FullScreenDialog } from '../../system/FullScreenDialog/FullScreenDialog
 import { BackLog } from '../../system/Backlog/BackLog';
 import { StatusBar } from '../../system/StatusBar/StatusBar';
 import { Tooltip } from '../../system/Tooltip/Tooltip';
-import { image } from '../../core/image';
 import { bgm, sfx } from '../../utils/audio';
 import { app, initSystems, endSystems } from '../../utils/app';
 import { Title } from '../Title/Title';
@@ -146,7 +145,7 @@ export class DayOne extends Container implements IScene {
     private _loadStatusBar = () => {
         this._StatusBar.creatStatusIcon({
             key: 'CurrentDay',
-            image: image.find('Current_day'),
+            image: 'img://Current_day.png',
             value: gameData.system.currentDay,
             x: 30,
             y: 0,
@@ -161,12 +160,12 @@ export class DayOne extends Container implements IScene {
                 if (currentTime >= 18 || currentTime < 6) {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Current_night'),
+                        image: 'img://Current_night.png',
                     });
                 } else {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Current_day'),
+                        image: 'img://Current_day.png',
                     });
                 }
             },
@@ -186,7 +185,7 @@ export class DayOne extends Container implements IScene {
         });
         this._StatusBar.creatStatusIcon({
             key: 'CurrentTime',
-            image: image.find('Current_time'),
+            image: 'img://Current_time.png',
             value: gameData.system.currentTime,
             x: 90,
             y: 0,
@@ -213,7 +212,7 @@ export class DayOne extends Container implements IScene {
         });
         this._StatusBar.creatStatusIcon({
             key: 'Health',
-            image: image.find('Health'),
+            image: 'img://Health.png',
             value: gameData.player.health,
             x: 1680,
             y: 0,
@@ -227,17 +226,17 @@ export class DayOne extends Container implements IScene {
                 if (currentHealth >= 0 && currentHealth < 20) {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Health_negative'),
+                        image: 'img://Health_negative.png',
                     });
                 } else if (currentHealth >= 20 && currentHealth < 80) {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Health'),
+                        image: 'img://Health.png',
                     });
                 } else if (currentHealth >= 80) {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Health_positive'),
+                        image: 'img://Health_positive.png',
                     });
                 }
             },
@@ -257,7 +256,7 @@ export class DayOne extends Container implements IScene {
         });
         this._StatusBar.creatStatusIcon({
             key: 'Stress',
-            image: image.find('Stress_level_0'),
+            image: 'img://Stress_level_0.png',
             value: gameData.player.stress,
             x: 1740,
             y: 0,
@@ -272,19 +271,19 @@ export class DayOne extends Container implements IScene {
                     gameData.player.stressLevel = 0;
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Stress_level_0'),
+                        image: 'img://Stress_level_0.png',
                     });
                 } else if (currentStress >= 100 && currentStress < 200) {
                     gameData.player.stressLevel = 1;
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Stress_level_1'),
+                        image: 'img://Stress_level_1.png',
                     });
                 } else if (currentStress >= 200 && currentStress < 300) {
                     gameData.player.stressLevel = 2;
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Stress_level_2'),
+                        image: 'img://Stress_level_2.png',
                     });
                 }
             },
@@ -308,7 +307,7 @@ export class DayOne extends Container implements IScene {
         });
         this._StatusBar.creatStatusIcon({
             key: 'Food',
-            image: image.find('Supplies'),
+            image: 'img://Supplies.png',
             value: gameData.player.food,
             x: 1800,
             y: 0,
@@ -335,7 +334,7 @@ export class DayOne extends Container implements IScene {
         });
         this._StatusBar.creatStatusIcon({
             key: 'Credibility',
-            image: image.find('Friend'),
+            image: 'img://Friend.png',
             value: gameData.player.credibility,
             x: 1860,
             y: 0,
@@ -349,17 +348,17 @@ export class DayOne extends Container implements IScene {
                 if (currentCredibility >= 0 && currentCredibility < 30) {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Rival'),
+                        image: 'img://Rival.png',
                     });
                 } else if (currentCredibility >= 30 && currentCredibility < 60) {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Friend'),
+                        image: 'img://Friend.png',
                     });
                 } else if (currentCredibility >= 60) {
                     this._StatusBar.updateStatusIcon({
                         key,
-                        image: image.find('Best_friend'),
+                        image: 'img://Best_friend.png',
                     });
                 }
             },
@@ -381,7 +380,7 @@ export class DayOne extends Container implements IScene {
         if (gameData.collection.smilingAngel_1) {
             this._StatusBar.creatStatusIcon({
                 key: 'Collection_smiling_angel_1',
-                image: image.find('Collection_smiling_angel_1'),
+                image: 'img://Collection_smiling_angel_1.png',
                 x: app.view.width - 60,
                 y: app.view.height - 90,
                 position: 'bottomRight',
@@ -405,7 +404,7 @@ export class DayOne extends Container implements IScene {
         if (gameData.collection.smilingAngel_2) {
             this._StatusBar.creatStatusIcon({
                 key: 'Collection_smiling_angel_2',
-                image: image.find('Collection_smiling_angel_2'),
+                image: 'img://Collection_smiling_angel_2.png',
                 x: app.view.width - 60,
                 y: app.view.height - 90,
                 position: 'bottomRight',
@@ -528,7 +527,7 @@ export class DayOne extends Container implements IScene {
             sfx.play('sfx_item_got');
             this._StatusBar.creatStatusIcon({
                 key: 'Item_corpse_pieces',
-                image: image.find('Item_corpse_pieces'),
+                image: 'img://Item_corpse_pieces.png',
                 value: gameData.item.CorpsePieces,
                 x: 30,
                 y: app.view.height - 90,
@@ -574,7 +573,7 @@ export class DayOne extends Container implements IScene {
             if (gameData.legacy.humanCorpse > 0) {
                 this._StatusBar.creatStatusIcon({
                     key: 'Item_human_corpse',
-                    image: image.find('Item_human_corpse'),
+                    image: 'img://Item_human_corpse.png',
                     value: gameData.legacy.humanCorpse,
                     x: 30,
                     y: app.view.height - 90,
@@ -636,7 +635,7 @@ export class DayOne extends Container implements IScene {
                 sfx.play('sfx_item_got');
                 this._StatusBar.creatStatusIcon({
                     key: 'Item_corpse_pieces',
-                    image: image.find('Item_corpse_pieces'),
+                    image: 'img://Item_corpse_pieces.png',
                     value: gameData.item.CorpsePieces,
                     x: 30,
                     y: app.view.height - 90,
@@ -872,7 +871,7 @@ export class DayOne extends Container implements IScene {
                         gameData.collection.smilingAngel_1 = true;
                         this._StatusBar.creatStatusIcon({
                             key: 'Collection_smiling_angel_1',
-                            image: image.find('Collection_smiling_angel_1'),
+                            image: 'img://Collection_smiling_angel_1.png',
                             x: app.view.width - 60,
                             y: app.view.height - 90,
                             position: 'bottomRight',
@@ -937,7 +936,7 @@ export class DayOne extends Container implements IScene {
                                 gameData.collection.smilingAngel_2 = true;
                                 this._StatusBar.creatStatusIcon({
                                     key: 'Collection_smiling_angel_2',
-                                    image: image.find('Collection_smiling_angel_2'),
+                                    image: 'img://Collection_smiling_angel_2.png',
                                     x: app.view.width - 60,
                                     y: app.view.height - 90,
                                     position: 'bottomRight',

@@ -1,10 +1,9 @@
 import type { ButtonOptions } from '@pixi/ui';
 import { FancyButton } from '@pixi/ui';
 import type { TextStyle } from 'pixi.js';
-import { Container, Sprite, Text } from 'pixi.js';
+import { Text } from 'pixi.js';
 
 import { sfx } from '../../utils/audio';
-import { image } from '../../core/image';
 
 /**
  * Options for the primary button.
@@ -42,16 +41,11 @@ export class PrimaryButton extends FancyButton {
             ...options?.textStyle,
         };
 
-        const defaultViewContainer = new Container();
-        defaultViewContainer.addChild(new Sprite(image.find('play_btn_up')));
-        const pressedViewContainer = new Container();
-        pressedViewContainer.addChild(new Sprite(image.find('play_btn_down')));
-
         super({
             // Assign the default view
-            defaultView: options?.buttonOptions?.defaultView ?? defaultViewContainer,
+            defaultView: options?.buttonOptions?.defaultView ?? 'img://play_btn_up.png',
             // Assign the pressed view
-            pressedView: options?.buttonOptions?.pressedView ?? pressedViewContainer,
+            pressedView: options?.buttonOptions?.pressedView ?? 'img://play_btn_down.png',
             // Assign button text
             text,
             // Offset the button text

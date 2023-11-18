@@ -16,29 +16,31 @@ export async function initAssets() {
     sound.add('sfx_item_lost', 'app://assets/audio/sfx_item_lost.mp3');
 
     // Load image assets
-    await image.add('play_btn_up', 'app://assets/images/play_btn_up.png');
-    await image.add('play_btn_down', 'app://assets/images/play_btn_down.png');
-    await image.add('player', 'app://assets/images/player.png');
-    await image.add('Health_negative', 'app://assets/images/Health_negative.png');
-    await image.add('Health_positive', 'app://assets/images/Health_positive.png');
-    await image.add('Health', 'app://assets/images/Health.png');
-    await image.add('Stress_level_0', 'app://assets/images/Stress_level_0.png');
-    await image.add('Stress_level_1', 'app://assets/images/Stress_level_1.png');
-    await image.add('Supplies', 'app://assets/images/Supplies.png');
-    await image.add('Friend', 'app://assets/images/Friend.png');
-    await image.add('Best_friend', 'app://assets/images/Best_friend.png');
-    await image.add('Current_day', 'app://assets/images/Current_day.png');
-    await image.add('Current_night', 'app://assets/images/Current_night.png');
-    await image.add('Current_time', 'app://assets/images/Current_time.png');
-    await image.add('Item_human_corpse', 'app://assets/images/Item_human_corpse.png');
-    await image.add('Item_corpse_pieces', 'app://assets/images/Item_corpse_pieces.png');
+    await image.add('play_btn_up', 'img://play_btn_up.png');
+    await image.add('play_btn_down', 'img://play_btn_down.png');
+    await image.add('logo_btn_up', 'img://logo_btn_up.png');
+    await image.add('logo_btn_down', 'img://logo_btn_down.png');
+    await image.add('player', 'img://player.png');
+    await image.add('Health_negative', 'img://Health_negative.png');
+    await image.add('Health_positive', 'img://Health_positive.png');
+    await image.add('Health', 'img://Health.png');
+    await image.add('Stress_level_0', 'img://Stress_level_0.png');
+    await image.add('Stress_level_1', 'img://Stress_level_1.png');
+    await image.add('Supplies', 'img://Supplies.png');
+    await image.add('Friend', 'img://Friend.png');
+    await image.add('Best_friend', 'img://Best_friend.png');
+    await image.add('Current_day', 'img://Current_day.png');
+    await image.add('Current_night', 'img://Current_night.png');
+    await image.add('Current_time', 'img://Current_time.png');
+    await image.add('Item_human_corpse', 'img://Item_human_corpse.png');
+    await image.add('Item_corpse_pieces', 'img://Item_corpse_pieces.png');
     await image.add(
         'Collection_smiling_angel_1',
-        'app://assets/images/Collection_smiling_angel_1.png',
+        'img://Collection_smiling_angel_1.png',
     );
     await image.add(
         'Collection_smiling_angel_2',
-        'app://assets/images/Collection_smiling_angel_2.png',
+        'img://Collection_smiling_angel_2.png',
     );
 
     // Load font assets
